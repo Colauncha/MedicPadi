@@ -1,13 +1,31 @@
-import './App.css'
+
+// import React from "react";
+// import SplashScreen from "./Components/splashScreen";
+// import WaitlistPage from "./Pages/WaitlistPage";
+
+// function App() {
+//   return (
+//     <>
+//       <SplashScreen />
+//       <WaitlistPage />
+//     </>
+//   );
+// }
+
+// export default App;
+
+
+import { Routes, Route } from "react-router-dom";
+import SplashScreen from "./Components/splashScreen";
+import WaitlistPage from "./Pages/WaitlistPage";
 
 function App() {
   return (
-    <>
-      <h1 className="text-3xl font-bold text-blue-700">
-        MedicPadi is Working 
-      </h1>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<SplashScreen />} />
+      <Route path="/waitlist" element={<WaitlistPage />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
