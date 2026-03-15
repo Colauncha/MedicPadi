@@ -17,10 +17,10 @@ const NIGERIAN_STATES = [
 ];
 
 const ROLES = [
-  { label: "Doctor",     image: doctorImg },
-  { label: "Pharmacist", image: pharmacistImg },
-  { label: "Laboratory", image: laboratoryImg },
-  { label: "Patient",    image: patientImg },
+  { label: "Doctor",     image: doctorImg, apiTag: "consultant" },
+  { label: "Pharmacist", image: pharmacistImg, apiTag: "pharmacy" },
+  { label: "Laboratory", image: laboratoryImg, apiTag: "lab" },
+  { label: "Patient",    image: patientImg, apiTag: "patient" },
 ];
 
 const FEATURES_LEFT = [
@@ -100,7 +100,7 @@ const WaitlistPage = () => {
         setApiError(data.message || "Something went wrong. Please try again.");
       }
     } catch (error) {
-      setApiError("Network error. Please check your connection and try again.");
+      setApiError(`Network error.${error.message ? ` ${error.message}` : "Please check your connection and try again."}`);
     } finally {
       setLoading(false);
     }
@@ -292,10 +292,10 @@ const WaitlistPage = () => {
                 {ROLES.map((item) => (
                   <div
                     key={item.label}
-                    onClick={() => setRole(item.label)}
+                    onClick={() => setRole(item.apiTag)}
                     className={`cursor-pointer border-2 rounded-xl overflow-hidden transition
-                      ${role === item.label
-                        ? "border-[#150D5E]"
+                      ${role === item.apiTag
+                        ? "border-[#32269e]"
                         : "border-transparent hover:border-gray-300"
                       }`}
                   >
