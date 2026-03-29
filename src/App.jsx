@@ -16,13 +16,14 @@
 
 
 import { Routes, Route } from "react-router-dom";
-import SplashScreen from "./Components/splashScreen";
+import DashboardPage from "./Pages/DashboardPage";
 import WaitlistPage from "./Pages/WaitlistPage";
+
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<SplashScreen />} />
+      <Route path="/" element={<DashboardPage />} />`
       <Route path="/waitlist" element={<WaitlistPage />} />
     </Routes>
   );
