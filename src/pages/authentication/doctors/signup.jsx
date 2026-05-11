@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router";
 import { createUser } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import doctor from "../../../assets/doctor.png";
@@ -9,16 +9,16 @@ import apple from "../../../assets/apple.svg";
 export default function DoctorSignup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     role: "consultant",
-    isVerified: false,
     phoneNumber: "",
     confirmPassword: "",
-    createdAt: new Date().toISOString(),
-    // agreedToTerms: false,
   });
 
   const [errors, setErrors] = useState({
@@ -67,10 +67,16 @@ export default function DoctorSignup() {
     e.preventDefault();
 
     try {
+      setIsLoading(true);
+      setError("");
       const result = await createUser(formData);
       console.log("User created:", result);
-    } catch (error) {
-      console.error(error.message);
+      navigate("/doctor-profile");
+    } catch (err) {
+      console.error(err.message);
+      setError(err.message || "Failed to create account. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,6 +97,12 @@ export default function DoctorSignup() {
                 To create account, provide details and set password
               </p>
             </div>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-200">
+                {error}
+              </div>
+            )}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
@@ -265,34 +277,21 @@ export default function DoctorSignup() {
                 )}
               </div>
 
-              <div className="flex items-start mb-6">
-                <div className="flex items-center h-5">
-                  <input
-                    id="terms"
-                    type="checkbox"
-                    name="agreedToTerms"
-                    checked={formData.agreedToTerms}
-                    onChange={handleChange}
-                    className="w-4 h-4 rounded border-gray-300 text-indigo-900 focus:ring-indigo-900"
-                  />
-                </div>
-                <label
-                  htmlFor="terms"
-                  className="ml-2 text-sm leading-5 text-[#454545]"
-                >
-                  I agree with{" "}
-                  <a href="#" className="text-[#331EB9] hover:underline">
-                    Terms, Privacy Policy
-                  </a>
-                </label>
-              </div>
-
               <button
                 type="submit"
-                className="w-full bg-[#150D5E] text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1A5A]"
-                disabled={!!errors.password || !!errors.confirmPassword}
+                className="w-full flex justify-center items-center bg-[#150D5E] text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1A5A] disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={
+                  !!errors.password || !!errors.confirmPassword || isLoading
+                }
               >
-                Sign up
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                    Signing up...
+                  </>
+                ) : (
+                  "Sign up"
+                )}
               </button>
 
               <div className="flex justify-end">

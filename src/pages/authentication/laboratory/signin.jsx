@@ -11,7 +11,6 @@ export default function LaboratorySignin() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    terms: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,10 +29,6 @@ export default function LaboratorySignin() {
     e.preventDefault();
     if (!formData.email || !formData.password) {
       setError("Please fill in all required fields.");
-      return;
-    }
-    if (!formData.terms) {
-      setError("Please agree to the Terms and Privacy Policy.");
       return;
     }
 
@@ -152,28 +147,6 @@ export default function LaboratorySignin() {
                 <p className="text-xs text-[#989898] leading-4 mt-1.5">
                   This is a hint to help the user
                 </p>
-              </div>
-
-              <div className="flex items-start mb-6">
-                <div className="flex items-center h-5">
-                  <input
-                    id="terms"
-                    name="terms"
-                    type="checkbox"
-                    checked={formData.terms}
-                    onChange={handleChange}
-                    className="w-4 h-4 rounded border-gray-300 text-indigo-900 focus:ring-indigo-900"
-                  />
-                </div>
-                <label
-                  htmlFor="terms"
-                  className="ml-2 text-sm leading-5 text-[#454545]"
-                >
-                  I agree with{" "}
-                  <a href="#" className="text-[#331EB9] hover:underline">
-                    Terms, Privacy Policy
-                  </a>
-                </label>
               </div>
 
               <button

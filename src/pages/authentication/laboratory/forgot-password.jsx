@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Mail } from "lucide-react";
+import { requestPasswordReset } from "../../../api/auth.api";
 import doctor from "../../../assets/doctor.png";
 
 export default function LaboratoryForgotPassword() {
-  const [selectedOption, setSelectedOption] = useState("");
+  const [email, setEmail] = useState("");
   const [step, setStep] = useState("select");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const isValidEmail =
+    email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   return (
     <div className="p-8 bg-[#E6E2F2]">
@@ -21,75 +27,69 @@ export default function LaboratoryForgotPassword() {
               <p className="text-[#888888] text-xs leading-4">
                 {step === "select"
                   ? "Please select option to receive the reset password link"
-                  : "Enter the recovery code we just sent to sarahjohn@gmail.com"}
+                  : `Enter the recovery code we just sent to ${email}`}
               </p>
             </div>
 
             {step === "select" ? (
               <form className="space-y-8">
-                <div
-                  className={`flex items-center justify-between p-4 border border-[#E7E7E7] rounded-xl cursor-pointer transition-colors ${
-                    selectedOption === "email"
-                      ? "border-[#150D5E] bg-[#F8F8FF]"
-                      : "border-[#E5E5E5] hover:bg-gray-50"
-                  }`}
-                  onClick={() =>
-                    setSelectedOption(selectedOption === "email" ? "" : "email")
-                  }
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#E6E2F2] flex items-center justify-center">
-                      <Mail className="w-5 h-5 text-[#331EB9]" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-[#121212]">
-                        Reset via email
-                      </h3>
-                      <p className="text-[10px] text-[#888888] mt-1">
-                        Code will be sent to your email password
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                      selectedOption === "email"
-                        ? "border-[#150D5E] bg-[#150D5E]"
-                        : "border-[#D1D1D1] bg-white"
-                    }`}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-[#121212]"
                   >
-                    {selectedOption === "email" && (
-                      <svg
-                        className="w-3 h-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="w-5 h-5 text-[#888888]" />
+                    </div>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your registered email"
+                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-[#121212] placeholder:text-[#888888]"
+                      required
+                    />
                   </div>
                 </div>
 
+                {error && (
+                  <div className="text-red-500 text-sm text-center">
+                    {error}
+                  </div>
+                )}
+
                 <button
                   type="button"
-                  onClick={() => {
-                    if (selectedOption) {
-                      setStep("recovery");
+                  onClick={async () => {
+                    if (isValidEmail) {
+                      setIsLoading(true);
+                      setError("");
+                      try {
+                        await requestPasswordReset(email);
+                        setStep("recovery");
+                      } catch (err) {
+                        setError(err.message || "Failed to request password reset.");
+                      } finally {
+                        setIsLoading(false);
+                      }
                     }
                   }}
-                  className={`w-full text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] ${
-                    selectedOption
-                      ? "bg-[#150D5E]"
+                  disabled={!isValidEmail || isLoading}
+                  className={`w-full text-white leading-6 py-3.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] flex justify-center items-center ${
+                    isValidEmail && !isLoading
+                      ? "bg-[#150D5E] hover:bg-[#150D5E]/90"
                       : "bg-[#150D5E]/60 cursor-not-allowed"
                   }`}
                 >
-                  Continue
+                  {isLoading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    "Continue"
+                  )}
                 </button>
               </form>
             ) : (

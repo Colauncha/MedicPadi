@@ -10,7 +10,14 @@ import PharmacySignup from "./pages/authentication/pharmacy/signup";
 import PharmacySignin from "./pages/authentication/pharmacy/signin";
 import PharmacyForgotPassword from "./pages/authentication/pharmacy/forgot-password";
 import LabDashboard from "./pages/dashboard/laboratory/dashboard";
+import LabPatient from "./pages/dashboard/laboratory/patient";
 import Home from "./pages/home/home";
+import LabPlaceholder from "./pages/dashboard/laboratory/placeholder";
+import LabProfile from "./pages/dashboard/laboratory/profile";
+import LabAppointment from "./pages/dashboard/laboratory/appointment";
+import LabReport from "./pages/dashboard/laboratory/report";
+import LaboratoryProfile from "./pages/authentication/laboratory/profile";
+import DoctorProfile from "./pages/authentication/doctors/profile";
 
 function App() {
   return (
@@ -35,6 +42,24 @@ function App() {
         element={<PharmacyForgotPassword />}
       />
       <Route path="/labdashboard" element={<LabDashboard />} />
+      <Route path="/labdashboard/patient" element={<LabPatient />} />
+      <Route path="/labdashboard/profile" element={<LabProfile />} />
+      <Route path="/labdashboard/appointments" element={<LabAppointment />} />
+      <Route path="/labdashboard/reports" element={<LabReport />} />
+      <Route
+        path="/labdashboard/policy"
+        element={<LabPlaceholder title="Policy" />}
+      />
+      <Route
+        path="/labdashboard/help"
+        element={<LabPlaceholder title="Help Center" />}
+      />
+      <Route
+        path="/labdashboard/settings"
+        element={<LabPlaceholder title="Settings" />}
+      />
+      <Route path="/laboratory-profile" element={<LaboratoryProfile />} />
+      <Route path="/doctor-profile" element={<DoctorProfile />} />
     </Routes>
   );
 }
