@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LabLayout from "../../../components/layout/LabLayout";
+import DashboardLayout from "../../../components/layout/DashboardLayout";
 import {
   Users,
   Activity,
@@ -21,7 +21,7 @@ export default function LabDashboard() {
   const [activeTab, setActiveTab] = useState("all");
 
   return (
-    <LabLayout>
+    <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-medium text-[#3d3d3d]">
           Patient Statistic
@@ -288,6 +288,6 @@ export default function LabDashboard() {
           </div>
         </div>
       </div>
-    </LabLayout>
+    </DashboardLayout>
   );
 }

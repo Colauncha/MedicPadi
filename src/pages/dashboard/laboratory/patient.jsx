@@ -1,4 +1,4 @@
-import LabLayout from "../../../components/layout/LabLayout";
+import DashboardLayout from "../../../components/layout/DashboardLayout";
 import {
   Users,
   Activity,
@@ -13,7 +13,7 @@ export default function LabPatient() {
   const patientCards = Array(15).fill(0); // 5 cols x 3 rows grid
 
   return (
-    <LabLayout>
+    <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-medium text-[#3d3d3d]">
           Patient Statistic
@@ -111,6 +111,6 @@ export default function LabPatient() {
           </div>
         ))}
       </div>
-    </LabLayout>
+    </DashboardLayout>
   );
 }

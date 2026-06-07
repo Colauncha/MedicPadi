@@ -14,11 +14,8 @@ export default function PharmacySignup() {
     email: "",
     password: "",
     role: "pharmacy",
-    isVerified: false,
     phoneNumber: "",
     confirmPassword: "",
-    createdAt: new Date().toISOString(),
-    // agreedToTerms: false,
   });
 
   const [errors, setErrors] = useState({

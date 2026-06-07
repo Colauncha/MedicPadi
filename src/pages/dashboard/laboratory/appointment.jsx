@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LabLayout from "../../../components/layout/LabLayout";
+import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { Calendar, Clock, FileText, Download } from "lucide-react";
 import sarah from "../../../assets/sarah.svg";
 
@@ -17,7 +17,7 @@ export default function LabAppointment() {
   ];
 
   return (
-    <LabLayout>
+    <DashboardLayout>
       <div className="flex flex-col lg:flex-row gap-10 w-full max-w-[1300px] mx-auto">
         {/* Left Column: Appointments List */}
         <div className="flex-[1.8] flex flex-col">
@@ -206,6 +206,6 @@ export default function LabAppointment() {
           </div>
         </div>
       </div>
-    </LabLayout>
+    </DashboardLayout>
   );
 }

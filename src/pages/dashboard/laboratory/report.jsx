@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LabLayout from "../../../components/layout/LabLayout";
+import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { Users, Activity, CalendarDays, ArrowUpRight, Upload } from "lucide-react";
 import sarah from "../../../assets/sarah.svg";
 
@@ -7,7 +7,7 @@ export default function LabReport() {
   const patientCards = Array(6).fill(0); // For the scrollable list on the left
 
   return (
-    <LabLayout>
+    <DashboardLayout>
       <div className="flex flex-col gap-8 w-full max-w-[1300px] mx-auto min-h-0">
         
         {/* Page Title */}
@@ -173,6 +173,6 @@ export default function LabReport() {
 
         </div>
       </div>
-    </LabLayout>
+    </DashboardLayout>
   );
 }

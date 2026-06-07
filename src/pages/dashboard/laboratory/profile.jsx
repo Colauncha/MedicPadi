@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LabLayout from "../../../components/layout/LabLayout";
+import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { Upload, ChevronDown, ChevronUp } from "lucide-react";
 import doctor from "../../../assets/image.svg";
 
@@ -22,7 +22,7 @@ export default function LabProfile() {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
   return (
-    <LabLayout>
+    <DashboardLayout>
       <div className="flex flex-col gap-6 w-full max-w-[1240px] mx-auto">
         {/* Top Section */}
         <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-6">
@@ -263,6 +263,6 @@ export default function LabProfile() {
           </div>
         </div>
       </div>
-    </LabLayout>
+    </DashboardLayout>
   );
 }

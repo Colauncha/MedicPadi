@@ -18,6 +18,11 @@ import LabAppointment from "./pages/dashboard/laboratory/appointment";
 import LabReport from "./pages/dashboard/laboratory/report";
 import LaboratoryProfile from "./pages/authentication/laboratory/profile";
 import DoctorProfile from "./pages/authentication/doctors/profile";
+import PharmDashboard from './pages/dashboard/pharmacy/dashboard'
+import PharmProduct from './pages/dashboard/pharmacy/product'
+import PharmOrder from './pages/dashboard/pharmacy/order'
+import PharmCustomer from './pages/dashboard/pharmacy/customers'
+import PharmPayment from './pages/dashboard/pharmacy/payments'
 
 function App() {
   return (
@@ -60,6 +65,12 @@ function App() {
       />
       <Route path="/laboratory-profile" element={<LaboratoryProfile />} />
       <Route path="/doctor-profile" element={<DoctorProfile />} />
+      <Route path="/pharmdashboard" element={<PharmDashboard />} />
+      <Route path="/pharmdashboard/product" element={<PharmProduct />} />
+      <Route path="/pharmdashboard/order" element={<PharmOrder />} />
+      <Route path="/pharmdashboard/customers" element={<PharmCustomer />} />
+      <Route path="/pharmdashboard/payments" element={<PharmPayment />} />
+
     </Routes>
   );
 }

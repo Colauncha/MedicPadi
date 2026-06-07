@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useNavigate, useLocation } from "react-router";
 import {
   LayoutDashboard,
   Contact,
@@ -11,40 +11,98 @@ import {
   LogOut,
   Search,
   Bell,
+  Package,
+  ShoppingCart,
+  Users,
+  CreditCard,
 } from "lucide-react";
 import logo from "../../assets/mediclogo2.svg";
 import avatar from "../../assets/image.svg";
 import { logoutUser } from "../../api/auth.api";
 
-const MENU_ITEMS = [
-  { name: "Dashboard", icon: LayoutDashboard, path: "/labdashboard" },
-  { name: "Patient", icon: Contact, path: "/labdashboard/patient" },
-  { name: "My Profile", icon: User, path: "/labdashboard/profile" },
-  {
-    name: "Appointments",
-    icon: CalendarDays,
-    path: "/labdashboard/appointments",
-  },
-  { name: "Reports", icon: FileText, path: "/labdashboard/reports" },
-];
-
-const HELP_ITEMS = [
-  { name: "Policy", icon: Shield, path: "/labdashboard/policy" },
-  { name: "Help Center", icon: HelpCircle, path: "/labdashboard/help" },
-  { name: "Settings", icon: Settings, path: "/labdashboard/settings" },
-];
-
-export default function LabLayout({ children }) {
+export default function DashboardLayout({
+  children,
+  role,
+  profileName,
+  profileSubtitle,
+  avatarSrc,
+}) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeRole =
+    role ||
+    (location.pathname.startsWith("/doctordashboard")
+      ? "doctor"
+      : location.pathname.startsWith("/pharmdashboard")
+      ? "pharmacy"
+      : "laboratory");
+
+  const prefix =
+    activeRole === "doctor"
+      ? "/doctordashboard"
+      : activeRole === "pharmacy"
+      ? "/pharmdashboard"
+      : "/labdashboard";
+
+  const menuItems =
+    activeRole === "pharmacy"
+      ? [
+          { name: "Dashboard", icon: LayoutDashboard, path: prefix },
+          { name: "Product", icon: Package, path: `${prefix}/product` },
+          { name: "Order", icon: ShoppingCart, path: `${prefix}/order` },
+          { name: "Customers", icon: Users, path: `${prefix}/customers` },
+          { name: "Payments", icon: CreditCard, path: `${prefix}/payments` },
+        ]
+      : [
+          { name: "Dashboard", icon: LayoutDashboard, path: prefix },
+          { name: "Patient", icon: Contact, path: `${prefix}/patient` },
+          { name: "My Profile", icon: User, path: `${prefix}/profile` },
+          {
+            name: "Appointments",
+            icon: CalendarDays,
+            path: `${prefix}/appointments`,
+          },
+          { name: "Reports", icon: FileText, path: `${prefix}/reports` },
+        ];
+
+  const helpItems = [
+    { name: "Policy", icon: Shield, path: `${prefix}/policy` },
+    { name: "Help Center", icon: HelpCircle, path: `${prefix}/help` },
+    { name: "Settings", icon: Settings, path: `${prefix}/settings` },
+  ];
 
   const handleLogout = async () => {
     try {
       await logoutUser();
-      navigate("/laboratory-signin");
+      navigate(
+        activeRole === "doctor"
+          ? "/doctor-signin"
+          : activeRole === "pharmacy"
+          ? "/pharmacy-signin"
+          : "/laboratory-signin"
+      );
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
+
+  const displayName =
+    profileName ||
+    (activeRole === "doctor"
+      ? "Dr. Sarah John"
+      : activeRole === "pharmacy"
+      ? "Alpha Pharmacy"
+      : "Olivex Laboratory Center");
+  const displaySubtitle =
+    profileSubtitle ||
+    (activeRole === "doctor"
+      ? "Doctor"
+      : activeRole === "pharmacy"
+      ? "Pharmacist"
+      : "View profile");
+  const displayAvatar = avatarSrc || avatar;
+
   return (
     <div className="flex h-screen w-full bg-white overflow-hidden text-[#1a1a4b]">
       <aside className="w-58 h-full bg-[#f8f9fc] flex flex-col border-r border-[#eef0f6] flex-shrink-0">
@@ -58,11 +116,11 @@ export default function LabLayout({ children }) {
               Main Menu
             </h3>
             <nav className="flex flex-col gap-2">
-              {MENU_ITEMS.map((item) => (
+              {menuItems.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  end={item.path === "/labdashboard"}
+                  end={item.path === prefix}
                   className={({ isActive }) =>
                     `flex items-center px-4 py-3 rounded-xl transition-colors ${
                       isActive
@@ -83,7 +141,7 @@ export default function LabLayout({ children }) {
               Help Center
             </h3>
             <nav className="flex flex-col gap-2">
-              {HELP_ITEMS.map((item) => (
+              {helpItems.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
@@ -118,7 +176,7 @@ export default function LabLayout({ children }) {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="search patient"
+              placeholder={activeRole === "pharmacy" ? "search products" : "search patient"}
               className="w-full h-[52px] pl-12 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-[15px]"
             />
           </div>
@@ -131,16 +189,16 @@ export default function LabLayout({ children }) {
             <div className="flex items-center space-x-3 cursor-pointer pl-2 border-l border-gray-100">
               <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden shrink-0">
                 <img
-                  src={avatar}
+                  src={displayAvatar}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex flex-col">
                 <h4 className="text-[#3d3d3d] leading-tight text-xl">
-                  Olivex Laboratory Center
+                  {displayName}
                 </h4>
-                <p className="text-xs text-[#464646] mt-0.5">View profile</p>
+                <p className="text-xs text-[#464646] mt-0.5">{displaySubtitle}</p>
               </div>
             </div>
           </div>
