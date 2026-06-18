@@ -34,6 +34,20 @@ import PharmProduct from "./pages/dashboard/pharmacy/product";
 import PharmOrder from "./pages/dashboard/pharmacy/order";
 import PharmCustomer from "./pages/dashboard/pharmacy/customers";
 import PharmPayment from "./pages/dashboard/pharmacy/payments";
+import LaboratoryProfile from "./pages/authentication/laboratory/profile";
+import DoctorProfile from "./pages/authentication/doctors/profile";
+import PharmDashboard from './pages/dashboard/pharmacy/dashboard'
+import PharmProduct from './pages/dashboard/pharmacy/product'
+import PharmOrder from './pages/dashboard/pharmacy/order'
+import PharmCustomer from './pages/dashboard/pharmacy/customers'
+import PharmPayment from './pages/dashboard/pharmacy/payments'
+import WaitlistPage from "./Pages/WaitlistPage";
+import DashboardPage from "./pages/dashboard/doctorsPage/DashboardPage";
+import PatientList from "./pages/dashboard/doctorsPage/PatientList";
+import PatientDetails from "./pages/dashboard/doctorsPage/PatientDetails";
+import Profile from "./pages/dashboard/doctorsPage/Profile";
+import AppointmentPage from "./pages/dashboard/doctorsPage/AppointmentPage";
+import ReportPage from "./pages/dashboard/doctorsPage/ReportPage";
 
 function App() {
   return (
@@ -87,6 +101,16 @@ function App() {
       <Route path="/pharmdashboard/order" element={<PharmOrder />} />
       <Route path="/pharmdashboard/customers" element={<PharmCustomer />} />
       <Route path="/pharmdashboard/payments" element={<PharmPayment />} />
+
+
+      <Route path="/waitlist" element={<WaitlistPage />} />
+      <Route path="/docdashboard" element={<DashboardPage />} />
+      <Route path="/docdashboard/patient" element={<PatientList />} />
+      <Route path="/docdashboard/patient/:id" element={<PatientDetails />} />
+      <Route path="/docdashboard/profile" element={<Profile />} />
+      <Route path="/docdashboard/appointments" element={<AppointmentPage />} />
+      <Route path="/docdashboard/reports" element={<ReportPage />} />
+     
     </Routes>
   );
 }
