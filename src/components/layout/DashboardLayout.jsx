@@ -32,18 +32,18 @@ export default function DashboardLayout({
 
   const activeRole =
     role ||
-    (location.pathname.startsWith("/doctordashboard")
+    (location.pathname.startsWith("/docdashboard")
       ? "doctor"
       : location.pathname.startsWith("/pharmdashboard")
-      ? "pharmacy"
-      : "laboratory");
+        ? "pharmacy"
+        : "laboratory");
 
   const prefix =
     activeRole === "doctor"
-      ? "/doctordashboard"
+      ? "/docdashboard"
       : activeRole === "pharmacy"
-      ? "/pharmdashboard"
-      : "/labdashboard";
+        ? "/pharmdashboard"
+        : "/labdashboard";
 
   const menuItems =
     activeRole === "pharmacy"
@@ -79,8 +79,8 @@ export default function DashboardLayout({
         activeRole === "doctor"
           ? "/doctor-signin"
           : activeRole === "pharmacy"
-          ? "/pharmacy-signin"
-          : "/laboratory-signin"
+            ? "/pharmacy-signin"
+            : "/laboratory-signin",
       );
     } catch (error) {
       console.error("Logout failed", error);
@@ -92,15 +92,15 @@ export default function DashboardLayout({
     (activeRole === "doctor"
       ? "Dr. Sarah John"
       : activeRole === "pharmacy"
-      ? "Alpha Pharmacy"
-      : "Olivex Laboratory Center");
+        ? "Alpha Pharmacy"
+        : "Olivex Laboratory Center");
   const displaySubtitle =
     profileSubtitle ||
     (activeRole === "doctor"
       ? "Doctor"
       : activeRole === "pharmacy"
-      ? "Pharmacist"
-      : "View profile");
+        ? "Pharmacist"
+        : "View profile");
   const displayAvatar = avatarSrc || avatar;
 
   return (
@@ -176,7 +176,9 @@ export default function DashboardLayout({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder={activeRole === "pharmacy" ? "search products" : "search patient"}
+              placeholder={
+                activeRole === "pharmacy" ? "search products" : "search patient"
+              }
               className="w-full h-[52px] pl-12 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-[15px]"
             />
           </div>
@@ -198,7 +200,9 @@ export default function DashboardLayout({
                 <h4 className="text-[#3d3d3d] leading-tight text-xl">
                   {displayName}
                 </h4>
-                <p className="text-xs text-[#464646] mt-0.5">{displaySubtitle}</p>
+                <p className="text-xs text-[#464646] mt-0.5">
+                  {displaySubtitle}
+                </p>
               </div>
             </div>
           </div>
