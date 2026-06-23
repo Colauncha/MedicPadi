@@ -24,7 +24,7 @@ export default function DoctorProfile() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate("/doctordashboard");
+    navigate("/docdashboard");
     console.log("Profile Data:", formData);
   };
 

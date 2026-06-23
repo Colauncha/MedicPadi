@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { loginUser } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import doctor from "../../../assets/doctor.png";
@@ -14,7 +14,7 @@ export default function DoctorSignin() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -43,7 +43,7 @@ export default function DoctorSignin() {
       console.log("Login successful", response);
 
       // Navigate to dashboard on success
-      // navigate("/doctor-dashboard"); // Update with actual route
+      navigate("/docdashboard"); // Update with actual route
     } catch (err) {
       console.error("Login failed", err);
       setError(err.message || "Failed to sign in. Please try again.");

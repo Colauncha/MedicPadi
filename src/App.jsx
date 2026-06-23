@@ -34,13 +34,7 @@ import PharmProduct from "./pages/dashboard/pharmacy/product";
 import PharmOrder from "./pages/dashboard/pharmacy/order";
 import PharmCustomer from "./pages/dashboard/pharmacy/customers";
 import PharmPayment from "./pages/dashboard/pharmacy/payments";
-import LaboratoryProfile from "./pages/authentication/laboratory/profile";
-import DoctorProfile from "./pages/authentication/doctors/profile";
-import PharmDashboard from './pages/dashboard/pharmacy/dashboard'
-import PharmProduct from './pages/dashboard/pharmacy/product'
-import PharmOrder from './pages/dashboard/pharmacy/order'
-import PharmCustomer from './pages/dashboard/pharmacy/customers'
-import PharmPayment from './pages/dashboard/pharmacy/payments'
+
 import WaitlistPage from "./Pages/WaitlistPage";
 import DashboardPage from "./pages/dashboard/doctorsPage/DashboardPage";
 import PatientList from "./pages/dashboard/doctorsPage/PatientList";
