@@ -27,6 +27,10 @@ import LabPlaceholder from "./pages/dashboard/laboratory/placeholder";
 import LabProfile from "./pages/dashboard/laboratory/profile";
 import LabAppointment from "./pages/dashboard/laboratory/appointment";
 import LabReport from "./pages/dashboard/laboratory/report";
+import LabTest from "./pages/dashboard/laboratory/test";
+import LabDepartment from "./pages/dashboard/laboratory/department";
+import AddTest from "./pages/dashboard/laboratory/addTest";
+import AddDepartment from "./pages/dashboard/laboratory/addDepartment";
 
 // Pharmacy dashboard pages
 import PharmDashboard from "./pages/dashboard/pharmacy/dashboard";
@@ -75,6 +79,10 @@ function App() {
       <Route path="/labdashboard" element={<LabDashboard />} />
       <Route path="/labdashboard/patient" element={<LabPatient />} />
       <Route path="/labdashboard/profile" element={<LabProfile />} />
+      <Route path="/labdashboard/test" element={<LabTest />} />
+      <Route path="/labdashboard/test/add" element={<AddTest />} />
+      <Route path="/labdashboard/department" element={<LabDepartment />} />
+      <Route path="/labdashboard/department/add" element={<AddDepartment />} />
       <Route path="/labdashboard/appointments" element={<LabAppointment />} />
       <Route path="/labdashboard/reports" element={<LabReport />} />
       <Route
@@ -104,7 +112,7 @@ function App() {
       <Route path="/docdashboard/profile" element={<Profile />} />
       <Route path="/docdashboard/appointments" element={<AppointmentPage />} />
       <Route path="/docdashboard/reports" element={<ReportPage />} />
-     
+
     </Routes>
   );
 }
