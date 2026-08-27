@@ -21,7 +21,7 @@ export default function DocDashboard() {
   const [activeTab, setActiveTab] = useState("all");
 
   return (
-    <DashboardLayout> {/* ✅ FIXED: was DocLayout */}
+    <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-medium text-[#3d3d3d]">
           Patient Statistic
@@ -36,12 +36,14 @@ export default function DocDashboard() {
               <Users className="w-4 h-4" fill="#331eb9" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-[#150d5e] mb-4">230</div>
-          <div className="flex items-center text-sm text-[#150d5e]">
+          <div className="text-2xl font-bold text-[#150d5e] mb-4">
+            230
+            <div className="flex items-center text-sm text-[#150d5e]">
             <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
             <span className="font-semibold text-sm mr-1">15%</span>
             <span className="text-sm">from last week</span>
           </div>
+            </div>
         </div>
 
         <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px]">
@@ -51,11 +53,13 @@ export default function DocDashboard() {
               <Activity className="w-4 h-4" fill="#331eb9" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-[#150d5e] mb-4">230</div>
+          <div className="text-2xl font-bold text-[#150d5e] mb-4">
+            230
           <div className="flex items-center text-sm text-[#150d5e]">
-            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
+            <ArrowUpRight className="w-3.5 h-3.5 mr-1 rounded-full bg-#D5D9FF" />
             <span className="font-semibold text-sm mr-1">15%</span>
-            <span className="text-sm">from last week</span>
+            <span className="text-sm">rise from last week</span>
+          </div>
           </div>
         </div>
 
@@ -66,11 +70,13 @@ export default function DocDashboard() {
               <CalendarDays className="w-4 h-4" fill="#331eb9" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-[#150d5e] mb-4">230</div>
+          <div className="text-2xl font-bold text-[#150d5e] mb-4">
+            230
           <div className="flex items-center text-sm text-[#150d5e]">
             <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
             <span className="font-semibold text-sm mr-1">25%</span>
             <span className="text-sm">Attended Appointments</span>
+          </div>
           </div>
         </div>
       </div>

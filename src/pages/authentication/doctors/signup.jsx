@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { createUser } from "../../../api/auth.api";
+import { createUser, sendVerificationMail } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import doctor from "../../../assets/doctor.png";
 import apple from "../../../assets/apple.svg";
@@ -71,6 +71,21 @@ export default function DoctorSignup() {
       setError("");
       const result = await createUser(formData);
       console.log("User created:", result);
+      const token = result?.access_token || result?.accessToken || result?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        console.warn(
+          "No token found in signup response — check the actual field name and update this line.",
+        );
+      }
+ 
+      try {
+        await sendVerificationMail(formData.email);
+      } catch (verifyErr) {
+        console.warn("Could not send verification email:", verifyErr.message);
+      }
+
       navigate("/doctor-profile");
     } catch (err) {
       console.error(err.message);
@@ -84,7 +99,7 @@ export default function DoctorSignup() {
     <div className="p-8 bg-[#E6E2F2]">
       <div className="flex min-h-screen bg-white font-sans">
         <div className="hidden lg:flex flex-col w-1/2 p-12 relative overflow-hidden items-center justify-center">
-          <img src={doctor} alt="" />
+          <img src={doctor} alt="doctor" />
         </div>
 
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">

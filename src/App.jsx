@@ -1,6 +1,9 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
 
+// Landing page components
+import Home from "./pages/HomePage/Home.jsx";
+
 // Doctor authentication pages
 import DoctorSignup from "./pages/authentication/doctors/signup";
 import DoctorSignin from "./pages/authentication/doctors/signin";
@@ -22,7 +25,6 @@ import PharmacyProfile from "./pages/authentication/pharmacy/profile";
 // Laboratory dashboard pages
 import LabDashboard from "./pages/dashboard/laboratory/dashboard";
 import LabPatient from "./pages/dashboard/laboratory/patient";
-import Home from "./pages/home/home";
 import LabPlaceholder from "./pages/dashboard/laboratory/placeholder";
 import LabProfile from "./pages/dashboard/laboratory/profile";
 import LabAppointment from "./pages/dashboard/laboratory/appointment";
@@ -42,6 +44,9 @@ import PatientDetails from "./pages/dashboard/doctorsPage/PatientDetails";
 import Profile from "./pages/dashboard/doctorsPage/Profile";
 import AppointmentPage from "./pages/dashboard/doctorsPage/AppointmentPage";
 import ReportPage from "./pages/dashboard/doctorsPage/ReportPage";
+
+
+
 
 function App() {
   return (
@@ -104,6 +109,8 @@ function App() {
       <Route path="/docdashboard/profile" element={<Profile />} />
       <Route path="/docdashboard/appointments" element={<AppointmentPage />} />
       <Route path="/docdashboard/reports" element={<ReportPage />} />
+
+      
      
     </Routes>
   );

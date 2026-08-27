@@ -35,15 +35,25 @@ export default function DoctorSignin() {
     try {
       setIsLoading(true);
       setError(null);
-      // Dummy call to the API function you will construct
+      
       const response = await loginUser({
         email: formData.email,
         password: formData.password,
       });
       console.log("Login successful", response);
 
+      // For token
+      const token = response?.access_token || response?.accessToken || response?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        console.warn(
+          "No token found in login response — check the actual field name and update this line.",
+        );
+      }
+
       // Navigate to dashboard on success
-      navigate("/docdashboard"); // Update with actual route
+      navigate("/docdashboard"); 
     } catch (err) {
       console.error("Login failed", err);
       setError(err.message || "Failed to sign in. Please try again.");
@@ -56,7 +66,7 @@ export default function DoctorSignin() {
     <div className="p-8 bg-[#E6E2F2]">
       <div className="flex min-h-screen bg-white font-sans">
         <div className="hidden lg:flex flex-col w-1/2 p-12 relative overflow-hidden items-center justify-center">
-          <img src={doctor} alt="" />
+          <img src={doctor} alt="doctor" />
         </div>
 
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">

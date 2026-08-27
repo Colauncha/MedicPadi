@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -8,7 +8,30 @@ const TIME_SLOTS = [
   "6 PM", "7 PM",
 ];
 
+function slotTo24h(slot) {
+  const [time, period] = slot.split(" ");
+  let hour = parseInt(time);
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, "0")}:00`;
+}
+
+function slotsToBusinessHours(slots) {
+  if (!slots.length) return null;
+  const times = slots.map(slotTo24h).sort();
+  return { start: times[0], end: times[times.length - 1] };
+}
+
 function Profile() {
+  const fileInputRef = useRef(null);
+  const [preview, setPreview] = useState(null);
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [appointmentError, setAppointmentError] = useState("");
+  const [appointmentSuccess, setAppointmentSuccess] = useState("");
+  const [appointmentLoading, setAppointmentLoading] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     gender: "",
@@ -30,8 +53,141 @@ function Profile() {
     Friday: [],
   });
 
+  // Pre-fill form from API on mount
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    fetch("/api/profile/retrieve", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data) return;
+        setForm({
+          name: data.name || "",
+          gender: data.gender || "",
+          phoneNumber: data.phoneNumber || "",
+          department: data.department || "",
+          placeOfWork: data.placeOfWork || "",
+          experience: data.experience || "",
+          awards: data.awards || "",
+          email: data.email || "",
+          about: data.about || "",
+        });
+        if (data.profilePicture?.url) setPreview(data.profilePicture.url);
+      })
+      .catch(() => {});
+  }, []);
+
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // Profile picture: preview + upload immediately
+  const handleImageClick = () => fileInputRef.current?.click();
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+
+    const token = localStorage.getItem("access_token");
+    const imageForm = new FormData();
+    imageForm.append("image", file);
+
+    try {
+      const res = await fetch("/api/profile/profile-picture", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: imageForm,
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setProfileError(err.message || "Image upload failed.");
+      }
+    } catch {
+      setProfileError("Image upload failed. Please try again.");
+    }
+  };
+
+  // Save personal information
+  const handleSaveProfile = async () => {
+    setProfileError("");
+    setProfileSuccess("");
+    setProfileLoading(true);
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setProfileError("You are not logged in.");
+      setProfileLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setProfileError(err.message || "Failed to update profile.");
+      } else {
+        setProfileSuccess("Profile saved successfully!");
+      }
+    } catch {
+      setProfileError("Something went wrong. Please try again.");
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // Save appointment / business hours
+  const handleSaveAppointment = async () => {
+    setAppointmentError("");
+    setAppointmentSuccess("");
+    setAppointmentLoading(true);
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setAppointmentError("You are not logged in.");
+      setAppointmentLoading(false);
+      return;
+    }
+
+    // Build the business hours payload — only include days with selected slots
+    const payload = {};
+    DAYS.forEach((day) => {
+      const hours = slotsToBusinessHours(selectedSlots[day]);
+      if (hours) payload[day.toLowerCase()] = hours;
+    });
+
+    try {
+      const res = await fetch("/api/profile/business-hours", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setAppointmentError(err.message || "Failed to save appointment.");
+      } else {
+        setAppointmentSuccess("Appointment hours saved!");
+      }
+    } catch {
+      setAppointmentError("Something went wrong. Please try again.");
+    } finally {
+      setAppointmentLoading(false);
+    }
   };
 
   const toggleSlot = (day, slot) => {
@@ -51,25 +207,39 @@ function Profile() {
   };
 
   return (
-    <DashboardLayout> {/* ✅ FIXED: was using DocLayout alias that was never defined in JSX */}
+    <DashboardLayout>
       <div className="p-6 min-h-screen bg-[#F3F4FF]">
         {/* Doctor Header Card */}
         <div className="bg-white rounded-2xl p-6 mb-6 flex flex-wrap items-center gap-6">
           <div className="flex flex-col items-center gap-2">
-            <div className="w-20 h-20 rounded-full bg-[#E8EAF6] overflow-hidden flex items-center justify-center border-2 border-[#3B4FA8]">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="#3B4FA8">
-                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-              </svg>
+            <div
+              onClick={handleImageClick}
+              className="w-20 h-20 rounded-full bg-[#E8EAF6] overflow-hidden flex items-center justify-center border-2 border-[#3B4FA8] cursor-pointer hover:opacity-80 transition"
+            >
+              {preview ? (
+                <img src={preview} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="#3B4FA8">
+                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                </svg>
+              )}
             </div>
-            <p className="text-sm font-semibold text-[#1a1a2e]">Dr. Ajayi M.</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+            <p className="text-sm font-semibold text-[#1a1a2e]">{form.name || "Dr. Ajayi M."}</p>
           </div>
 
           <div className="flex flex-wrap gap-8 flex-1">
             {[
-              { label: "Gender", value: "Male" },
-              { label: "Experience", value: "12 Years" },
-              { label: "Department", value: "Orthopedic", colored: true },
-              { label: "Phone Num", value: "09012345678" },
+              { label: "Gender", value: form.gender || "Male" },
+              { label: "Experience", value: form.experience || "12 Years" },
+              { label: "Department", value: form.department || "Orthopedic", colored: true },
+              { label: "Phone Num", value: form.phoneNumber || "09012345678" },
             ].map(({ label, value, colored }) => (
               <div key={label} className="flex flex-col gap-0.5">
                 <span className="text-xs text-gray-400">{label}</span>
@@ -81,7 +251,10 @@ function Profile() {
           </div>
 
           <div className="flex flex-col items-end gap-3 ml-auto">
-            <div className="flex flex-col items-center text-xs text-gray-400 gap-1">
+            <div
+              onClick={handleImageClick}
+              className="flex flex-col items-center text-xs text-gray-400 gap-1 cursor-pointer hover:text-[#3B4FA8] transition"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M12 16V4m0 0L8 8m4-4l4 4" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M4 20h16" strokeLinecap="round" />
@@ -89,8 +262,14 @@ function Profile() {
               <span>Upload your profile picture</span>
               <span>or click to browse</span>
             </div>
-            <button className="bg-[#2E3A8C] text-white text-sm px-6 py-2 rounded-lg hover:bg-[#243074] transition">
-              Save information
+            {profileError && <p className="text-xs text-red-500">{profileError}</p>}
+            {profileSuccess && <p className="text-xs text-green-500">{profileSuccess}</p>}
+            <button
+              onClick={handleSaveProfile}
+              disabled={profileLoading}
+              className="bg-[#2E3A8C] text-white text-sm px-6 py-2 rounded-lg hover:bg-[#243074] transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {profileLoading ? "Saving..." : "Save information"}
             </button>
           </div>
         </div>
@@ -254,7 +433,10 @@ function Profile() {
                           );
                         })}
                       </div>
-                      <button className="mt-4 w-full bg-[#2E3A8C] text-white text-sm py-2 rounded-lg hover:bg-[#243074] transition">
+                      <button
+                        onClick={() => toggleDay(null)}
+                        className="mt-4 w-full bg-[#2E3A8C] text-white text-sm py-2 rounded-lg hover:bg-[#243074] transition"
+                      >
                         Done
                       </button>
                     </div>
@@ -263,8 +445,15 @@ function Profile() {
               ))}
             </div>
 
-            <button className="mt-auto w-full bg-[#2E3A8C] text-white text-sm py-3 rounded-xl hover:bg-[#243074] transition font-medium">
-              Save Appointment
+            {appointmentError && <p className="text-xs text-red-500">{appointmentError}</p>}
+            {appointmentSuccess && <p className="text-xs text-green-500">{appointmentSuccess}</p>}
+
+            <button
+              onClick={handleSaveAppointment}
+              disabled={appointmentLoading}
+              className="mt-auto w-full bg-[#2E3A8C] text-white text-sm py-3 rounded-xl hover:bg-[#243074] transition font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {appointmentLoading ? "Saving..." : "Save Appointment"}
             </button>
           </div>
         </div>
