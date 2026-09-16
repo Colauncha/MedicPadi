@@ -15,6 +15,8 @@ import {
   ShoppingCart,
   Users,
   CreditCard,
+  FlaskConical,
+  Building,
 } from "lucide-react";
 import logo from "../../assets/mediclogo2.svg";
 import avatar from "../../assets/image.svg";
@@ -48,13 +50,27 @@ export default function DashboardLayout({
   const menuItems =
     activeRole === "pharmacy"
       ? [
+        { name: "Dashboard", icon: LayoutDashboard, path: prefix },
+        { name: "Product", icon: Package, path: `${prefix}/product` },
+        { name: "Order", icon: ShoppingCart, path: `${prefix}/order` },
+        { name: "Customers", icon: Users, path: `${prefix}/customers` },
+        { name: "Payments", icon: CreditCard, path: `${prefix}/payments` },
+      ]
+      : activeRole === "laboratory"
+        ? [
           { name: "Dashboard", icon: LayoutDashboard, path: prefix },
-          { name: "Product", icon: Package, path: `${prefix}/product` },
-          { name: "Order", icon: ShoppingCart, path: `${prefix}/order` },
-          { name: "Customers", icon: Users, path: `${prefix}/customers` },
-          { name: "Payments", icon: CreditCard, path: `${prefix}/payments` },
+          { name: "Patient", icon: Contact, path: `${prefix}/patient` },
+          { name: "My Profile", icon: User, path: `${prefix}/profile` },
+          { name: "Test", icon: FlaskConical, path: `${prefix}/test` },
+          { name: "Department", icon: Building, path: `${prefix}/department` },
+          {
+            name: "Appointments",
+            icon: CalendarDays,
+            path: `${prefix}/appointments`,
+          },
+          { name: "Reports", icon: FileText, path: `${prefix}/reports` },
         ]
-      : [
+        : [
           { name: "Dashboard", icon: LayoutDashboard, path: prefix },
           { name: "Patient", icon: Contact, path: `${prefix}/patient` },
           { name: "My Profile", icon: User, path: `${prefix}/profile` },
@@ -122,10 +138,9 @@ export default function DashboardLayout({
                   to={item.path}
                   end={item.path === prefix}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-xl transition-colors ${
-                      isActive
-                        ? "bg-[#150D5E] text-white shadow-sm"
-                        : "text-[#150D5E]"
+                    `flex items-center px-4 py-3 rounded-xl transition-colors ${isActive
+                      ? "bg-[#150D5E] text-white shadow-sm"
+                      : "text-[#150D5E]"
                     }`
                   }
                 >
@@ -146,10 +161,9 @@ export default function DashboardLayout({
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-xl transition-colors ${
-                      isActive
-                        ? "bg-[#1a1a4b] text-white shadow-sm"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-[#1a1a4b]"
+                    `flex items-center px-4 py-3 rounded-xl transition-colors ${isActive
+                      ? "bg-[#1a1a4b] text-white shadow-sm"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-[#1a1a4b]"
                     }`
                   }
                 >
@@ -177,7 +191,13 @@ export default function DashboardLayout({
             <input
               type="text"
               placeholder={
-                activeRole === "pharmacy" ? "search products" : "search patient"
+                activeRole === "pharmacy"
+                  ? "search products"
+                  : activeRole === "laboratory"
+                    ? location.pathname.endsWith("/department")
+                      ? "search department"
+                      : "search test"
+                    : "search patient"
               }
               className="w-full h-[52px] pl-12 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-[15px]"
             />
