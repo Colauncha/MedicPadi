@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import logo from "../../assets/mediclogo.svg";
+// import MedicPadi_logo1 from "../../../public/images/MedicPadi_logo1.png";
+// import logo from "../../assets/mediclogo.svg";
 
 const NAV_LINKS = [
   { label: "For patients", href: "#patients" },
@@ -11,13 +12,14 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-[#ECECEC]">
+    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-[#E7E7E7]">
       <div className="max-w-[1240px] mx-auto flex items-center justify-between px-6 lg:px-10 h-20">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="Medicpadi" className="h-7 w-auto" />
-          <span className="text-lg font-semibold tracking-tight text-[#150D5E]">
-            MEDICPADI
-          </span>
+          <img 
+            src="/MedicPadi_logo1.png" 
+            alt="Medicpadi" 
+            className="w-[212px] h-[48px] object-contain"
+          />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-8">
@@ -25,7 +27,7 @@ export default function Navbar() {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm text-[#454545] hover:text-[#150D5E] transition-colors"
+              className="text-sm text-[#888888] hover:text-[#150D5E] transition-colors"
             >
               {link.label}
             </a>

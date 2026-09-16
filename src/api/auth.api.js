@@ -83,12 +83,12 @@ export const requestPasswordReset = async (email) => {
   }
 
   try {
-    const response = await fetch("/api/auth/request-password-reset", {
+    const response = await fetch(`/api/auth/request-password-reset?email=${encodeURIComponent(email)}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email }),
+      // body: JSON.stringify({ email }),
     });
 
     const data = await response.json();
@@ -129,20 +129,23 @@ export const resetPassword = async ({ email, otp, newPassword }) => {
 
 export const sendVerificationMail = async (email) => {
   try {
+    const token = localStorage.getItem("token");
+
     const response = await fetch("/api/auth/send-verification-mail", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
       body: JSON.stringify({ email }),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Could not send verification email");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Send Verification Mail Error:", error.message);

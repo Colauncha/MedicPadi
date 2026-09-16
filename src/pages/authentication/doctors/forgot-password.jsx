@@ -68,8 +68,8 @@ export default function DoctorForgotPassword() {
     e.preventDefault();
     const code = otp.join("");
  
-    if (code.length !== 4) {
-      setError("Please enter the full 4-digit code.");
+    if (code.length !== 6) {
+      setError("Please enter the 6-digit reset code.");
       return;
     }
     if (newPassword.length < 8) {
