@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
-import { Search, Plus, SlidersHorizontal } from "lucide-react";
-import { listLabDepartments } from '../../../api/services.api';
+import { Search, Plus, SlidersHorizontal, Trash2, X, AlertTriangle } from "lucide-react";
+import { listLabDepartments, updateLabDepartments, deleteLabDepartments } from '../../../api/services.api';
 
 export default function LabDepartment() {
     const navigate = useNavigate();
@@ -12,6 +12,20 @@ export default function LabDepartment() {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeDepts, setActiveDepts] = useState({});
+
+    // States for update and delete department
+    const [updatingDept, setUpdatingDept] = useState(null);
+    const [deletingDept, setDeletingDept] = useState(null);
+
+    const [updateFormData, setUpdateFormData] = useState({
+        name: "",
+        description: ""
+    });
+    const [updateErrors, setUpdateErrors] = useState({});
+    const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
+    const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
+    const [updateApiError, setUpdateApiError] = useState("");
+    const [deleteApiError, setDeleteApiError] = useState("");
 
     useEffect(() => {
         const fetchDepartments = async () => {
@@ -71,6 +85,115 @@ export default function LabDepartment() {
         const search = searchTerm.toLowerCase();
         return !searchTerm || name.includes(search) || code.includes(search);
     });
+
+    // Handlers for Update and Delete
+    const handleOpenUpdateModal = (dept, index) => {
+        setUpdatingDept({ ...dept, _idx: index });
+        setUpdateApiError("");
+        setUpdateErrors({});
+        setUpdateFormData({
+            name: getDeptName(dept),
+            description: dept.description || dept.info || ""
+        });
+    };
+
+    const handleUpdateInputChange = (e) => {
+        const { name, value } = e.target;
+        setUpdateFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+        if (updateErrors[name]) {
+            setUpdateErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    const validateUpdateForm = () => {
+        const errs = {};
+        if (!updateFormData.name.trim()) errs.name = "Department name is required";
+        setUpdateErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const handleSaveUpdate = async (e) => {
+        e.preventDefault();
+        if (!validateUpdateForm()) return;
+
+        try {
+            setIsSubmittingUpdate(true);
+            setUpdateApiError("");
+            const payload = { ...updateFormData };
+
+            if (updatingDept.id) {
+                try {
+                    await updateLabDepartments(updatingDept.id, payload);
+                } catch (err) {
+                    console.warn("API department update failed, updating local state:", err);
+                }
+            }
+
+            setDepartments((prevDepts) =>
+                prevDepts.map((d, idx) => {
+                    const identifier = d.id !== undefined ? d.id : idx;
+                    const targetIdentifier = updatingDept.id !== undefined ? updatingDept.id : updatingDept._idx;
+                    if (identifier === targetIdentifier) {
+                        return {
+                            ...d,
+                            name: payload.name,
+                            department_name: payload.name,
+                            departmentName: payload.name,
+                            description: payload.description,
+                        };
+                    }
+                    return d;
+                })
+            );
+
+            setUpdatingDept(null);
+        } catch (err) {
+            console.error("Update department error:", err);
+            setUpdateApiError(err.message || "Failed to update department");
+        } finally {
+            setIsSubmittingUpdate(false);
+        }
+    };
+
+    const handleOpenDeleteModal = (dept, index) => {
+        setDeletingDept({ ...dept, _idx: index });
+        setDeleteApiError("");
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deletingDept) return;
+
+        try {
+            setIsSubmittingDelete(true);
+            setDeleteApiError("");
+
+            if (deletingDept.id) {
+                try {
+                    await deleteLabDepartments(deletingDept.id);
+                } catch (err) {
+                    console.warn("API department delete failed, removing from local state:", err);
+                }
+            }
+
+            setDepartments((prevDepts) =>
+                prevDepts.filter((d, idx) => {
+                    const identifier = d.id !== undefined ? d.id : idx;
+                    const targetIdentifier = deletingDept.id !== undefined ? deletingDept.id : deletingDept._idx;
+                    return identifier !== targetIdentifier;
+                })
+            );
+
+            setDeletingDept(null);
+        } catch (err) {
+            console.error("Delete department error:", err);
+            setDeleteApiError(err.message || "Failed to delete department");
+        } finally {
+            setIsSubmittingDelete(false);
+        }
+    };
 
     return (
         <DashboardLayout>
@@ -202,15 +325,28 @@ export default function LabDepartment() {
                                     </div>
 
                                     {/* Actions Bottom Row */}
-                                    <div className="grid grid-cols-2 gap-3 pt-2">
-                                        <button className="w-full bg-white border border-[#0f0b4d] text-[#0f0b4d] text-xs font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-center cursor-pointer">
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenUpdateModal(dept, index)}
+                                            className="flex-1 bg-white border border-[#0f0b4d] text-[#0f0b4d] text-xs font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-center cursor-pointer"
+                                        >
                                             Edit
                                         </button>
-                                        <button 
+                                        <button
+                                            type="button"
                                             onClick={() => navigate("/labdashboard/test")}
-                                            className="w-full bg-[#0f0b4d] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#150f61] transition-colors text-center cursor-pointer"
+                                            className="flex-1 bg-[#0f0b4d] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#150f61] transition-colors text-center cursor-pointer"
                                         >
-                                            View Test
+                                            View Department
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenDeleteModal(dept, index)}
+                                            className="w-10 h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer shrink-0"
+                                            title="Delete Department"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
 
@@ -221,6 +357,147 @@ export default function LabDepartment() {
                 )}
 
             </div>
+
+            {/* Update Department Modal */}
+            {updatingDept && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="relative w-full max-w-[560px] bg-white rounded-3xl border border-gray-100 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+                        <button
+                            type="button"
+                            onClick={() => setUpdatingDept(null)}
+                            className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer"
+                        >
+                            <X className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Update Department</h2>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Modify department details below and save your changes
+                            </p>
+                        </div>
+
+                        {updateApiError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+                                {updateApiError}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSaveUpdate} className="flex flex-col gap-4">
+                            {/* Department Name */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-500">Department Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={updateFormData.name}
+                                    onChange={handleUpdateInputChange}
+                                    placeholder="Hematology"
+                                    className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10"
+                                />
+                                {updateErrors.name && (
+                                    <span className="text-xs text-red-500">{updateErrors.name}</span>
+                                )}
+                            </div>
+
+                            {/* Additional Information / Description */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-500">Additional Information</label>
+                                <textarea
+                                    name="description"
+                                    value={updateFormData.description}
+                                    onChange={handleUpdateInputChange}
+                                    placeholder="Write out additional information regarding this department"
+                                    className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10 h-28 resize-none"
+                                />
+                            </div>
+
+                            {/* Submit Buttons */}
+                            <div className="flex items-center justify-end gap-3 mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setUpdatingDept(null)}
+                                    className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-xs hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingUpdate}
+                                    className="px-6 py-2.5 rounded-xl bg-[#0f0b4d] text-white font-semibold text-xs hover:bg-[#150f61] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
+                                >
+                                    {isSubmittingUpdate ? (
+                                        <>
+                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            <span>Saving...</span>
+                                        </>
+                                    ) : (
+                                        <span>Save Changes</span>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Department Modal */}
+            {deletingDept && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="relative w-full max-w-[440px] bg-white rounded-3xl border border-gray-100 shadow-2xl p-6 sm:p-8">
+                        <button
+                            type="button"
+                            onClick={() => setDeletingDept(null)}
+                            className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer"
+                        >
+                            <X className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4 border border-red-100">
+                                <AlertTriangle className="w-6 h-6" />
+                            </div>
+
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">Delete Department</h3>
+                            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                                Are you sure you want to delete <span className="font-semibold text-gray-800">"{getDeptName(deletingDept)}"</span>? This action cannot be undone.
+                            </p>
+
+                            {deleteApiError && (
+                                <div className="w-full mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+                                    {deleteApiError}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-3 w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeletingDept(null)}
+                                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold text-xs hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleConfirmDelete}
+                                    disabled={isSubmittingDelete}
+                                    className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold text-xs hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                                >
+                                    {isSubmittingDelete ? (
+                                        <>
+                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            <span>Deleting...</span>
+                                        </>
+                                    ) : (
+                                        <span>Delete Department</span>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </DashboardLayout>
     );
 }

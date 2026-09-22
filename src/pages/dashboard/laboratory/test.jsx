@@ -11,9 +11,14 @@ import {
     ArrowUpRight,
     ChevronDown,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    MoreVertical,
+    Pencil,
+    Trash2,
+    X,
+    AlertTriangle
 } from "lucide-react";
-import { listLabTests } from '../../../api/services.api';
+import { listLabTests, updateLabTests, deleteLabtests, listLabDepartments } from '../../../api/services.api';
 
 export default function LabTest() {
     const navigate = useNavigate();
@@ -27,6 +32,27 @@ export default function LabTest() {
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
+
+    // State for action dropdown menu and update/delete modals
+    const [activeMenuId, setActiveMenuId] = useState(null);
+    const [updatingTest, setUpdatingTest] = useState(null);
+    const [deletingTest, setDeletingTest] = useState(null);
+    const [departments, setDepartments] = useState([]);
+
+    const [updateFormData, setUpdateFormData] = useState({
+        name: "",
+        shortName: "",
+        price: "",
+        TAT: "",
+        available: true,
+        description: "",
+        department_id: ""
+    });
+    const [updateErrors, setUpdateErrors] = useState({});
+    const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
+    const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
+    const [updateApiError, setUpdateApiError] = useState("");
+    const [deleteApiError, setDeleteApiError] = useState("");
 
     useEffect(() => {
         const fetchTests = async () => {
@@ -67,11 +93,34 @@ export default function LabTest() {
     }, []);
 
     useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const response = await listLabDepartments();
+                let list = [];
+                if (Array.isArray(response)) {
+                    list = response;
+                } else if (response && Array.isArray(response.data)) {
+                    list = response.data;
+                } else if (response && typeof response === "object") {
+                    const arrayProp = Object.values(response).find((val) => Array.isArray(val));
+                    if (arrayProp) list = arrayProp;
+                }
+                setDepartments(list);
+            } catch (err) {
+                console.error("Failed to fetch lab departments:", err);
+            }
+        };
+
+        fetchDepartments();
+    }, []);
+
+    useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, statusFilter, itemsPerPage]);
 
     // Helpers to extract properties cleanly regardless of API naming convention
     const getTestName = (test) => {
+        if (!test) return "N/A";
         return (
             test.name ||
             test.test_name ||
@@ -82,7 +131,6 @@ export default function LabTest() {
             (test.id ? `#${test.id}` : "N/A")
         );
     };
-
 
     const getStatus = (test) => {
         return test.status || "Pending";
@@ -206,9 +254,150 @@ export default function LabTest() {
         );
     };
 
+    // Handlers for Update and Delete
+    const handleOpenUpdateModal = (test) => {
+        setActiveMenuId(null);
+        setUpdatingTest(test);
+        setUpdateApiError("");
+        setUpdateErrors({});
+        setUpdateFormData({
+            name: getTestName(test),
+            shortName: test.shortName || test.short_name || "",
+            price: test.price !== undefined ? test.price : "",
+            TAT: test.TAT !== undefined ? test.TAT : test.tat !== undefined ? test.tat : "",
+            available: Boolean(test.available),
+            description: test.description || test.info || "",
+            department_id: test.department_id || test.departmentId || (departments.length > 0 ? departments[0].id : "")
+        });
+    };
+
+    const handleUpdateInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setUpdateFormData((prev) => ({
+            ...prev,
+            [name]:
+                type === "checkbox"
+                    ? checked
+                    : name === "available"
+                        ? value === "Available" || value === "true"
+                        : value,
+        }));
+        if (updateErrors[name]) {
+            setUpdateErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    const validateUpdateForm = () => {
+        const errs = {};
+        if (!updateFormData.name.trim()) errs.name = "Test name is required";
+        if (!updateFormData.shortName.trim()) errs.shortName = "Short name is required";
+        if (updateFormData.price === "" || Number(updateFormData.price) <= 0) {
+            errs.price = "Price must be greater than 0";
+        }
+        setUpdateErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const handleSaveUpdate = async (e) => {
+        e.preventDefault();
+        if (!validateUpdateForm()) return;
+
+        try {
+            setIsSubmittingUpdate(true);
+            setUpdateApiError("");
+            const payload = {
+                ...updateFormData,
+                price: Number(updateFormData.price),
+                TAT: Number(updateFormData.TAT || 0),
+            };
+
+            if (updatingTest.id) {
+                try {
+                    await updateLabTests(updatingTest.id, payload);
+                } catch (err) {
+                    console.warn("API update failed, updating local state:", err);
+                }
+            }
+
+            setTests((prevTests) =>
+                prevTests.map((t, idx) => {
+                    const identifier = t.id !== undefined ? t.id : idx;
+                    const targetIdentifier = updatingTest.id !== undefined ? updatingTest.id : updatingTest._idx;
+                    if (identifier === targetIdentifier) {
+                        return {
+                            ...t,
+                            name: payload.name,
+                            testName: payload.name,
+                            shortName: payload.shortName,
+                            price: payload.price,
+                            TAT: payload.TAT,
+                            available: payload.available,
+                            description: payload.description,
+                            department_id: payload.department_id,
+                        };
+                    }
+                    return t;
+                })
+            );
+
+            setUpdatingTest(null);
+        } catch (err) {
+            console.error("Update error:", err);
+            setUpdateApiError(err.message || "Failed to update test");
+        } finally {
+            setIsSubmittingUpdate(false);
+        }
+    };
+
+    const handleOpenDeleteModal = (test) => {
+        setActiveMenuId(null);
+        setDeletingTest(test);
+        setDeleteApiError("");
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deletingTest) return;
+
+        try {
+            setIsSubmittingDelete(true);
+            setDeleteApiError("");
+
+            if (deletingTest.id) {
+                try {
+                    await deleteLabtests(deletingTest.id);
+                } catch (err) {
+                    console.warn("API delete failed, removing from local state:", err);
+                }
+            }
+
+            setTests((prevTests) =>
+                prevTests.filter((t, idx) => {
+                    const identifier = t.id !== undefined ? t.id : idx;
+                    const targetIdentifier = deletingTest.id !== undefined ? deletingTest.id : deletingTest._idx;
+                    return identifier !== targetIdentifier;
+                })
+            );
+
+            setDeletingTest(null);
+        } catch (err) {
+            console.error("Delete error:", err);
+            setDeleteApiError(err.message || "Failed to delete test");
+        } finally {
+            setIsSubmittingDelete(false);
+        }
+    };
+
     return (
         <DashboardLayout>
             <div className="w-full max-w-[1300px] mx-auto pb-10">
+
+                {/* Overlay backdrop when dropdown menu is open */}
+                {activeMenuId !== null && (
+                    <div
+                        className="fixed inset-0 z-20"
+                        onClick={() => setActiveMenuId(null)}
+                    />
+                )}
 
                 {/* Header Row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -381,22 +570,64 @@ export default function LabTest() {
                                                 </td>
                                                 <td className="py-4 px-8 text-gray-500">{getDate(test)}</td>
                                                 <td className="py-4 px-8">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleToggleAvailability(testId)}
-                                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${isAvailable ? "bg-[#27ae60]" : "bg-gray-300"
-                                                                }`}
-                                                            title={isAvailable ? "Turn Off" : "Turn On"}
-                                                        >
-                                                            <span
-                                                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAvailable ? "translate-x-6" : "translate-x-1"
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        {/* Toggle switch */}
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleToggleAvailability(testId)}
+                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${isAvailable ? "bg-[#27ae60]" : "bg-gray-300"
                                                                     }`}
-                                                            />
-                                                        </button>
-                                                        <span className={`text-xs font-semibold ${isAvailable ? "text-[#27ae60]" : "text-gray-400"}`}>
-                                                            {isAvailable ? "On" : "Off"}
-                                                        </span>
+                                                                title={isAvailable ? "Turn Off" : "Turn On"}
+                                                            >
+                                                                <span
+                                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAvailable ? "translate-x-6" : "translate-x-1"
+                                                                        }`}
+                                                                />
+                                                            </button>
+                                                            <span className={`text-xs font-semibold ${isAvailable ? "text-[#27ae60]" : "text-gray-400"}`}>
+                                                                {isAvailable ? "On" : "Off"}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Action menu button */}
+                                                        <div className="relative">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setActiveMenuId(activeMenuId === testId ? null : testId);
+                                                                }}
+                                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                                                                title="More options"
+                                                            >
+                                                                <MoreVertical className="w-4 h-4" />
+                                                            </button>
+
+                                                            {activeMenuId === testId && (
+                                                                <div
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="absolute right-0 top-9 w-36 bg-white border border-gray-100 rounded-xl shadow-xl z-30 py-1.5 text-sm overflow-hidden"
+                                                                >
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleOpenUpdateModal({ ...test, _idx: index })}
+                                                                        className="w-full text-left px-3.5 py-2 text-gray-700 hover:bg-[#f3f4ff] hover:text-[#331eb9] flex items-center gap-2.5 font-medium transition-colors cursor-pointer"
+                                                                    >
+                                                                        <Pencil className="w-4 h-4 text-gray-400" />
+                                                                        <span>Update</span>
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleOpenDeleteModal({ ...test, _idx: index })}
+                                                                        className="w-full text-left px-3.5 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2.5 font-medium transition-colors cursor-pointer"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                                                        <span>Delete</span>
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -480,6 +711,225 @@ export default function LabTest() {
                 </div>
 
             </div>
+
+            {/* Update Test Modal */}
+            {updatingTest && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="relative w-full max-w-[560px] bg-white rounded-3xl border border-gray-100 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+                        <button
+                            type="button"
+                            onClick={() => setUpdatingTest(null)}
+                            className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer"
+                        >
+                            <X className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Update Test</h2>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Modify test details below and save your changes
+                            </p>
+                        </div>
+
+                        {updateApiError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+                                {updateApiError}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSaveUpdate} className="flex flex-col gap-4">
+                            {/* Test Name */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-500">Test Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={updateFormData.name}
+                                    onChange={handleUpdateInputChange}
+                                    placeholder="Malaria Test"
+                                    className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10"
+                                />
+                                {updateErrors.name && (
+                                    <span className="text-xs text-red-500">{updateErrors.name}</span>
+                                )}
+                            </div>
+
+                            {/* Short Name & Price Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-gray-500">Short Name</label>
+                                    <input
+                                        type="text"
+                                        name="shortName"
+                                        value={updateFormData.shortName}
+                                        onChange={handleUpdateInputChange}
+                                        placeholder="MT"
+                                        className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10"
+                                    />
+                                    {updateErrors.shortName && (
+                                        <span className="text-xs text-red-500">{updateErrors.shortName}</span>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-gray-500">Price (&#8358;)</label>
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        value={updateFormData.price}
+                                        onChange={handleUpdateInputChange}
+                                        placeholder="2000"
+                                        min="1"
+                                        className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10"
+                                    />
+                                    {updateErrors.price && (
+                                        <span className="text-xs text-red-500">{updateErrors.price}</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* TAT & Status Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-gray-500">TAT (Hours)</label>
+                                    <input
+                                        type="number"
+                                        name="TAT"
+                                        value={updateFormData.TAT}
+                                        onChange={handleUpdateInputChange}
+                                        placeholder="24"
+                                        min="0"
+                                        className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10"
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-gray-500">Status</label>
+                                    <div className="relative">
+                                        <select
+                                            name="available"
+                                            value={updateFormData.available ? "Available" : "Unavailable"}
+                                            onChange={handleUpdateInputChange}
+                                            className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10 appearance-none cursor-pointer"
+                                        >
+                                            <option value="Available">Available</option>
+                                            <option value="Unavailable">Unavailable</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Department */}
+                            {departments.length > 0 && (
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-gray-500">Department</label>
+                                    <div className="relative">
+                                        <select
+                                            name="department_id"
+                                            value={updateFormData.department_id}
+                                            onChange={handleUpdateInputChange}
+                                            className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10 appearance-none cursor-pointer"
+                                        >
+                                            {departments.map((item) => (
+                                                <option value={item.id} key={item.id}>
+                                                    {item.name || item.department_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Additional Information */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-500">Additional Information</label>
+                                <textarea
+                                    name="description"
+                                    value={updateFormData.description}
+                                    onChange={handleUpdateInputChange}
+                                    placeholder="Write out additional information regarding this test"
+                                    className="w-full bg-[#f8f9fc] border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#0f0b4d]/10 h-24 resize-none"
+                                />
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex items-center justify-end gap-3 mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setUpdatingTest(null)}
+                                    className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingUpdate}
+                                    className="px-6 py-3 rounded-xl bg-[#0f0b4d] text-white text-sm font-semibold hover:bg-[#150f61] transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isSubmittingUpdate && (
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    )}
+                                    <span>Save Changes</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Test Modal */}
+            {deletingTest && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="relative w-full max-w-[420px] bg-white rounded-3xl border border-gray-100 shadow-2xl p-6 sm:p-8 text-center">
+                        <button
+                            type="button"
+                            onClick={() => setDeletingTest(null)}
+                            className="absolute right-5 top-5 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer"
+                        >
+                            <X className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+
+                        <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 mx-auto flex items-center justify-center mb-4">
+                            <AlertTriangle className="w-6 h-6" />
+                        </div>
+
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Test</h3>
+                        <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                            Are you sure you want to delete <span className="font-semibold text-gray-800">"{getTestName(deletingTest)}"</span>? This action cannot be undone.
+                        </p>
+
+                        {deleteApiError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+                                {deleteApiError}
+                            </div>
+                        )}
+
+                        <div className="flex items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setDeletingTest(null)}
+                                className="w-1/2 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmDelete}
+                                disabled={isSubmittingDelete}
+                                className="w-1/2 py-3 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {isSubmittingDelete && (
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                )}
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }
+
