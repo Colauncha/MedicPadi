@@ -40,6 +40,17 @@ export default function LaboratorySignin() {
         password: formData.password,
       });
       console.log("Login successful", response);
+      if (formData.email) {
+        localStorage.setItem("userEmail", formData.email);
+      }
+      const phone = response?.user?.phoneNumber || response?.user?.phone || response?.phoneNumber || response?.phone;
+      if (phone) {
+        localStorage.setItem("userPhone", phone);
+      }
+      const token = response?.token || response?.access_token || response?.accessToken;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
       navigate("/labdashboard");
     } catch (err) {
       console.error("Login failed", err);

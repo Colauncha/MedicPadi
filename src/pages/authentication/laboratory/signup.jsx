@@ -71,6 +71,16 @@ export default function LaboratorySignup() {
       setError("");
       const result = await createUser(formData);
       console.log("User created:", result);
+      if (formData.email) {
+        localStorage.setItem("userEmail", formData.email);
+      }
+      if (formData.phoneNumber) {
+        localStorage.setItem("userPhone", formData.phoneNumber);
+      }
+      const token = result?.token || result?.access_token || result?.accessToken;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
       navigate("/laboratory-profile");
     } catch (err) {
       console.error(err.message);

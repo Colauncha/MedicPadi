@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router";
 import {
   LayoutDashboard,
@@ -20,7 +21,7 @@ import {
 } from "lucide-react";
 import logo from "../../assets/mediclogo2.svg";
 import avatar from "../../assets/image.svg";
-import { logoutUser } from "../../api/auth.api";
+import { logoutUser, retrieveProfile } from "../../api/auth.api";
 
 export default function DashboardLayout({
   children,
@@ -31,6 +32,46 @@ export default function DashboardLayout({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [labProfileData, setLabProfileData] = useState(() => {
+    try {
+      const saved = localStorage.getItem("labProfile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const loadProfile = () => {
+      try {
+        const saved = localStorage.getItem("labProfile");
+        if (saved) setLabProfileData(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    loadProfile();
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      retrieveProfile()
+        .then((data) => {
+          if (data) {
+            setLabProfileData((prev) => ({
+              ...prev,
+              companyName: data.companyName || data.name || prev?.companyName,
+              avatarSrc: data.profilePicture?.url || prev?.avatarSrc,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+
+    window.addEventListener("profileUpdate", loadProfile);
+    return () => window.removeEventListener("profileUpdate", loadProfile);
+  }, []);
 
   const activeRole =
     role ||
@@ -109,7 +150,7 @@ export default function DashboardLayout({
       ? "Dr. Sarah John"
       : activeRole === "pharmacy"
         ? "Alpha Pharmacy"
-        : "Olivex Laboratory Center");
+        : labProfileData?.companyName || labProfileData?.name || "Olivex Laboratory Center");
   const displaySubtitle =
     profileSubtitle ||
     (activeRole === "doctor"
@@ -117,7 +158,8 @@ export default function DashboardLayout({
       : activeRole === "pharmacy"
         ? "Pharmacist"
         : "View profile");
-  const displayAvatar = avatarSrc || avatar;
+  const hasCustomAvatar = Boolean(avatarSrc || labProfileData?.avatarSrc);
+  const displayAvatar = avatarSrc || labProfileData?.avatarSrc || (activeRole !== "laboratory" ? avatar : null);
 
   return (
     <div className="flex h-screen w-full bg-white overflow-hidden text-[#1a1a4b]">
@@ -208,19 +250,27 @@ export default function DashboardLayout({
               <Bell className="w-[22px] h-[22px] fill-current" />
             </button>
 
-            <div className="flex items-center space-x-3 cursor-pointer pl-2 border-l border-gray-100">
-              <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden shrink-0">
-                <img
-                  src={displayAvatar}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
+            <div
+              onClick={() => navigate(`${prefix}/profile`)}
+              className="flex items-center space-x-3 cursor-pointer pl-2 border-l border-gray-100 hover:opacity-85 transition-opacity"
+              title="View profile"
+            >
+              <div className="w-12 h-12 rounded-full bg-[#f0f2f8] border border-[#eef0f6] overflow-hidden shrink-0 flex items-center justify-center text-[#9a9db0]">
+                {displayAvatar ? (
+                  <img
+                    src={displayAvatar}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-6 h-6 stroke-[1.5]" />
+                )}
               </div>
               <div className="flex flex-col">
                 <h4 className="text-[#3d3d3d] leading-tight text-xl">
                   {displayName}
                 </h4>
-                <p className="text-xs text-[#464646] mt-0.5">
+                <p className="text-xs text-[#464646] mt-0.5 hover:text-[#150d5e] transition-colors">
                   {displaySubtitle}
                 </p>
               </div>

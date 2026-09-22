@@ -462,53 +462,41 @@ export default function LabTest() {
                 {/* Statistics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {/* Card 1 */}
-                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative">
-                        <div className="flex justify-between items-start mb-4">
+                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px] flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <h3 className="text-[#331eb9] text-[15px] font-medium">Total Test</h3>
                             <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9]">
                                 <Users className="w-4 h-4" fill="#331eb9" />
                             </div>
                         </div>
-                        <div className="text-3xl font-bold text-[#150d5e] mb-3">
+                        <div className="text-3xl font-bold text-[#150d5e]">
                             {isLoading ? "..." : totalCount}
-                        </div>
-                        <div className="flex items-center text-xs text-[#331eb9] font-medium">
-                            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
-                            <span className="font-semibold mr-1">15%</span>
-                            <span className="opacity-95">from last week</span>
                         </div>
                     </div>
 
                     {/* Card 2 */}
-                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative">
-                        <div className="flex justify-between items-start mb-4">
+                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px] flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <h3 className="text-[#331eb9] text-[15px] font-medium">Total Department</h3>
                             <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9]">
                                 <Network className="w-4 h-4" />
                             </div>
                         </div>
-                        <div className="flex items-center text-xs text-[#331eb9] font-medium">
-                            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
-                            <span className="font-semibold mr-1">15%</span>
-                            <span className="opacity-95">rise from last week</span>
+                        <div className="text-3xl font-bold text-[#150d5e]">
+                            {departments.length}
                         </div>
                     </div>
 
                     {/* Card 3 */}
-                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative">
-                        <div className="flex justify-between items-start mb-4">
+                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px] flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <h3 className="text-[#331eb9] text-[15px] font-medium">Completed Test</h3>
                             <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9]">
                                 <ClipboardCheck className="w-4 h-4" />
                             </div>
                         </div>
-                        <div className="text-3xl font-bold text-[#150d5e] mb-3">
+                        <div className="text-3xl font-bold text-[#150d5e]">
                             {isLoading ? "..." : completedCount}
-                        </div>
-                        <div className="flex items-center text-xs text-[#331eb9] font-medium">
-                            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
-                            <span className="font-semibold mr-1">25%</span>
-                            <span className="opacity-95">Attended appointments</span>
                         </div>
                     </div>
                 </div>
