@@ -111,7 +111,7 @@ export const resetPassword = async ({ email, otp, newPassword }) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, otp, newPassword }),
+      body: JSON.stringify({ email, otp: Number(otp), newPassword }),
     });
  
     const data = await response.json();
@@ -375,6 +375,32 @@ export const uploadProfilePicture = async (file) => {
     return data;
   } catch (error) {
     console.error("Upload Profile Picture Error:", error.message);
+    throw error;
+  }
+};
+
+export const updateBusinessHours = async (businessHours) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch("/api/profile/business-hours", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: JSON.stringify(businessHours),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update business hours");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Update Business Hours Error:", error.message);
     throw error;
   }
 };

@@ -13,7 +13,8 @@ export default function Home() {
   return (
     <div className="font-sans">
       <Navbar />
-      <Hero />
+      <main>
+        <Hero />
       <TrustedLogos />
       <RoleTabs />
       <ProcessSteps />
@@ -21,6 +22,7 @@ export default function Home() {
       <PortalCards />
       <Testimonials />
       <CtaBanner />
+      </main>
       <Footer />
     </div>
   );

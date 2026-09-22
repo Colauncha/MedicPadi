@@ -11,11 +11,7 @@ const TESTIMONIALS = [
     name: "Dr. Ajayi Micheal",
     role: "Cardiologist",
   },
-  // NOTE: the Figma file shows this third card with the exact same quote
-  // and name as the second one -- almost certainly a placeholder duplicate
-  // left in the design rather than intentional. Swap in a real third
-  // testimonial when you have one; kept distinct filler text for now so
-  // the section doesn't visibly repeat itself.
+  
   {
     quote:
       "Delivery updates show up before the patient even asks. That alone has cut our support calls in half.",

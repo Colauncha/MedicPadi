@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
+import {
+  retrieveProfile,
+  updateProfile,
+  uploadProfilePicture,
+  updateBusinessHours,
+} from "../../../api/auth.api";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TIME_SLOTS = [
@@ -13,13 +19,13 @@ function slotTo24h(slot) {
   let hour = parseInt(time);
   if (period === "PM" && hour !== 12) hour += 12;
   if (period === "AM" && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, "0")}:00`;
+  return hour;
 }
 
 function slotsToBusinessHours(slots) {
   if (!slots.length) return null;
-  const times = slots.map(slotTo24h).sort();
-  return { start: times[0], end: times[times.length - 1] };
+  const hours = slots.map(slotTo24h).sort((a, b) => a - b);
+  return { start: hours[0], end: hours[hours.length - 1] };
 }
 
 function Profile() {
@@ -33,15 +39,19 @@ function Profile() {
   const [appointmentLoading, setAppointmentLoading] = useState(false);
 
   const [form, setForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     gender: "",
     phoneNumber: "",
-    department: "",
-    placeOfWork: "",
-    experience: "",
-    awards: "",
+    speciality: "",
     email: "",
+    
     about: "",
+    placeOfWork: "",
+    yearsOfService: "",
+    awards: "",
+    costPerSession: "",
+    sessionLength: "",
   });
 
   const [expandedDay, setExpandedDay] = useState("Monday");
@@ -53,27 +63,26 @@ function Profile() {
     Friday: [],
   });
 
-  // Pre-fill form from API on mount
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("/api/profile/retrieve", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    retrieveProfile()
       .then((data) => {
         if (!data) return;
         setForm({
-          name: data.name || "",
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
           gender: data.gender || "",
           phoneNumber: data.phoneNumber || "",
-          department: data.department || "",
-          placeOfWork: data.placeOfWork || "",
-          experience: data.experience || "",
-          awards: data.awards || "",
+          speciality: data.speciality || "",
           email: data.email || "",
           about: data.about || "",
+          placeOfWork: data.placeOfWork || "",
+          yearsOfService: data.yearsOfService || "",
+          awards: data.awards || "",
+          costPerSession: data.costPerSession || "",
+          sessionLength: data.sessionLength || "",
         });
         if (data.profilePicture?.url) setPreview(data.profilePicture.url);
       })
@@ -84,7 +93,6 @@ function Profile() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Profile picture: preview + upload immediately
   const handleImageClick = () => fileInputRef.current?.click();
 
   const handleImageChange = async (e) => {
@@ -92,75 +100,49 @@ function Profile() {
     if (!file) return;
     setPreview(URL.createObjectURL(file));
 
-    const token = localStorage.getItem("access_token");
-    const imageForm = new FormData();
-    imageForm.append("image", file);
-
     try {
-      const res = await fetch("/api/profile/profile-picture", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: imageForm,
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        setProfileError(err.message || "Image upload failed.");
-      }
-    } catch {
-      setProfileError("Image upload failed. Please try again.");
+      await uploadProfilePicture(file);
+    } catch (err) {
+      setProfileError(err.message || "Image upload failed.");
     }
   };
 
-  // Save personal information
   const handleSaveProfile = async () => {
     setProfileError("");
     setProfileSuccess("");
     setProfileLoading(true);
 
-    const token = localStorage.getItem("access_token");
-    if (!token) {
+    if (!localStorage.getItem("token")) {
       setProfileError("You are not logged in.");
       setProfileLoading(false);
       return;
     }
 
-    try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(form),
-      });
+    // Only UpdateDoctorDto's confirmed fields are sent.
+    const { about, placeOfWork, yearsOfService, awards, costPerSession, sessionLength } = form;
+    const profilePayload = { about, placeOfWork, yearsOfService, awards, costPerSession, sessionLength };
 
-      if (!res.ok) {
-        const err = await res.json();
-        setProfileError(err.message || "Failed to update profile.");
-      } else {
-        setProfileSuccess("Profile saved successfully!");
-      }
-    } catch {
-      setProfileError("Something went wrong. Please try again.");
+    try {
+      await updateProfile(profilePayload);
+      setProfileSuccess("Profile saved successfully!");
+    } catch (err) {
+      setProfileError(err.message || "Failed to update profile.");
     } finally {
       setProfileLoading(false);
     }
   };
 
-  // Save appointment / business hours
   const handleSaveAppointment = async () => {
     setAppointmentError("");
     setAppointmentSuccess("");
     setAppointmentLoading(true);
 
-    const token = localStorage.getItem("access_token");
-    if (!token) {
+    if (!localStorage.getItem("token")) {
       setAppointmentError("You are not logged in.");
       setAppointmentLoading(false);
       return;
     }
 
-    // Build the business hours payload — only include days with selected slots
     const payload = {};
     DAYS.forEach((day) => {
       const hours = slotsToBusinessHours(selectedSlots[day]);
@@ -168,23 +150,10 @@ function Profile() {
     });
 
     try {
-      const res = await fetch("/api/profile/business-hours", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        setAppointmentError(err.message || "Failed to save appointment.");
-      } else {
-        setAppointmentSuccess("Appointment hours saved!");
-      }
-    } catch {
-      setAppointmentError("Something went wrong. Please try again.");
+      await updateBusinessHours(payload);
+      setAppointmentSuccess("Appointment hours saved!");
+    } catch (err) {
+      setAppointmentError(err.message || "Failed to save appointment.");
     } finally {
       setAppointmentLoading(false);
     }
@@ -209,7 +178,6 @@ function Profile() {
   return (
     <DashboardLayout>
       <div className="p-6 min-h-screen bg-[#F3F4FF]">
-        {/* Doctor Header Card */}
         <div className="bg-white rounded-2xl p-6 mb-6 flex flex-wrap items-center gap-6">
           <div className="flex flex-col items-center gap-2">
             <div
@@ -231,14 +199,16 @@ function Profile() {
               className="hidden"
               onChange={handleImageChange}
             />
-            <p className="text-sm font-semibold text-[#1a1a2e]">{form.name || "Dr. Ajayi M."}</p>
+            <p className="text-sm font-semibold text-[#1a1a2e]">
+              {form.firstName ? `Dr. ${form.firstName} ${form.lastName}` : "Dr. Ajayi M."}
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-8 flex-1">
             {[
               { label: "Gender", value: form.gender || "Male" },
-              { label: "Experience", value: form.experience || "12 Years" },
-              { label: "Department", value: form.department || "Orthopedic", colored: true },
+              { label: "Experience", value: form.yearsOfService || "12 Years" },
+              { label: "Speciality", value: form.speciality || "Orthopedic", colored: true },
               { label: "Phone Num", value: form.phoneNumber || "09012345678" },
             ].map(({ label, value, colored }) => (
               <div key={label} className="flex flex-col gap-0.5">
@@ -274,54 +244,63 @@ function Profile() {
           </div>
         </div>
 
-        {/* Two Column Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Personal Information */}
           <div className="bg-white rounded-2xl p-6">
             <h2 className="text-base font-semibold text-[#1a1a2e] mb-5">Personal Information</h2>
+            {/* <p className="text-[11px] text-gray-400 mb-4">
+              Fields marked "set at signup" can't be changed here yet -- there's no confirmed
+              backend endpoint for editing them post-signup.
+            </p> */}
             <div className="flex flex-col gap-4">
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Name</label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Sarah John"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">First Name (set at signup)</label>
+                  <input
+                    name="firstName"
+                    value={form.firstName}
+                    disabled
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Last Name (set at signup)</label>
+                  <input
+                    name="lastName"
+                    value={form.lastName}
+                    disabled
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Gender</label>
+                  <label className="text-xs text-gray-400 mb-1 block">Gender (set at signup)</label>
                   <input
                     name="gender"
                     value={form.gender}
-                    onChange={handleChange}
-                    placeholder="E.g Male"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                    disabled
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Phone Number</label>
+                  <label className="text-xs text-gray-400 mb-1 block">Phone Number (set at signup)</label>
                   <input
                     name="phoneNumber"
                     value={form.phoneNumber}
-                    onChange={handleChange}
-                    placeholder="09012345678"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                    disabled
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Department</label>
+                <label className="text-xs text-gray-400 mb-1 block">Speciality (set at signup)</label>
                 <input
-                  name="department"
-                  value={form.department}
-                  onChange={handleChange}
-                  placeholder="E.g Cardiology"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                  name="speciality"
+                  value={form.speciality}
+                  disabled
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
                 />
               </div>
 
@@ -338,12 +317,12 @@ function Profile() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Experience</label>
+                  <label className="text-xs text-gray-400 mb-1 block">Years of Service</label>
                   <input
-                    name="experience"
-                    value={form.experience}
+                    name="yearsOfService"
+                    value={form.yearsOfService}
                     onChange={handleChange}
-                    placeholder="12 Years"
+                    placeholder="12"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
                   />
                 </div>
@@ -359,14 +338,38 @@ function Profile() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Cost Per Session</label>
+                  <input
+                    name="costPerSession"
+                    value={form.costPerSession}
+                    onChange={handleChange}
+                    placeholder="e.g. 15000"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Session Length (mins)</label>
+                  <input
+                    name="sessionLength"
+                    value={form.sessionLength}
+                    onChange={handleChange}
+                    placeholder="e.g. 30"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Email address</label>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  Email address (unconfirmed update path -- see UpdateAcctDto note)
+                </label>
                 <input
                   name="email"
                   value={form.email}
-                  onChange={handleChange}
-                  placeholder="doctor@medicpadi.com"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                  disabled
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
                 />
               </div>
 
@@ -385,7 +388,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* My Available Appointment */}
           <div className="bg-white rounded-2xl p-6 flex flex-col gap-4">
             <h2 className="text-base font-semibold text-[#1a1a2e]">My Available Appointment</h2>
 
