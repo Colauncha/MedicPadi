@@ -16,25 +16,28 @@ async function handleResponse(response, fallbackMessage) {
   return data;
 }
 
-export const listAppointments = async (params = {}) => {
+// GET /api/orders/appointments 
+export const listAppointmentsByStatus = async (status) => {
   try {
-    const query = new URLSearchParams(
-      Object.entries(params).filter(([, v]) => v !== undefined && v !== null),
-    ).toString();
-
-    const response = await fetch(`${BASE}${query ? `?${query}` : ""}`, {
+    const response = await fetch(`${BASE}?status=${encodeURIComponent(status)}`, {
       method: "GET",
       headers: authHeaders(),
     });
 
-    return await handleResponse(response, "Failed to load appointments");
+    const data = await handleResponse(response, `Failed to load ${status} appointments`);
+    if (Array.isArray(data)) return data;
+    return data?.data || data?.items || data?.results || [];
   } catch (error) {
-    console.error("List Appointments Error:", error.message);
+    console.error(`List Appointments (${status}) Error:`, error.message);
     throw error;
   }
 };
 
-// GET /api/orders/appointments/{id}
+export const listAppointmentsByStatuses = async (statuses) => {
+  const results = await Promise.all(statuses.map((s) => listAppointmentsByStatus(s)));
+  return results.flat();
+};
+
 export const getAppointment = async (id) => {
   try {
     const response = await fetch(`${BASE}/${id}`, {
@@ -49,7 +52,6 @@ export const getAppointment = async (id) => {
   }
 };
 
-// PATCH /api/orders/appointments/{id} 
 export const updateAppointment = async (id, updates) => {
   try {
     const response = await fetch(`${BASE}/${id}`, {
@@ -65,7 +67,6 @@ export const updateAppointment = async (id, updates) => {
   }
 };
 
-// DELETE /api/orders/appointments/{id} 
 export const cancelAppointment = async (id) => {
   try {
     const response = await fetch(`${BASE}/${id}`, {
@@ -80,7 +81,6 @@ export const cancelAppointment = async (id) => {
   }
 };
 
-// GET /api/orders/appointments/{id}/accept 
 export const acceptAppointment = async (id) => {
   try {
     const response = await fetch(`${BASE}/${id}/accept`, {
@@ -95,7 +95,6 @@ export const acceptAppointment = async (id) => {
   }
 };
 
-// GET /api/orders/appointments/{id}/complete 
 export const completeAppointment = async (id) => {
   try {
     const response = await fetch(`${BASE}/${id}/complete`, {

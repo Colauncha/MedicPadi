@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
 
+
 // Landing page components
 import Home from "./pages/HomePage/Home.jsx";
 
@@ -42,15 +43,15 @@ import PharmCustomer from "./pages/dashboard/pharmacy/customers";
 import PharmPayment from "./pages/dashboard/pharmacy/payments";
 
 import WaitlistPage from "./Pages/WaitlistPage";
+
+// Doctor dashboard pages
 import DashboardPage from "./pages/dashboard/doctorsPage/DashboardPage";
 import PatientList from "./pages/dashboard/doctorsPage/PatientList";
 import PatientDetails from "./pages/dashboard/doctorsPage/PatientDetails";
 import Profile from "./pages/dashboard/doctorsPage/Profile";
 import AppointmentPage from "./pages/dashboard/doctorsPage/AppointmentPage";
 import ReportPage from "./pages/dashboard/doctorsPage/ReportPage";
-
-
-
+// import VideoCallPage from "./pages/dashboard/doctorsPage/videoCallPage";
 
 function App() {
   return (
@@ -117,6 +118,7 @@ function App() {
       <Route path="/docdashboard/profile" element={<Profile />} />
       <Route path="/docdashboard/appointments" element={<AppointmentPage />} />
       <Route path="/docdashboard/reports" element={<ReportPage />} />
+      {/* <Route path="/docdashboard/appointments/:id/call" element={<VideoCallPage />} /> */}
 
     </Routes>
   );
