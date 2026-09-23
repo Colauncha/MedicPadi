@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
+import { createProfile, uploadProfilePicture } from "../../../api/auth.api";
 import doctor from "../../../assets/doctor.png";
 import logo from "../../../assets/mediclogo.svg";
 
 export default function LaboratoryProfile() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     companyName: "",
     companyAddress: "",
@@ -23,10 +28,57 @@ export default function LaboratoryProfile() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleImageClick = () => fileInputRef.current?.click();
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+
+    try {
+      const res = await uploadProfilePicture(file);
+      if (res) {
+        const uploadedUrl = res.url || res.imageUrl || res.profilePicture?.url || res.data?.url || objectUrl;
+        setPreview(uploadedUrl);
+      }
+    } catch (err) {
+      console.warn("API image upload warning:", err.message);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/labdashboard");
-    console.log("Profile Data:", formData);
+    setError("");
+    setLoading(true);
+
+    const userEmail = localStorage.getItem("userEmail") || "";
+    const userPhone = localStorage.getItem("userPhone") || "";
+
+    const profilePayload = {
+      ...formData,
+      email: userEmail,
+      phoneNumber: userPhone,
+      name: formData.companyName, // mapped for generic endpoints
+      avatarSrc: preview,
+    };
+
+    // Save locally so dashboard & header update immediately
+    localStorage.setItem("labProfile", JSON.stringify(profilePayload));
+    window.dispatchEvent(new Event("profileUpdate"));
+
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await createProfile(profilePayload);
+      }
+    } catch (err) {
+      console.warn("API profile update warning:", err.message);
+    } finally {
+      setLoading(false);
+      navigate("/labdashboard");
+    }
   };
 
   return (
@@ -54,13 +106,37 @@ export default function LaboratoryProfile() {
               </p>
             </div>
 
+            {error && (
+              <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="border-2 border-dashed border-[#E7E7E7] rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
-                <Upload className="w-5 h-5 text-[#888888] mb-2" />
+              <div
+                onClick={handleImageClick}
+                className="border-2 border-dashed border-[#E7E7E7] rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="Company Logo Preview"
+                    className="w-20 h-20 rounded-full object-cover mb-2"
+                  />
+                ) : (
+                  <Upload className="w-5 h-5 text-[#888888] mb-2" />
+                )}
                 <p className="text-xs text-[#888888] mb-1">
-                  Upload your company image
+                  {preview ? "Change company image" : "Upload your company image"}
                 </p>
                 <p className="text-[10px] text-[#A0A0A0]">or click to browse</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
               </div>
 
               <div>
@@ -91,7 +167,7 @@ export default function LaboratoryProfile() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[#888888] mb-1.5">
                     Location
@@ -155,9 +231,17 @@ export default function LaboratoryProfile() {
 
               <button
                 type="submit"
-                className="w-full bg-[#150D5E] text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] mt-4"
+                disabled={loading}
+                className="w-full flex items-center justify-center bg-[#150D5E] text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] mt-4 disabled:opacity-60"
               >
-                Continue
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                    Saving...
+                  </>
+                ) : (
+                  "Continue"
+                )}
               </button>
             </form>
           </div>
@@ -166,3 +250,4 @@ export default function LaboratoryProfile() {
     </div>
   );
 }
+
