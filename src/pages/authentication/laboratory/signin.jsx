@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { loginUser } from "../../../api/auth.api";
+import { loginUser, getUserIdFromToken } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import doctor from "../../../assets/doctor.png";
 import apple from "../../../assets/apple.svg";
@@ -25,40 +25,71 @@ export default function LaboratorySignin() {
     if (error) setError(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setError("Please fill in all required fields.");
-      return;
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!formData.email || !formData.password) {
+    setError("Please fill in all required fields.");
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+    setError(null);
+
+    const response = await loginUser({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    console.log("Login successful", response);
+
+    // Save email
+    localStorage.setItem("userEmail", formData.email);
+
+    // Get the access token from the actual response structure
+    const token = response?.token?.access_token;
+
+    if (!token) {
+      throw new Error("Access token was not returned by the server.");
     }
 
+    // Save token
+    localStorage.setItem("token", token);
+
+    // Decode JWT payload to get user ID from `sub`
     try {
-      setIsLoading(true);
-      setError(null);
-      const response = await loginUser({
-        email: formData.email,
-        password: formData.password,
-      });
-      console.log("Login successful", response);
-      if (formData.email) {
-        localStorage.setItem("userEmail", formData.email);
+      const payload = token.split(".")[1];
+
+      const decodedPayload = JSON.parse(
+        atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+      );
+
+      const userId = decodedPayload?.sub;
+
+      if (!userId) {
+        throw new Error("User ID was not found in the access token.");
       }
-      const phone = response?.user?.phoneNumber || response?.user?.phone || response?.phoneNumber || response?.phone;
-      if (phone) {
-        localStorage.setItem("userPhone", phone);
-      }
-      const token = response?.token || response?.access_token || response?.accessToken;
-      if (token) {
-        localStorage.setItem("token", token);
-      }
-      navigate("/labdashboard");
-    } catch (err) {
-      console.error("Login failed", err);
-      setError(err.message || "Failed to sign in. Please try again.");
-    } finally {
-      setIsLoading(false);
+
+      // Save user ID
+      localStorage.setItem("userId", userId);
+
+      console.log("Saved userId:", userId);
+      console.log("Saved token:", token);
+    } catch (decodeError) {
+      console.error("Failed to decode access token:", decodeError);
+      throw new Error("Could not retrieve user ID from the access token.");
     }
-  };
+
+    navigate("/labdashboard");
+  } catch (err) {
+    console.error("Login failed", err);
+    setError(err.message || "Failed to sign in. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="p-8 bg-[#E6E2F2]">

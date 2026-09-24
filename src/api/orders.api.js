@@ -47,3 +47,55 @@ export const labStats = async () => {
     throw error;
   }
 };
+
+export const testRequisitions = async () => {
+  try {
+    const response = await fetch("/api/orders/test-requisitions", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    console.log("TEST REQUISITION RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Test requisition failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Test Requisition Error:", error.message);
+    throw error;
+  }
+};
+
+export const patientsTestRequisitions = async (labId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`/api/orders/test-requisitions/lab/${labId}/patients`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    console.log("PATIENTS TEST REQUISITION RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Patients Test requisition failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Patients Test Requisition Error:", error.message);
+    throw error;
+  }
+};

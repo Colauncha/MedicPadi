@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { createUser } from "../../../api/auth.api";
+import { createUser, getUserIdFromToken } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import doctor from "../../../assets/doctor.png";
 import apple from "../../../assets/apple.svg";
@@ -63,32 +63,63 @@ export default function LaboratorySignup() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    try {
-      setIsLoading(true);
-      setError("");
-      const result = await createUser(formData);
-      console.log("User created:", result);
-      if (formData.email) {
-        localStorage.setItem("userEmail", formData.email);
-      }
-      if (formData.phoneNumber) {
-        localStorage.setItem("userPhone", formData.phoneNumber);
-      }
-      const token = result?.token || result?.access_token || result?.accessToken;
-      if (token) {
-        localStorage.setItem("token", token);
-      }
-      navigate("/laboratory-profile");
-    } catch (err) {
-      console.error(err.message);
-      setError(err.message || "Failed to create account. Please try again.");
-    } finally {
-      setIsLoading(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    setIsLoading(true);
+    setError("");
+
+    const result = await createUser(formData);
+
+    console.log("SIGNUP RESPONSE:", result);
+
+    // Get access token
+    const token = result?.token?.access_token;
+
+    if (!token) {
+      throw new Error("Access token was not returned by the server.");
     }
-  };
+
+    // Save token
+    localStorage.setItem("token", token);
+
+    // Extract user ID from JWT `sub`
+    const userId = getUserIdFromToken(token);
+
+    console.log("USER ID FROM TOKEN:", userId);
+
+    if (!userId) {
+      throw new Error("User ID could not be extracted from the token.");
+    }
+
+    // Save user ID
+    localStorage.setItem("userId", userId);
+
+    // Save email
+    if (formData.email) {
+      localStorage.setItem("userEmail", formData.email);
+    }
+
+    // Save phone
+    if (formData.phoneNumber) {
+      localStorage.setItem("userPhone", formData.phoneNumber);
+    }
+
+    console.log("Saved userId:", localStorage.getItem("userId"));
+
+    navigate("/laboratory-profile");
+  } catch (err) {
+    console.error("Signup error:", err);
+
+    setError(
+      err.message || "Failed to create account. Please try again."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="p-8 bg-[#E6E2F2]">

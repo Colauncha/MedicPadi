@@ -404,3 +404,22 @@ export const updateBusinessHours = async (businessHours) => {
     throw error;
   }
 };
+
+export const getUserIdFromToken = (token) => {
+  try {
+    if (!token) return null;
+
+    const payload = token.split(".")[1];
+
+    if (!payload) return null;
+
+    const decodedPayload = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+
+    return decodedPayload.sub || null;
+  } catch (error) {
+    console.error("Failed to decode token:", error);
+    return null;
+  }
+};
