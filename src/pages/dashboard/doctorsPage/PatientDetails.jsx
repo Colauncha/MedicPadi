@@ -249,3 +249,6 @@ function PatientDetails() {
 }
 
 export default PatientDetails;
+
+
+

@@ -123,3 +123,15 @@ export const getAppointmentSignature = async (id) => {
     throw error;
   }
 };
+export const getDoctorStats = async () => {
+  try {
+    const response = await fetch(`${BASE.replace("/appointments", "")}/stats/doctor`, {
+      method: "GET",
+      headers: authHeaders(),
+    });
+    return await handleResponse(response, "Failed to load dashboard stats");
+  } catch (error) {
+    console.error("Get Doctor Stats Error:", error.message);
+    throw error;
+  }
+};

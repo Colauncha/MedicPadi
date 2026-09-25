@@ -6,6 +6,7 @@ import {
   uploadProfilePicture,
   updateBusinessHours,
 } from "../../../api/auth.api";
+import { getDoctorSpecialities } from "../../../api/profile.api";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TIME_SLOTS = [
@@ -28,6 +29,16 @@ function slotsToBusinessHours(slots) {
   return { start: hours[0], end: hours[hours.length - 1] };
 }
 
+function normalizeSpecialities(raw) {
+  const list = Array.isArray(raw) ? raw : raw?.data || raw?.items || [];
+  return list.map((item) => {
+    if (typeof item === "string") return { value: item, label: item };
+    const value = item.id ?? item.value ?? item.name ?? item.speciality ?? String(item);
+    const label = item.name ?? item.label ?? item.speciality ?? String(item);
+    return { value, label };
+  });
+}
+
 function Profile() {
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
@@ -37,6 +48,16 @@ function Profile() {
   const [appointmentError, setAppointmentError] = useState("");
   const [appointmentSuccess, setAppointmentSuccess] = useState("");
   const [appointmentLoading, setAppointmentLoading] = useState(false);
+  const [specialities, setSpecialities] = useState([]);
+
+  useEffect(() => {
+    getDoctorSpecialities()
+      .then((raw) => {
+        console.log("Raw specialities response:", raw);
+        setSpecialities(normalizeSpecialities(raw));
+      })
+      .catch((err) => console.error("Error fetching specialities:", err.message));
+  }, []);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -45,7 +66,6 @@ function Profile() {
     phoneNumber: "",
     speciality: "",
     email: "",
-    
     about: "",
     placeOfWork: "",
     yearsOfService: "",
@@ -118,10 +138,15 @@ function Profile() {
       return;
     }
 
-    // Only UpdateDoctorDto's confirmed fields are sent.
     const { about, placeOfWork, yearsOfService, awards, costPerSession, sessionLength } = form;
-    const profilePayload = { about, placeOfWork, yearsOfService, awards, costPerSession, sessionLength };
-
+    const profilePayload = {
+      about,
+      placeOfWork,
+      yearsOfService: Number(yearsOfService) || 0,
+      awards: Number(awards) || 0,
+      costPerSession: Number(costPerSession) || 0,
+      sessionLength: Number(sessionLength) || 0,
+    };
     try {
       await updateProfile(profilePayload);
       setProfileSuccess("Profile saved successfully!");
@@ -208,16 +233,32 @@ function Profile() {
             {[
               { label: "Gender", value: form.gender || "Male" },
               { label: "Experience", value: form.yearsOfService || "12 Years" },
-              { label: "Speciality", value: form.speciality || "Orthopedic", colored: true },
               { label: "Phone Num", value: form.phoneNumber || "09012345678" },
-            ].map(({ label, value, colored }) => (
+            ].map(({ label, value }) => (
               <div key={label} className="flex flex-col gap-0.5">
                 <span className="text-xs text-gray-400">{label}</span>
-                <span className={`text-sm font-medium ${colored ? "text-[#3B4FA8]" : "text-gray-700"}`}>
-                  {value}
-                </span>
+                <span className="text-sm font-medium text-gray-700">{value}</span>
               </div>
             ))}
+
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-gray-400">Speciality</span>
+              <select
+                name="speciality"
+                value={form.speciality}
+                onChange={handleChange}
+                className="text-sm font-medium text-[#3B4FA8] bg-transparent border-none p-0 pr-1 focus:outline-none focus:ring-0 cursor-pointer"
+              >
+                <option value="" disabled>
+                  Select speciality
+                </option>
+                {specialities.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex flex-col items-end gap-3 ml-auto">
@@ -247,10 +288,6 @@ function Profile() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl p-6">
             <h2 className="text-base font-semibold text-[#1a1a2e] mb-5">Personal Information</h2>
-            {/* <p className="text-[11px] text-gray-400 mb-4">
-              Fields marked "set at signup" can't be changed here yet -- there's no confirmed
-              backend endpoint for editing them post-signup.
-            </p> */}
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -292,16 +329,6 @@ function Profile() {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Speciality (set at signup)</label>
-                <input
-                  name="speciality"
-                  value={form.speciality}
-                  disabled
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
-                />
               </div>
 
               <div>
