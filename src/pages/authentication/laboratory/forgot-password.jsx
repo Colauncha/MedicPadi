@@ -6,14 +6,11 @@ import doctor from "../../../assets/doctor.png";
 
 export default function LaboratoryForgotPassword() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [step, setStep] = useState("select");
-
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
@@ -59,8 +56,7 @@ export default function LaboratoryForgotPassword() {
       setTimer(60);
     } catch (err) {
       setError(
-        err.message ||
-        "We could not find an account with this email address."
+        err.message || "We could not find an account with this email address.",
       );
     } finally {
       setIsLoading(false);
@@ -199,9 +195,7 @@ export default function LaboratoryForgotPassword() {
             {/* Heading */}
             <div className="text-center mb-8">
               <h1 className="text-2xl font-medium leading-8 text-[#121212] mb-2">
-                {step === "select"
-                  ? "Forgot Password"
-                  : "Enter recovery code"}
+                {step === "select" ? "Forgot Password" : "Enter recovery code"}
               </h1>
 
               <p className="text-[#888888] text-xs leading-4">
@@ -253,14 +247,14 @@ export default function LaboratoryForgotPassword() {
                     {error}
                   </div>
                 )}
-
                 <button
                   type="submit"
                   disabled={!isValidEmail || isLoading}
-                  className={`w-full text-white leading-6 py-3.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] flex justify-center items-center ${isValidEmail && !isLoading
-                    ? "bg-[#150D5E] hover:bg-[#150D5E]/90"
-                    : "bg-[#150D5E]/60 cursor-not-allowed"
-                    }`}
+                  className={`w-full text-white leading-6 py-3.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] flex justify-center items-center ${
+                    isValidEmail && !isLoading
+                      ? "bg-[#150D5E] hover:bg-[#150D5E]/90"
+                      : "bg-[#150D5E]/60 cursor-not-allowed"
+                  }`}
                 >
                   {isLoading ? (
                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -293,12 +287,8 @@ export default function LaboratoryForgotPassword() {
                         maxLength="1"
                         inputMode="numeric"
                         value={value}
-                        onChange={(e) =>
-                          handleOtpChange(index, e.target.value)
-                        }
-                        onKeyDown={(e) =>
-                          handleOtpKeyDown(index, e)
-                        }
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl bg-[#F8F8FF] border border-[#E7E7E7] rounded-lg focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors"
                       />
                     ))}
@@ -307,18 +297,17 @@ export default function LaboratoryForgotPassword() {
 
                 {/* Timer / Resend */}
                 <div className="flex items-center justify-between text-xs px-2">
-                  <span className="text-[#888888]">
-                    {formatTimer(timer)}
-                  </span>
+                  <span className="text-[#888888]">{formatTimer(timer)}</span>
 
                   <button
                     type="button"
                     onClick={handleResendOtp}
                     disabled={timer > 0 || isResending}
-                    className={`font-medium transition-colors ${timer === 0 && !isResending
-                      ? "text-[#150D5E] hover:underline cursor-pointer"
-                      : "text-[#BDBDBD] cursor-not-allowed"
-                      }`}
+                    className={`font-medium transition-colors ${
+                      timer === 0 && !isResending
+                        ? "text-[#150D5E] hover:underline cursor-pointer"
+                        : "text-[#BDBDBD] cursor-not-allowed"
+                    }`}
                   >
                     {isResending ? "Sending..." : "Resend OTP"}
                   </button>
@@ -379,10 +368,11 @@ export default function LaboratoryForgotPassword() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] mt-2 flex justify-center items-center ${isLoading
-                    ? "bg-[#150D5E]/60 cursor-not-allowed"
-                    : "bg-[#150D5E] hover:bg-[#150D5E]/90"
-                    }`}
+                  className={`w-full text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] mt-2 flex justify-center items-center ${
+                    isLoading
+                      ? "bg-[#150D5E]/60 cursor-not-allowed"
+                      : "bg-[#150D5E] hover:bg-[#150D5E]/90"
+                  }`}
                 >
                   {isLoading ? (
                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -398,5 +388,3 @@ export default function LaboratoryForgotPassword() {
     </div>
   );
 }
-
-
