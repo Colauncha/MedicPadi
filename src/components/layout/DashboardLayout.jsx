@@ -41,6 +41,14 @@ export default function DashboardLayout({
       return null;
     }
   });
+  const [pharmProfileData, setPharmProfileData] = useState(() => {
+    try {
+      const saved = localStorage.getItem("pharmacyProfile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const loadProfile = () => {
@@ -73,6 +81,37 @@ export default function DashboardLayout({
     return () => window.removeEventListener("profileUpdate", loadProfile);
   }, []);
 
+  useEffect(() => {
+    const loadProfile = () => {
+      try {
+        const saved = localStorage.getItem("pharmacyProfile");
+        if (saved) setPharmProfileData(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    loadProfile();
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      retrieveProfile()
+        .then((data) => {
+          if (data) {
+            setPharmProfileData((prev) => ({
+              ...prev,
+              companyName: data.companyName || data.name || prev?.companyName,
+              avatarSrc: data.profilePicture?.url || prev?.avatarSrc,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+
+    window.addEventListener("profileUpdate", loadProfile);
+    return () => window.removeEventListener("profileUpdate", loadProfile);
+  }, []);
+
   const activeRole =
     role ||
     (location.pathname.startsWith("/docdashboard")
@@ -91,37 +130,41 @@ export default function DashboardLayout({
   const menuItems =
     activeRole === "pharmacy"
       ? [
-        { name: "Dashboard", icon: LayoutDashboard, path: prefix },
-        { name: "Product", icon: Package, path: `${prefix}/product` },
-        { name: "Order", icon: ShoppingCart, path: `${prefix}/order` },
-        { name: "Customers", icon: Users, path: `${prefix}/customers` },
-        { name: "Payments", icon: CreditCard, path: `${prefix}/payments` },
-      ]
+          { name: "Dashboard", icon: LayoutDashboard, path: prefix },
+          { name: "Product", icon: Package, path: `${prefix}/product` },
+          { name: "Order", icon: ShoppingCart, path: `${prefix}/order` },
+          { name: "Customers", icon: Users, path: `${prefix}/customers` },
+          { name: "Payments", icon: CreditCard, path: `${prefix}/payments` },
+        ]
       : activeRole === "laboratory"
         ? [
-          { name: "Dashboard", icon: LayoutDashboard, path: prefix },
-          { name: "Patient", icon: Contact, path: `${prefix}/patient` },
-          { name: "My Profile", icon: User, path: `${prefix}/profile` },
-          { name: "Test", icon: FlaskConical, path: `${prefix}/test` },
-          { name: "Department", icon: Building, path: `${prefix}/department` },
-          {
-            name: "Appointments",
-            icon: CalendarDays,
-            path: `${prefix}/appointments`,
-          },
-          { name: "Reports", icon: FileText, path: `${prefix}/reports` },
-        ]
+            { name: "Dashboard", icon: LayoutDashboard, path: prefix },
+            { name: "Patient", icon: Contact, path: `${prefix}/patient` },
+            { name: "My Profile", icon: User, path: `${prefix}/profile` },
+            { name: "Test", icon: FlaskConical, path: `${prefix}/test` },
+            {
+              name: "Department",
+              icon: Building,
+              path: `${prefix}/department`,
+            },
+            {
+              name: "Appointments",
+              icon: CalendarDays,
+              path: `${prefix}/appointments`,
+            },
+            { name: "Reports", icon: FileText, path: `${prefix}/reports` },
+          ]
         : [
-          { name: "Dashboard", icon: LayoutDashboard, path: prefix },
-          { name: "Patient", icon: Contact, path: `${prefix}/patient` },
-          { name: "My Profile", icon: User, path: `${prefix}/profile` },
-          {
-            name: "Appointments",
-            icon: CalendarDays,
-            path: `${prefix}/appointments`,
-          },
-          { name: "Reports", icon: FileText, path: `${prefix}/reports` },
-        ];
+            { name: "Dashboard", icon: LayoutDashboard, path: prefix },
+            { name: "Patient", icon: Contact, path: `${prefix}/patient` },
+            { name: "My Profile", icon: User, path: `${prefix}/profile` },
+            {
+              name: "Appointments",
+              icon: CalendarDays,
+              path: `${prefix}/appointments`,
+            },
+            { name: "Reports", icon: FileText, path: `${prefix}/reports` },
+          ];
 
   const helpItems = [
     { name: "Policy", icon: Shield, path: `${prefix}/policy` },
@@ -149,8 +192,12 @@ export default function DashboardLayout({
     (activeRole === "doctor"
       ? "Dr. Sarah John"
       : activeRole === "pharmacy"
-        ? "Alpha Pharmacy"
-        : labProfileData?.companyName || labProfileData?.name || "Olivex Laboratory Center");
+        ? pharmProfileData?.companyName ||
+          pharmProfileData?.name ||
+          "Alpha Pharmacy"
+        : labProfileData?.companyName ||
+          labProfileData?.name ||
+          "Olivex Laboratory Center");
   const displaySubtitle =
     profileSubtitle ||
     (activeRole === "doctor"
@@ -158,8 +205,20 @@ export default function DashboardLayout({
       : activeRole === "pharmacy"
         ? "Pharmacist"
         : "View profile");
-  const hasCustomAvatar = Boolean(avatarSrc || labProfileData?.avatarSrc);
-  const displayAvatar = avatarSrc || labProfileData?.avatarSrc || (activeRole !== "laboratory" ? avatar : null);
+
+  const hasCustomAvatar = Boolean(
+    avatarSrc ||
+    (activeRole === "pharmacy"
+      ? pharmProfileData?.avatarSrc
+      : labProfileData?.avatarSrc),
+  );
+
+  const displayAvatar =
+    avatarSrc ||
+    (activeRole === "pharmacy"
+      ? pharmProfileData?.avatarSrc
+      : labProfileData?.avatarSrc) ||
+    null;
 
   return (
     <div className="flex h-screen w-full bg-white overflow-hidden text-[#1a1a4b]">
@@ -180,9 +239,10 @@ export default function DashboardLayout({
                   to={item.path}
                   end={item.path === prefix}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-xl transition-colors ${isActive
-                      ? "bg-[#150D5E] text-white shadow-sm"
-                      : "text-[#150D5E]"
+                    `flex items-center px-4 py-3 rounded-xl transition-colors ${
+                      isActive
+                        ? "bg-[#150D5E] text-white shadow-sm"
+                        : "text-[#150D5E]"
                     }`
                   }
                 >
@@ -203,9 +263,10 @@ export default function DashboardLayout({
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-xl transition-colors ${isActive
-                      ? "bg-[#1a1a4b] text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-[#1a1a4b]"
+                    `flex items-center px-4 py-3 rounded-xl transition-colors ${
+                      isActive
+                        ? "bg-[#1a1a4b] text-white shadow-sm"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-[#1a1a4b]"
                     }`
                   }
                 >
