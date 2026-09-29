@@ -40,7 +40,12 @@ export default function LaboratoryProfile() {
     try {
       const res = await uploadProfilePicture(file);
       if (res) {
-        const uploadedUrl = res.url || res.imageUrl || res.profilePicture?.url || res.data?.url || objectUrl;
+        const uploadedUrl =
+          res.url ||
+          res.imageUrl ||
+          res.profilePicture?.url ||
+          res.data?.url ||
+          objectUrl;
         setPreview(uploadedUrl);
       }
     } catch (err) {
@@ -99,10 +104,10 @@ export default function LaboratoryProfile() {
           <div className="w-full max-w-[550px] bg-white rounded-2xl p-8 sm:p-10 border border-[#B0B0B0] z-10 relative shadow-sm">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-medium leading-8 text-[#121212] mb-2">
-                Company Information
+                Laboratory Information
               </h1>
               <p className="text-[#888888] text-xs leading-4">
-                Please input the company information below
+                Please input the laboratory information below
               </p>
             </div>
 
@@ -127,7 +132,9 @@ export default function LaboratoryProfile() {
                   <Upload className="w-5 h-5 text-[#888888] mb-2" />
                 )}
                 <p className="text-xs text-[#888888] mb-1">
-                  {preview ? "Change company image" : "Upload your company image"}
+                  {preview
+                    ? "Change company image"
+                    : "Upload your company image"}
                 </p>
                 <p className="text-[10px] text-[#A0A0A0]">or click to browse</p>
                 <input
@@ -250,4 +257,3 @@ export default function LaboratoryProfile() {
     </div>
   );
 }
-

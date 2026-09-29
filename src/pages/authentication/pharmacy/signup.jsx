@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router";
-import { createUser } from "../../../api/auth.api";
+import { Link, useNavigate } from "react-router";
+import { createUser, getUserIdFromToken } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import pharmacy from "../../../assets/pharmacy.png";
 import apple from "../../../assets/apple.svg";
@@ -9,7 +9,8 @@ import apple from "../../../assets/apple.svg";
 export default function PharmacySignup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,11 +18,11 @@ export default function PharmacySignup() {
     phoneNumber: "",
     confirmPassword: "",
   });
-
   const [errors, setErrors] = useState({
     password: "",
     confirmPassword: "",
   });
+  const navigate = useNavigate();
 
   const validatePassword = (password, confirmPassword) => {
     let passwordError = "";
@@ -64,10 +65,43 @@ export default function PharmacySignup() {
     e.preventDefault();
 
     try {
+      setIsLoading(true);
+      setError("");
+
       const result = await createUser(formData);
-      console.log("User created:", result);
-    } catch (error) {
-      console.error(error.message);
+
+      console.log("SIGNUP RESPONSE:", result);
+
+      const userId = result?.user_id;
+
+      console.log("USER ID FROM TOKEN:", userId);
+
+      if (!userId) {
+        throw new Error("User ID could not be extracted from the token.");
+      }
+
+      // Save user ID
+      localStorage.setItem("userId", userId);
+
+      // Save email
+      if (formData.email) {
+        localStorage.setItem("userEmail", formData.email);
+      }
+
+      // Save phone
+      if (formData.phoneNumber) {
+        localStorage.setItem("userPhone", formData.phoneNumber);
+      }
+
+      console.log("Saved userId:", localStorage.getItem("userId"));
+
+      navigate("/pharmacy-signin");
+    } catch (err) {
+      console.error("Signup error:", err);
+
+      setError(err.message || "Failed to create account. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,28 +294,6 @@ export default function PharmacySignup() {
                     Please repeat your password
                   </p>
                 )}
-              </div>
-
-              <div className="flex items-start mb-6">
-                <div className="flex items-center h-5">
-                  <input
-                    id="terms"
-                    type="checkbox"
-                    name="agreedToTerms"
-                    checked={formData.agreedToTerms}
-                    onChange={handleChange}
-                    className="w-4 h-4 rounded border-gray-300 text-indigo-900 focus:ring-indigo-900"
-                  />
-                </div>
-                <label
-                  htmlFor="terms"
-                  className="ml-2 text-sm leading-5 text-[#454545]"
-                >
-                  I agree with{" "}
-                  <a href="#" className="text-[#331EB9] hover:underline">
-                    Terms, Privacy Policy
-                  </a>
-                </label>
               </div>
 
               <button

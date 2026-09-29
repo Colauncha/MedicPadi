@@ -27,6 +27,7 @@ export default function PharmacySignin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.email || !formData.password) {
       setError("Please fill in all required fields.");
       return;
@@ -35,13 +36,21 @@ export default function PharmacySignin() {
     try {
       setIsLoading(true);
       setError(null);
+
       const response = await loginUser({
         email: formData.email,
         password: formData.password,
       });
+
       console.log("Login successful", response);
 
-      navigate("/pharmdashboard");
+      const user = response?.user || response;
+
+      if (user?.isProfileComplete === true) {
+        navigate("/pharmdashboard");
+      } else {
+        navigate("/pharmacy-profile");
+      }
     } catch (err) {
       console.error("Login failed", err);
       setError(err.message || "Failed to sign in. Please try again.");

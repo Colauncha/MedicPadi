@@ -48,6 +48,31 @@ export const labStats = async () => {
   }
 };
 
+export const pharmacyStats = async () => {
+  try {
+    const response = await fetch("/api/orders/stats/pharmacy", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    console.log("PHARMACY STATS RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Pharmacy Stats failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Pharmacy Stats Error:", error.message);
+    throw error;
+  }
+};
+
 export const testRequisitions = async () => {
   try {
     const response = await fetch("/api/orders/test-requisitions", {
@@ -76,14 +101,17 @@ export const testRequisitions = async () => {
 export const patientsTestRequisitions = async (labId) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(`/api/orders/test-requisitions/lab/${labId}/patients`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
+    const response = await fetch(
+      `/api/orders/test-requisitions/lab/${labId}/patients`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: "include",
       },
-      credentials: "include",
-    });
+    );
 
     const data = await response.json();
 

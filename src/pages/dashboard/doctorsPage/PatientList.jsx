@@ -1,24 +1,143 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
+import {
+  listAppointmentsByStatuses,
+  getDoctorStats,
+} from "../../../api/appointments.api";
+import { getProfileById } from "../../../api/profile.api";
 
-const patients = [
-  { id: "PT001", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 60, gender: "Male",   lastAppointment: "15-03-2026" },
-  { id: "PT002", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 10, gender: "Female", lastAppointment: "15-03-2026" },
-  { id: "PT003", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 40, gender: "Male",   lastAppointment: "15-03-2026" },
-  { id: "PT004", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 20, gender: "Female", lastAppointment: "15-03-2026" },
-  { id: "PT005", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 30, gender: "Female", lastAppointment: "15-03-2026" },
-  { id: "PT006", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 16, gender: "Female", lastAppointment: "15-03-2026" },
-  { id: "PT007", name: "Sarah John", email: "sarahjohn22@gmail.com", phone: "09012345678", age: 8,  gender: "Male",   lastAppointment: "15-03-2026" },
-];
+const calculateAge = (dateOfBirth) => {
+  if (!dateOfBirth) return "N/A";
+
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 &&
+      today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  return age;
+};
 
 const ITEMS_PER_PAGE = 7;
 
 function PatientList() {
   const navigate = useNavigate();
+
+  const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(3);
-  const totalPages = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const ITEMS_PER_PAGE = 7;
+
+  useEffect(() => {
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+
+      const appointments = await listAppointmentsByStatuses([
+        "pending",
+        "scheduled",
+        "confirmed",
+        "completed",
+      ]);
+
+      const uniquePatientIds = [
+        ...new Set(
+          appointments
+            .map((appointment) => appointment.patient_id)
+            .filter(Boolean)
+        ),
+      ];
+
+      const patientResults = await Promise.all(
+        uniquePatientIds.map(async (patientId) => {
+          try {
+            const result = await getProfileById(patientId, "patient");
+            const profile = result.profile;
+            const patientAppointments = appointments.filter(
+  (appointment) => appointment.patient_id === patientId
+);
+
+const latestAppointment = patientAppointments.reduce(
+  (latest, appointment) => {
+    if (!latest) return appointment;
+
+    return new Date(appointment.appointment_time) >
+      new Date(latest.appointment_time)
+      ? appointment
+      : latest;
+  },
+  null
+);
+
+            return {
+              id: profile.id,
+              name: `${profile.firstName || ""} ${
+                profile.lastName || ""
+              }`.trim(),
+              email: "N/A",
+              phone: profile.phoneNumber || "N/A",
+              gender: profile.gender || "N/A",
+             age: calculateAge(profile.dateOfBirth),
+              lastAppointment: latestAppointment
+              ? new Date(
+                latestAppointment.appointment_time
+                ).toLocaleDateString("en-GB")
+                : "N/A",
+            };
+          } catch (error) {
+            console.error(
+              `Failed to load patient ${patientId}:`,
+              error
+            );
+            return null;
+          }
+        })
+      );
+
+      setPatients(patientResults.filter(Boolean));
+    } catch (error) {
+      console.error("PATIENT LIST ERROR:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPatients();
+}, []);
+
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      setLoadingStats(true);
+
+      const data = await getDoctorStats();
+
+      console.log("PATIENT PAGE STATS:", data);
+
+      setStats(data);
+    } catch (error) {
+      console.error("PATIENT PAGE STATS ERROR:", error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  fetchStats();
+}, []);
 
   const filtered = patients.filter(
     (p) =>
@@ -26,13 +145,21 @@ function PatientList() {
       p.id.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+
+const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
+const paginatedPatients = filtered.slice(
+  startIndex,
+  startIndex + ITEMS_PER_PAGE
+);
+
   const handleViewDetails = (patient) => {
-    // ✅ FIXED: route now uses the correct /docdashboard prefix
     navigate(`/docdashboard/patient/${patient.id}`, { state: { patient } });
   };
 
   return (
-    <DashboardLayout> {/* ✅ FIXED: was missing layout wrapper */}
+    <DashboardLayout> 
       <div className="flex flex-col gap-5 p-6">
         <h1 className="text-lg font-bold text-gray-800">Patient Lists</h1>
 
@@ -46,7 +173,9 @@ function PatientList() {
             </div>
             <div className="flex-1">
               <p className="text-[10px] text-white/70">Total Patients</p>
-              <p className="text-2xl font-bold">1,000</p>
+              <p className="text-2xl font-bold">
+                {loadingStats ? "..." : stats?.totalPatients ?? 0}
+              </p>
             </div>
           </div>
 
@@ -58,7 +187,9 @@ function PatientList() {
             </div>
             <div className="flex-1">
               <p className="text-[10px] text-gray-400">New Patients</p>
-              <p className="text-2xl font-bold text-gray-800">200</p>
+              <p className="text-2xl font-bold text-gray-800">
+                 {loadingStats ? "..." : stats?.newPatientsThisWeek ?? 0}
+              </p>
             </div>
           </div>
 
@@ -70,7 +201,13 @@ function PatientList() {
             </div>
             <div className="flex-1">
               <p className="text-[10px] text-gray-400">Returning Patients</p>
-              <p className="text-2xl font-bold text-gray-800">68%</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {loadingStats
+                  ? "..."
+                  : stats?.returningPatientPercent != null
+                  ? `${stats.returningPatientPercent}%`
+                  : "N/A"}
+              </p>
             </div>
           </div>
         </div>
@@ -117,7 +254,7 @@ function PatientList() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((patient) => (
+                {paginatedPatients.map((patient) => (
                   <tr key={patient.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-3 text-gray-700 text-xs">{patient.id}</td>
                     <td className="py-3 px-3 text-gray-800 text-xs font-medium">{patient.name}</td>
@@ -143,7 +280,12 @@ function PatientList() {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-2">
             <p className="text-xs text-gray-400">
-              Showing 7 – {Math.min(currentPage * ITEMS_PER_PAGE, 79)} out of 79
+              {filtered.length === 0
+    ? "Showing 0 out of 0"
+    : `Showing ${startIndex + 1} – ${Math.min(
+        startIndex + ITEMS_PER_PAGE,
+        filtered.length
+      )} out of ${filtered.length}`}
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -152,19 +294,21 @@ function PatientList() {
               >
                 ‹
               </button>
-              {[1, 2, 3, 4, "...", 10].map((page, i) => (
-                <button
-                  key={i}
-                  onClick={() => typeof page === "number" && setCurrentPage(page)}
-                  className={`w-7 h-7 flex items-center justify-center rounded-md text-xs font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-[#150D5E] text-white"
-                      : "border border-gray-200 text-gray-500 hover:bg-gray-100"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+  (page) => (
+    <button
+      key={page}
+      onClick={() => setCurrentPage(page)}
+      className={`w-7 h-7 flex items-center justify-center rounded-md text-xs font-medium transition-colors ${
+        currentPage === page
+          ? "bg-[#150D5E] text-white"
+          : "border border-gray-200 text-gray-500 hover:bg-gray-100"
+      }`}
+    >
+      {page}
+    </button>
+  )
+)}
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:bg-gray-100 text-xs"

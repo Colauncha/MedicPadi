@@ -83,13 +83,16 @@ export const requestPasswordReset = async (email) => {
   }
 
   try {
-    const response = await fetch(`/api/auth/request-password-reset?email=${encodeURIComponent(email)}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `/api/auth/request-password-reset?email=${encodeURIComponent(email)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify({ email }),
       },
-      // body: JSON.stringify({ email }),
-    });
+    );
 
     const data = await response.json();
 
@@ -113,13 +116,13 @@ export const resetPassword = async ({ email, otp, newPassword }) => {
       },
       body: JSON.stringify({ email, otp: Number(otp), newPassword }),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Password reset failed");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Password Reset Error:", error.message);
@@ -159,13 +162,13 @@ export const verifyEmail = async (token) => {
       `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
       { method: "GET" },
     );
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Email verification failed");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Verify Email Error:", error.message);
@@ -176,7 +179,7 @@ export const verifyEmail = async (token) => {
 export const updateAccount = async (updates) => {
   try {
     const token = localStorage.getItem("token");
- 
+
     const response = await fetch("/api/auth/update", {
       method: "PATCH",
       headers: {
@@ -185,13 +188,13 @@ export const updateAccount = async (updates) => {
       },
       body: JSON.stringify(updates),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Account update failed");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Update Account Error:", error.message);
@@ -202,7 +205,7 @@ export const updateAccount = async (updates) => {
 export const adminUpdateAccount = async (userId, updates) => {
   try {
     const token = localStorage.getItem("token");
- 
+
     const response = await fetch("/api/auth/admin/update", {
       method: "PATCH",
       headers: {
@@ -211,13 +214,13 @@ export const adminUpdateAccount = async (userId, updates) => {
       },
       body: JSON.stringify({ userId, ...updates }),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Admin update failed");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Admin Update Account Error:", error.message);
@@ -228,7 +231,7 @@ export const adminUpdateAccount = async (userId, updates) => {
 export const deleteUser = async (userId) => {
   try {
     const token = localStorage.getItem("token");
- 
+
     const response = await fetch("/api/auth/delete", {
       method: "POST",
       headers: {
@@ -237,13 +240,13 @@ export const deleteUser = async (userId) => {
       },
       body: JSON.stringify({ userId }),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Delete user failed");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Delete User Error:", error.message);
@@ -254,7 +257,7 @@ export const deleteUser = async (userId) => {
 export const getUserWallet = async () => {
   try {
     const token = localStorage.getItem("token");
- 
+
     const response = await fetch("/api/auth/wallet", {
       method: "POST",
       headers: {
@@ -262,13 +265,13 @@ export const getUserWallet = async () => {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Could not retrieve wallet");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Get Wallet Error:", error.message);
@@ -279,22 +282,41 @@ export const getUserWallet = async () => {
 export const createProfile = async (profileData) => {
   try {
     const token = localStorage.getItem("token");
- 
+    const userId = localStorage.getItem("userId");
+
+    if (!token) {
+      throw new Error("Authentication token not found. Please sign in again.");
+    }
+
+    if (!userId) {
+      throw new Error("User ID not found. Please sign in again.");
+    }
+
+    console.log("Token exists:", !!token);
+    console.log(
+      "Token format:",
+      token.split(".").length === 3 ? "JWT format" : "Invalid JWT format",
+    );
+    console.log("User ID:", userId);
+
     const response = await fetch("/api/profile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(profileData),
+      body: JSON.stringify({
+        ...profileData,
+        user_id: userId,
+      }),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Failed to save profile information");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Profile Creation Error:", error.message);
@@ -305,20 +327,20 @@ export const createProfile = async (profileData) => {
 export const retrieveProfile = async () => {
   try {
     const token = localStorage.getItem("token");
- 
+
     const response = await fetch("/api/profile/retrieve", {
       method: "GET",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Failed to retrieve profile");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Retrieve Profile Error:", error.message);
@@ -329,7 +351,7 @@ export const retrieveProfile = async () => {
 export const updateProfile = async (profileData) => {
   try {
     const token = localStorage.getItem("token");
- 
+
     const response = await fetch("/api/profile", {
       method: "PATCH",
       headers: {
@@ -338,13 +360,13 @@ export const updateProfile = async (profileData) => {
       },
       body: JSON.stringify(profileData),
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Failed to update profile");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Update Profile Error:", error.message);
@@ -357,7 +379,7 @@ export const uploadProfilePicture = async (file) => {
     const token = localStorage.getItem("token");
     const imageForm = new FormData();
     imageForm.append("image", file);
- 
+
     const response = await fetch("/api/profile/profile-picture", {
       method: "POST",
       headers: {
@@ -365,13 +387,13 @@ export const uploadProfilePicture = async (file) => {
       },
       body: imageForm,
     });
- 
+
     const data = await response.json();
- 
+
     if (!response.ok) {
       throw new Error(data.message || "Image upload failed");
     }
- 
+
     return data;
   } catch (error) {
     console.error("Upload Profile Picture Error:", error.message);
@@ -414,7 +436,7 @@ export const getUserIdFromToken = (token) => {
     if (!payload) return null;
 
     const decodedPayload = JSON.parse(
-      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
     );
 
     return decodedPayload.sub || null;
