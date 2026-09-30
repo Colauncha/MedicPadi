@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { getProfileById } from "../../../api/profile.api";
-import { listAppointmentsByStatuses } from "../../../api/appointments.api";
+import {
+  listAppointmentsByStatuses,
+  getAppointment,
+} from "../../../api/appointments.api";
 
 function PatientDetails() {
   const navigate = useNavigate();
@@ -19,12 +22,22 @@ function PatientDetails() {
 
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
+  const [selectedMedicalRecord, setSelectedMedicalRecord] =
+  useState(null);
+  const [showMessageModal, setShowMessageModal] =
+  useState(false);
 
-  const [labResults] = useState([
-    { name: "General Blood Analysis" },
-    { name: "Sugar Level Test" },
-    { name: "Blood Pressure" },
-  ]);
+  const [messageText, setMessageText] =
+  useState("");
+
+  const [labResults, setLabResults] = useState([]);
+  const [loadingLabResults, setLoadingLabResults] = useState(true);
+  const [selectedLabResult, setSelectedLabResult] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] =
+  useState(null);
+
+  const [loadingAppointmentDetails, setLoadingAppointmentDetails] =
+  useState(false);
 
   // =========================
   // FETCH PATIENT PROFILE
@@ -143,28 +156,135 @@ function PatientDetails() {
     }
   }, [id]);
 
-
+  // =========================
+  // FETCH LAB REQUISITIONS
+  // =========================
   useEffect(() => {
-  const fetchLabTests = async () => {
-    try {
-      const response = await fetch("/api/services/lab/tests", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
+    const fetchLabRequisition = async () => {
+      try {
+        setLoadingLabResults(true);
 
-      const data = await response.json();
+        const response = await fetch(
+          "/api/orders/test-requisitions",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      console.log("FIRST LAB TEST:", data?.data?.[0]);
-    } catch (error) {
-      console.error("Lab Tests Error:", error);
+        if (!response.ok) {
+          throw new Error(
+            "Failed to fetch lab requisitions"
+          );
+        }
+
+        const data = await response.json();
+
+        const patientRequisitions = (
+          data?.data || []
+        ).filter(
+          (requisition) =>
+            requisition.patient_id === id
+        );
+
+        const allItems = [];
+
+        for (const requisition of patientRequisitions) {
+          const detailsResponse = await fetch(
+            `/api/orders/test-requisitions/${requisition.id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!detailsResponse.ok) {
+            continue;
+          }
+
+          const details =
+            await detailsResponse.json();
+
+          if (Array.isArray(details?.items)) {
+            allItems.push(
+              ...details.items.map((item) => ({
+                ...item,
+
+                name:
+                  item.lab_test_id ===
+                  "d5df7ff8-1f00-4479-83a1-342da1cf9750"
+                    ? "Malaria"
+                    : item.lab_test_id ===
+                      "9f7c7826-1016-498d-881f-8fca73fb45ce"
+                    ? "Full Blood Count"
+                    : "Laboratory Test",
+
+                requisitionStatus:
+                  details.status,
+
+                paymentStatus:
+                  details.payment_status,
+
+                date:
+                  details.createdAt,
+
+                requisitionId:
+                  details.id,
+              }))
+            );
+          }
+        }
+
+        console.log(
+          "PATIENT LAB TESTS:",
+          allItems
+        );
+
+        setLabResults(allItems);
+      } catch (error) {
+        console.error(
+          "Lab Requisition Error:",
+          error
+        );
+
+        setLabResults([]);
+      } finally {
+        setLoadingLabResults(false);
+      }
+    };
+
+    if (id) {
+      fetchLabRequisition();
     }
-  };
+  }, [id]);
 
-  fetchLabTests();
-}, []);
+  // =========================
+// VIEW APPOINTMENT DETAILS
+// =========================
+const handleViewAppointment = async (appointmentId) => {
+  try {
+    setLoadingAppointmentDetails(true);
+
+    const appointment = await getAppointment(
+      appointmentId
+    );
+
+    setSelectedAppointment(appointment);
+  } catch (error) {
+    console.error(
+      "Failed to load appointment details:",
+      error
+    );
+  } finally {
+    setLoadingAppointmentDetails(false);
+  }
+};
 
   // =========================
   // FORMAT PATIENT DATA
@@ -248,15 +368,17 @@ function PatientDetails() {
   // =========================
   const now = new Date();
 
-  const pastAppointments = appointments.filter(
-    (appt) =>
-      new Date(appt.appointment_time) < now
-  );
+  const pastAppointments =
+    appointments.filter(
+      (appt) =>
+        new Date(appt.appointment_time) < now
+    );
 
-  const upcomingAppointments = appointments.filter(
-    (appt) =>
-      new Date(appt.appointment_time) >= now
-  );
+  const upcomingAppointments =
+    appointments.filter(
+      (appt) =>
+        new Date(appt.appointment_time) >= now
+    );
 
   return (
     <DashboardLayout>
@@ -313,11 +435,13 @@ function PatientDetails() {
                 },
                 {
                   label: "Weight",
-                  value: patient.weight || "N/A",
+                  value:
+                    patient.weight || "N/A",
                 },
                 {
                   label: "Height",
-                  value: patient.height || "N/A",
+                  value:
+                    patient.height || "N/A",
                 },
                 {
                   label: "Sex",
@@ -385,8 +509,11 @@ function PatientDetails() {
 
             </div>
 
-            <button className="w-full bg-[#150D5E] text-white text-xs py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors">
-              Send Message
+            <button 
+               onClick={() => setShowMessageModal(true)}
+               className="w-full bg-[#150D5E] text-white text-xs py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors"
+            >
+  Send Message
             </button>
 
           </div>
@@ -545,9 +672,14 @@ function PatientDetails() {
 
                     </div>
 
-                    <button className="bg-[#150D5E] text-white text-[10px] px-3 py-1.5 rounded-lg font-medium">
-                      View Report
-                    </button>
+                    <button
+  onClick={() =>
+    setSelectedMedicalRecord(record)
+  }
+  className="bg-[#150D5E] text-white text-[10px] px-3 py-1.5 rounded-lg font-medium"
+>
+  View Report
+</button>
 
                   </div>
                 )
@@ -565,40 +697,63 @@ function PatientDetails() {
               Lab Results
             </h3>
 
-            {labResults.map(
-              (result, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-                >
+            {loadingLabResults ? (
+              <p className="text-xs text-gray-400 py-4">
+                Loading lab results...
+              </p>
+            ) : labResults.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8">
 
-                  <div className="w-8 h-8 rounded-full bg-[#F3F4FF] flex items-center justify-center flex-shrink-0">
+                <p className="text-sm text-gray-500">
+                  No lab results available.
+                </p>
 
-                    <svg
-                      className="w-4 h-4 text-[#150D5E]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Laboratory tests will appear here when available.
+                </p>
+
+              </div>
+            ) : (
+              labResults.map(
+                (result, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+
+                    <div className="w-8 h-8 rounded-full bg-[#F3F4FF] flex items-center justify-center flex-shrink-0">
+
+                      <svg
+                        className="w-4 h-4 text-[#150D5E]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
+                      </svg>
+
+                    </div>
+
+                    <p className="text-xs font-semibold text-gray-800 flex-1">
+                      {result.name}
+                    </p>
+
+                    <button
+                      onClick={() =>
+                        setSelectedLabResult(result)
+                      }
+                      className="bg-[#150D5E] text-white text-[10px] px-3 py-1.5 rounded-lg font-medium hover:bg-[#1a1275] transition-colors flex-shrink-0"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
+                      View Report
+                    </button>
 
                   </div>
-
-                  <p className="text-xs font-semibold text-gray-800 flex-1">
-                    {result.name}
-                  </p>
-
-                  <button className="bg-[#150D5E] text-white text-[10px] px-3 py-1.5 rounded-lg font-medium hover:bg-[#1a1275] transition-colors flex-shrink-0">
-                    View Report
-                  </button>
-
-                </div>
+                )
               )
             )}
 
@@ -735,9 +890,14 @@ function PatientDetails() {
 
                           <div className="ml-auto">
 
-                            <button className="bg-[#150D5E] text-white text-xs px-5 py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors">
-                              View
-                            </button>
+                            <button
+  onClick={() =>
+    handleViewAppointment(appt.id)
+  }
+  className="bg-[#150D5E] text-white text-xs px-5 py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors"
+>
+  View
+</button>
 
                           </div>
 
@@ -802,9 +962,14 @@ function PatientDetails() {
 
                       </div>
 
-                      <button className="bg-[#150D5E] text-white text-[10px] px-3 py-1.5 rounded-lg font-medium">
-                        View Report
-                      </button>
+                      <button
+  onClick={() =>
+    setSelectedMedicalRecord(record)
+  }
+  className="bg-[#150D5E] text-white text-[10px] px-3 py-1.5 rounded-lg font-medium"
+>
+  View Report
+</button>
 
                     </div>
                   )
@@ -816,6 +981,505 @@ function PatientDetails() {
 
         </div>
       </div>
+
+      {/* =========================
+          LAB REPORT POPUP
+      ========================= */}
+      {selectedLabResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+
+          <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+
+            {/* HEADER */}
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+
+              <div>
+                <h3 className="text-sm font-bold text-gray-800">
+                  Lab Report
+                </h3>
+
+                <p className="mt-1 text-[10px] text-gray-400">
+                  Laboratory test information
+                </p>
+              </div>
+
+              <button
+                onClick={() =>
+                  setSelectedLabResult(null)
+                }
+                className="text-gray-400 hover:text-gray-700 text-lg"
+              >
+                ×
+              </button>
+
+            </div>
+
+            {/* REPORT CONTENT */}
+            <div className="p-5 space-y-4">
+
+              <div>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Test
+                </p>
+
+                <p className="text-sm font-semibold text-gray-800">
+                  {selectedLabResult.name ||
+                    "Laboratory Test"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Date
+                </p>
+
+                <p className="text-sm font-semibold text-gray-800">
+                  {selectedLabResult.date
+                    ? new Date(
+                        selectedLabResult.date
+                      ).toLocaleDateString(
+                        "en-GB"
+                      )
+                    : "N/A"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Status
+                </p>
+
+                <p className="text-sm font-semibold text-green-600 capitalize">
+                  {selectedLabResult.requisitionStatus ||
+                    "N/A"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Payment Status
+                </p>
+
+                <p className="text-sm font-semibold text-gray-800 capitalize">
+                  {selectedLabResult.paymentStatus ||
+                    "N/A"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Requisition ID
+                </p>
+
+                <p className="text-xs text-gray-600 break-all">
+                  {selectedLabResult.requisitionId ||
+                    "N/A"}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-[#F3F4FF] p-3">
+
+                <p className="text-[10px] text-[#150D5E] font-medium">
+                  Result
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  The laboratory result is not available yet.
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* FOOTER */}
+            <div className="border-t border-gray-100 px-5 py-4 flex justify-end">
+
+              <button
+                onClick={() =>
+                  setSelectedLabResult(null)
+                }
+                className="bg-[#150D5E] text-white text-xs px-5 py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors"
+              >
+                Close
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+    APPOINTMENT DETAILS POPUP
+========================= */}
+{selectedAppointment && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+
+    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+
+        <div>
+          <h3 className="text-sm font-bold text-gray-800">
+            Appointment Details
+          </h3>
+
+          <p className="mt-1 text-[10px] text-gray-400">
+            Appointment information
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            setSelectedAppointment(null)
+          }
+          className="text-gray-400 hover:text-gray-700 text-lg"
+        >
+          ×
+        </button>
+
+      </div>
+
+      {/* CONTENT */}
+      <div className="p-5 space-y-4">
+
+        {loadingAppointmentDetails ? (
+          <p className="text-sm text-gray-400 text-center py-6">
+            Loading appointment details...
+          </p>
+        ) : (
+          <>
+            {/* DATE */}
+            <div>
+              <p className="text-[10px] text-gray-400 font-medium">
+                Date
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                {selectedAppointment.appointment_time
+                  ? new Date(
+                      selectedAppointment.appointment_time
+                    ).toLocaleDateString("en-GB")
+                  : "N/A"}
+              </p>
+            </div>
+
+            {/* TIME */}
+            <div>
+              <p className="text-[10px] text-gray-400 font-medium">
+                Time
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                {selectedAppointment.appointment_time
+                  ? new Date(
+                      selectedAppointment.appointment_time
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "N/A"}
+              </p>
+            </div>
+
+            {/* TYPE */}
+            <div>
+              <p className="text-[10px] text-gray-400 font-medium">
+                Type
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                Consultation
+              </p>
+            </div>
+
+            {/* STATUS */}
+            <div>
+              <p className="text-[10px] text-gray-400 font-medium">
+                Status
+              </p>
+
+              <p className="text-sm font-semibold text-green-600 capitalize">
+                {selectedAppointment.status ||
+                  "N/A"}
+              </p>
+            </div>
+
+            {/* APPOINTMENT ID */}
+            <div>
+              <p className="text-[10px] text-gray-400 font-medium">
+                Appointment ID
+              </p>
+
+              <p className="text-xs text-gray-600 break-all">
+                {selectedAppointment.id ||
+                  "N/A"}
+              </p>
+            </div>
+
+            {/* NOTES */}
+            {selectedAppointment.notes && (
+              <div className="rounded-lg bg-[#F3F4FF] p-3">
+
+                <p className="text-[10px] text-[#150D5E] font-medium">
+                  Notes
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  {selectedAppointment.notes}
+                </p>
+
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="border-t border-gray-100 px-5 py-4 flex justify-end">
+
+        <button
+          onClick={() =>
+            setSelectedAppointment(null)
+          }
+          className="bg-[#150D5E] text-white text-xs px-5 py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+
+
+{/* =========================
+    MEDICAL RECORD DETAILS POPUP
+========================= */}
+{selectedMedicalRecord && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+
+    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+
+        <div>
+          <h3 className="text-sm font-bold text-gray-800">
+            Medical Record
+          </h3>
+
+          <p className="mt-1 text-[10px] text-gray-400">
+            Patient medical record
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            setSelectedMedicalRecord(null)
+          }
+          className="text-gray-400 hover:text-gray-700 text-lg"
+        >
+          ×
+        </button>
+
+      </div>
+
+      {/* CONTENT */}
+      <div className="p-5 space-y-4">
+
+        {/* TITLE */}
+        <div>
+          <p className="text-[10px] text-gray-400 font-medium">
+            Title
+          </p>
+
+          <p className="text-sm font-semibold text-gray-800">
+            {selectedMedicalRecord.title ||
+              "Medical Record"}
+          </p>
+        </div>
+
+        {/* TYPE */}
+        <div>
+          <p className="text-[10px] text-gray-400 font-medium">
+            Type
+          </p>
+
+          <p className="text-sm font-semibold text-gray-800 capitalize">
+            {selectedMedicalRecord.type ||
+              "N/A"}
+          </p>
+        </div>
+
+        {/* DATE */}
+        <div>
+          <p className="text-[10px] text-gray-400 font-medium">
+            Date
+          </p>
+
+          <p className="text-sm font-semibold text-gray-800">
+            {selectedMedicalRecord.createdAt
+              ? new Date(
+                  selectedMedicalRecord.createdAt
+                ).toLocaleDateString("en-GB")
+              : "N/A"}
+          </p>
+        </div>
+
+        {/* DESCRIPTION */}
+        {selectedMedicalRecord.description && (
+          <div className="rounded-lg bg-[#F3F4FF] p-3">
+
+            <p className="text-[10px] text-[#150D5E] font-medium">
+              Description
+            </p>
+
+            <p className="text-xs text-gray-500 mt-1">
+              {selectedMedicalRecord.description}
+            </p>
+
+          </div>
+        )}
+
+        {/* NOTES */}
+        {selectedMedicalRecord.notes && (
+          <div>
+            <p className="text-[10px] text-gray-400 font-medium">
+              Notes
+            </p>
+
+            <p className="text-xs text-gray-600 mt-1">
+              {selectedMedicalRecord.notes}
+            </p>
+          </div>
+        )}
+
+        {/* RECORD ID */}
+        <div>
+          <p className="text-[10px] text-gray-400 font-medium">
+            Record ID
+          </p>
+
+          <p className="text-xs text-gray-600 break-all">
+            {selectedMedicalRecord.id ||
+              "N/A"}
+          </p>
+        </div>
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="border-t border-gray-100 px-5 py-4 flex justify-end">
+
+        <button
+          onClick={() =>
+            setSelectedMedicalRecord(null)
+          }
+          className="bg-[#150D5E] text-white text-xs px-5 py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+
+{/* =========================
+    SEND MESSAGE POPUP
+========================= */}
+{showMessageModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+
+    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+
+        <div>
+          <h3 className="text-sm font-bold text-gray-800">
+            Send Message
+          </h3>
+
+          <p className="mt-1 text-[10px] text-gray-400">
+            Message {patient.name}
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowMessageModal(false);
+            setMessageText("");
+          }}
+          className="text-gray-400 hover:text-gray-700 text-lg"
+        >
+          ×
+        </button>
+
+      </div>
+
+      {/* MESSAGE CONTENT */}
+      <div className="p-5">
+
+        <label className="text-[10px] text-gray-400 font-medium">
+          Message
+        </label>
+
+        <textarea
+          value={messageText}
+          onChange={(e) =>
+            setMessageText(e.target.value)
+          }
+          placeholder={`Write a message to ${patient.name}...`}
+          rows={5}
+          className="w-full mt-2 border border-gray-200 rounded-lg p-3 text-xs text-gray-700 outline-none focus:border-[#150D5E] resize-none"
+        />
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="border-t border-gray-100 px-5 py-4 flex justify-end gap-2">
+
+        <button
+          onClick={() => {
+            setShowMessageModal(false);
+            setMessageText("");
+          }}
+          className="border border-gray-200 text-gray-600 text-xs px-5 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {
+            console.log(
+              "MESSAGE TO PATIENT:",
+              {
+                patientId: patient.id,
+                patientName: patient.name,
+                message: messageText,
+              }
+            );
+
+            setShowMessageModal(false);
+            setMessageText("");
+          }}
+          disabled={!messageText.trim()}
+          className="bg-[#150D5E] text-white text-xs px-5 py-2 rounded-lg font-medium hover:bg-[#1a1275] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Send
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 }
