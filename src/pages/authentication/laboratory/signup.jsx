@@ -63,63 +63,46 @@ export default function LaboratorySignup() {
     });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    try {
+      setIsLoading(true);
+      setError("");
 
-  try {
-    setIsLoading(true);
-    setError("");
+      const result = await createUser(formData);
 
-    const result = await createUser(formData);
+      console.log("SIGNUP RESPONSE:", result);
 
-    console.log("SIGNUP RESPONSE:", result);
+      // Get access token
+      const userId = result?.user_id;
 
-    // Get access token
-    const token = result?.token?.access_token;
+      if (!userId) {
+        throw new Error("User ID could not be extracted from the token.");
+      }
 
-    if (!token) {
-      throw new Error("Access token was not returned by the server.");
+      // Save user ID
+      localStorage.setItem("userId", userId);
+
+      // Save email
+      if (formData.email) {
+        localStorage.setItem("userEmail", formData.email);
+      }
+
+      // Save phone
+      if (formData.phoneNumber) {
+        localStorage.setItem("userPhone", formData.phoneNumber);
+      }
+
+      navigate("/laboratory-profile");
+    } catch (err) {
+      console.error("Signup error:", err);
+
+      setError(err.message || "Failed to create account. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    // Save token
-    localStorage.setItem("token", token);
-
-    // Extract user ID from JWT `sub`
-    const userId = getUserIdFromToken(token);
-
-    console.log("USER ID FROM TOKEN:", userId);
-
-    if (!userId) {
-      throw new Error("User ID could not be extracted from the token.");
-    }
-
-    // Save user ID
-    localStorage.setItem("userId", userId);
-
-    // Save email
-    if (formData.email) {
-      localStorage.setItem("userEmail", formData.email);
-    }
-
-    // Save phone
-    if (formData.phoneNumber) {
-      localStorage.setItem("userPhone", formData.phoneNumber);
-    }
-
-    console.log("Saved userId:", localStorage.getItem("userId"));
-
-    navigate("/laboratory-profile");
-  } catch (err) {
-    console.error("Signup error:", err);
-
-    setError(
-      err.message || "Failed to create account. Please try again."
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="p-8 bg-[#E6E2F2]">

@@ -93,8 +93,6 @@ export default function PharmacySignup() {
         localStorage.setItem("userPhone", formData.phoneNumber);
       }
 
-      console.log("Saved userId:", localStorage.getItem("userId"));
-
       navigate("/pharmacy-signin");
     } catch (err) {
       console.error("Signup error:", err);

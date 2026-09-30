@@ -292,13 +292,6 @@ export const createProfile = async (profileData) => {
       throw new Error("User ID not found. Please sign in again.");
     }
 
-    console.log("Token exists:", !!token);
-    console.log(
-      "Token format:",
-      token.split(".").length === 3 ? "JWT format" : "Invalid JWT format",
-    );
-    console.log("User ID:", userId);
-
     const response = await fetch("/api/profile", {
       method: "POST",
       headers: {
