@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { Upload, ChevronDown, ChevronUp, Loader2, User } from "lucide-react";
-import { retrieveProfile, updateProfile, createProfile, uploadProfilePicture } from "../../../api/auth.api";
+import {
+  retrieveProfile,
+  updateProfile,
+  createProfile,
+  uploadProfilePicture,
+} from "../../../api/auth.api";
 
 export default function LabProfile() {
   const fileInputRef = useRef(null);
@@ -62,11 +67,14 @@ export default function LabProfile() {
         if (data) {
           setForm((prev) => ({
             companyName: data.companyName || data.name || prev.companyName,
-            companyAddress: data.companyAddress || data.address || prev.companyAddress,
+            companyAddress:
+              data.companyAddress || data.address || prev.companyAddress,
             location: data.location || prev.location,
             email: data.email || prev.email || userEmail,
-            phoneNumber: data.phoneNumber || data.phone || prev.phoneNumber || userPhone,
-            yearsOfService: data.yearsOfService || data.experience || prev.yearsOfService,
+            phoneNumber:
+              data.phoneNumber || data.phone || prev.phoneNumber || userPhone,
+            yearsOfService:
+              data.yearsOfService || data.experience || prev.yearsOfService,
             awards: data.awards || prev.awards,
             aboutCompany: data.aboutCompany || data.about || prev.aboutCompany,
           }));
@@ -97,7 +105,12 @@ export default function LabProfile() {
     try {
       const res = await uploadProfilePicture(file);
       if (res) {
-        finalUrl = res.url || res.imageUrl || res.profilePicture?.url || res.data?.url || objectUrl;
+        finalUrl =
+          res.url ||
+          res.imageUrl ||
+          res.profilePicture?.url ||
+          res.data?.url ||
+          objectUrl;
         setPreview(finalUrl);
       }
       setSuccess("Profile picture uploaded!");
@@ -142,7 +155,9 @@ export default function LabProfile() {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        await updateProfile(updatedProfile).catch(() => createProfile(updatedProfile));
+        await updateProfile(updatedProfile).catch(() =>
+          createProfile(updatedProfile),
+        );
       }
       setSuccess("Profile information saved successfully!");
     } catch (err) {
@@ -259,7 +274,9 @@ export default function LabProfile() {
             <div className="flex flex-col items-center w-full z-10 bg-white/80 backdrop-blur-sm p-4 py-5 rounded-xl">
               <Upload className="w-5 h-5 text-[#888888] mb-2" />
               <p className="text-[13px] text-[#888888] mb-0.5">
-                {preview ? "Change profile picture" : "Upload your profile picture"}
+                {preview
+                  ? "Change profile picture"
+                  : "Upload your profile picture"}
               </p>
               <p className="text-[11px] text-[#a0a0a0] mb-5">
                 or click to browse
@@ -287,14 +304,17 @@ export default function LabProfile() {
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Company Information Form */}
           <div className="border border-[#e7e7e7] rounded-xl p-6 lg:p-8 bg-white">
             <h3 className="text-[#464646] font-medium mb-6">
               Company Information
             </h3>
 
-            <form onSubmit={handleSaveInformation} className="flex flex-col gap-5">
+            <form
+              onSubmit={handleSaveInformation}
+              className="flex flex-col gap-5"
+            >
               <div className="flex flex-col gap-1.5">
                 <label className="text-[13px] text-[#888888]">Name</label>
                 <input
@@ -365,7 +385,9 @@ export default function LabProfile() {
 
               <div className="flex gap-4">
                 <div className="flex flex-col gap-1.5 flex-1">
-                  <label className="text-[13px] text-[#888888]">Experience</label>
+                  <label className="text-[13px] text-[#888888]">
+                    Experience
+                  </label>
                   <input
                     type="text"
                     name="yearsOfService"
@@ -423,7 +445,7 @@ export default function LabProfile() {
           </div>
 
           {/* Available Appointment */}
-          <div className="border border-[#e7e7e7] rounded-xl bg-white flex flex-col overflow-hidden h-full">
+          {/* <div className="border border-[#e7e7e7] rounded-xl bg-white flex flex-col overflow-hidden h-full">
             <div className="p-6 pb-4 border-b border-[#e7e7e7]">
               <h3 className="text-[#3d3d3d] font-medium text-center">
                 My Available Appointment
@@ -431,7 +453,7 @@ export default function LabProfile() {
             </div>
 
             <div className="flex flex-1 p-6 gap-6 flex-col sm:flex-row">
-              {/* Accordion List */}
+              {/* Accordion List 
               <div className="flex-1 flex flex-col gap-3">
                 {days.map((day) => (
                   <div
@@ -478,7 +500,7 @@ export default function LabProfile() {
                 ))}
               </div>
 
-              {/* Right empty container */}
+              {/* Right empty container 
               <div className="flex-[0.8] border border-[#e7e7e7] rounded-xl bg-[#fdfdfe] min-h-[300px] hidden sm:block"></div>
             </div>
 
@@ -487,10 +509,9 @@ export default function LabProfile() {
                 Save Appointment
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </DashboardLayout>
   );
 }
-

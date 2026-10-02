@@ -25,71 +25,77 @@ export default function LaboratorySignin() {
     if (error) setError(null);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!formData.email || !formData.password) {
-    setError("Please fill in all required fields.");
-    return;
-  }
-
-  try {
-    setIsLoading(true);
-    setError(null);
-
-    const response = await loginUser({
-      email: formData.email,
-      password: formData.password,
-    });
-
-    console.log("Login successful", response);
-
-    // Save email
-    localStorage.setItem("userEmail", formData.email);
-
-    // Get the access token from the actual response structure
-    const token = response?.token?.access_token;
-
-    if (!token) {
-      throw new Error("Access token was not returned by the server.");
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all required fields.");
+      return;
     }
 
-    // Save token
-    localStorage.setItem("token", token);
-
-    // Decode JWT payload to get user ID from `sub`
     try {
-      const payload = token.split(".")[1];
+      setIsLoading(true);
+      setError(null);
 
-      const decodedPayload = JSON.parse(
-        atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
-      );
+      const response = await loginUser({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      const userId = decodedPayload?.sub;
+      console.log("Login successful", response);
 
-      if (!userId) {
-        throw new Error("User ID was not found in the access token.");
+      // Save email
+      localStorage.setItem("userEmail", formData.email);
+
+      // Get the access token from the actual response structure
+      const token = response?.token?.access_token;
+
+      if (!token) {
+        throw new Error("Access token was not returned by the server.");
       }
 
-      // Save user ID
-      localStorage.setItem("userId", userId);
+      // Save token
+      localStorage.setItem("token", token);
 
-      console.log("Saved userId:", userId);
-      console.log("Saved token:", token);
-    } catch (decodeError) {
-      console.error("Failed to decode access token:", decodeError);
-      throw new Error("Could not retrieve user ID from the access token.");
+      // Decode JWT payload to get user ID from `sub`
+      try {
+        const payload = token.split(".")[1];
+
+        const decodedPayload = JSON.parse(
+          atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
+        );
+
+        const userId = decodedPayload?.sub;
+
+        if (!userId) {
+          throw new Error("User ID was not found in the access token.");
+        }
+
+        // Save user ID
+        localStorage.setItem("userId", userId);
+
+        console.log("Saved userId:", userId);
+        console.log("Saved token:", token);
+      } catch (decodeError) {
+        console.error("Failed to decode access token:", decodeError);
+        throw new Error("Could not retrieve user ID from the access token.");
+      }
+      const user = response?.user || response;
+      console.log(user);
+
+      // navigate("/labdashboard");
+      if (user?.isProfileComplete === true) {
+        navigate("/labdashboard");
+      } else {
+        navigate("/laboratory-profile");
+      }
+    } catch (err) {
+      console.error("Login failed", err);
+      setError(err.message || "Failed to sign in. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    navigate("/labdashboard");
-  } catch (err) {
-    console.error("Login failed", err);
-    setError(err.message || "Failed to sign in. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="p-8 bg-[#E6E2F2]">

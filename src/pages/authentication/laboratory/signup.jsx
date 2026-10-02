@@ -94,7 +94,7 @@ export default function LaboratorySignup() {
         localStorage.setItem("userPhone", formData.phoneNumber);
       }
 
-      navigate("/laboratory-profile");
+      navigate("/laboratory-signin");
     } catch (err) {
       console.error("Signup error:", err);
 
