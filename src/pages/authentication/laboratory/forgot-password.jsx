@@ -182,19 +182,19 @@ export default function LaboratoryForgotPassword() {
   };
 
   return (
-    <div className="p-8 bg-[#E6E2F2]">
-      <div className="flex bg-white font-sans overflow-hidden">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8 bg-[#E6E2F2] flex items-center justify-center">
+      <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden font-sans min-h-[520px]">
         {/* Left side */}
-        <div className="hidden lg:flex flex-col w-1/2 p-12 relative items-center justify-center">
-          <img src={doctor} alt="Doctor" className="object-contain" />
+        <div className="hidden lg:flex flex-col w-1/2 p-8 sm:p-12 relative overflow-hidden items-center justify-center bg-[#fcfcfd]">
+          <img src={doctor} alt="Doctor" className="object-contain max-h-[480px]" />
         </div>
 
         {/* Right side */}
-        <div className="w-full lg:w-1/2 flex justify-center p-6 sm:p-12 relative">
-          <div className="w-full max-w-[490px] bg-white rounded-2xl p-8 sm:p-12 border border-[#B0B0B0] z-10 relative shadow-sm">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-10">
+          <div className="w-full max-w-[460px] bg-white rounded-2xl p-6 sm:p-10 border border-[#B0B0B0] shadow-sm">
             {/* Heading */}
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-medium leading-8 text-[#121212] mb-2">
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="text-xl sm:text-2xl font-medium leading-8 text-[#121212] mb-1.5">
                 {step === "select" ? "Forgot Password" : "Enter recovery code"}
               </h1>
 
@@ -208,22 +208,22 @@ export default function LaboratoryForgotPassword() {
             {/* EMAIL STEP */}
             {step === "select" ? (
               <form
-                className="space-y-8"
+                className="space-y-6"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendOtp();
                 }}
               >
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-[#121212]"
+                    className="block text-xs sm:text-sm font-medium text-[#121212]"
                   >
                     Email Address
                   </label>
 
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Mail className="w-5 h-5 text-[#888888]" />
                     </div>
 
@@ -236,28 +236,28 @@ export default function LaboratoryForgotPassword() {
                         setError("");
                       }}
                       placeholder="Enter your registered email"
-                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-[#121212] placeholder:text-[#888888]"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-sm text-[#121212] placeholder:text-[#888888]"
                       required
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="text-red-500 text-sm text-center">
+                  <div className="text-red-500 text-xs sm:text-sm text-center">
                     {error}
                   </div>
                 )}
                 <button
                   type="submit"
                   disabled={!isValidEmail || isLoading}
-                  className={`w-full text-white leading-6 py-3.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] flex justify-center items-center ${
+                  className={`w-full text-white font-medium text-sm leading-6 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] flex justify-center items-center cursor-pointer ${
                     isValidEmail && !isLoading
                       ? "bg-[#150D5E] hover:bg-[#150D5E]/90"
                       : "bg-[#150D5E]/60 cursor-not-allowed"
                   }`}
                 >
                   {isLoading ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     "Continue"
                   )}
@@ -266,7 +266,7 @@ export default function LaboratoryForgotPassword() {
             ) : (
               /* RECOVERY STEP */
               <form
-                className="space-y-6"
+                className="space-y-5"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleResetPassword();
@@ -274,11 +274,11 @@ export default function LaboratoryForgotPassword() {
               >
                 {/* OTP */}
                 <div>
-                  <label className="block text-sm font-medium text-[#121212] mb-3">
+                  <label className="block text-xs sm:text-sm font-medium text-[#121212] mb-2.5 text-center sm:text-left">
                     Recovery Code
                   </label>
 
-                  <div className="flex justify-center gap-2 sm:gap-3">
+                  <div className="flex justify-center gap-1.5 sm:gap-2.5">
                     {otp.map((value, index) => (
                       <input
                         key={index}
@@ -289,14 +289,14 @@ export default function LaboratoryForgotPassword() {
                         value={value}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl bg-[#F8F8FF] border border-[#E7E7E7] rounded-lg focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors"
+                        className="w-9 h-10 sm:w-11 sm:h-12 text-center text-lg sm:text-xl font-bold bg-[#F8F8FF] border border-[#E7E7E7] rounded-lg focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors"
                       />
                     ))}
                   </div>
                 </div>
 
                 {/* Timer / Resend */}
-                <div className="flex items-center justify-between text-xs px-2">
+                <div className="flex items-center justify-between text-xs px-1">
                   <span className="text-[#888888]">{formatTimer(timer)}</span>
 
                   <button
@@ -314,10 +314,10 @@ export default function LaboratoryForgotPassword() {
                 </div>
 
                 {/* New Password */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label
                     htmlFor="newPassword"
-                    className="block text-sm font-medium text-[#121212]"
+                    className="block text-xs sm:text-sm font-medium text-[#121212]"
                   >
                     New Password
                   </label>
@@ -331,15 +331,15 @@ export default function LaboratoryForgotPassword() {
                       setError("");
                     }}
                     placeholder="Enter your new password"
-                    className="w-full px-4 py-3.5 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-[#121212] placeholder:text-[#888888]"
+                    className="w-full px-4 py-3 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-sm text-[#121212] placeholder:text-[#888888]"
                   />
                 </div>
 
                 {/* Confirm Password */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label
                     htmlFor="confirmPassword"
-                    className="block text-sm font-medium text-[#121212]"
+                    className="block text-xs sm:text-sm font-medium text-[#121212]"
                   >
                     Confirm New Password
                   </label>
@@ -353,13 +353,13 @@ export default function LaboratoryForgotPassword() {
                       setError("");
                     }}
                     placeholder="Confirm your new password"
-                    className="w-full px-4 py-3.5 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-[#121212] placeholder:text-[#888888]"
+                    className="w-full px-4 py-3 rounded-xl border border-[#E7E7E7] focus:outline-none focus:border-[#150D5E] focus:ring-1 focus:ring-[#150D5E] transition-colors bg-[#F8F8FF] text-sm text-[#121212] placeholder:text-[#888888]"
                   />
                 </div>
 
                 {/* Error */}
                 {error && (
-                  <div className="text-red-500 text-sm text-center">
+                  <div className="text-red-500 text-xs sm:text-sm text-center">
                     {error}
                   </div>
                 )}
@@ -368,14 +368,14 @@ export default function LaboratoryForgotPassword() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] mt-2 flex justify-center items-center ${
+                  className={`w-full text-white font-medium text-sm leading-6 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#150D5E] mt-2 flex justify-center items-center cursor-pointer ${
                     isLoading
                       ? "bg-[#150D5E]/60 cursor-not-allowed"
                       : "bg-[#150D5E] hover:bg-[#150D5E]/90"
                   }`}
                 >
                   {isLoading ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     "Continue"
                   )}
@@ -388,3 +388,4 @@ export default function LaboratoryForgotPassword() {
     </div>
   );
 }
+

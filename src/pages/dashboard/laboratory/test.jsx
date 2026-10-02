@@ -400,24 +400,24 @@ export default function LabTest() {
                 )}
 
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-2xl font-bold text-[#150d5e]">Tests</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                        <h1 className="text-xl sm:text-2xl font-bold text-[#150d5e]">Tests</h1>
                         <div className="relative w-full sm:w-[320px]">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="search patient, sample ID"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full h-11 pl-11 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-sm placeholder:text-[#c4c4c4]"
+                                className="w-full h-10 sm:h-11 pl-10 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-xs sm:text-sm placeholder:text-[#c4c4c4]"
                             />
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap sm:flex-nowrap">
                         <button
                             onClick={() => navigate("/labdashboard/test/add")}
-                            className="bg-[#0f0b4d] text-white flex items-center gap-2 px-6 h-11 rounded-xl text-[14px] font-medium hover:bg-[#1a1a4b]/90 transition-colors shadow-sm cursor-pointer"
+                            className="flex-1 sm:flex-none bg-[#0f0b4d] text-white flex items-center justify-center gap-2 px-4 sm:px-6 h-10 sm:h-11 rounded-xl text-xs sm:text-[14px] font-medium hover:bg-[#1a1a4b]/90 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
                         >
                             <Plus className="w-4 h-4" />
                             Add New Test
@@ -425,7 +425,7 @@ export default function LabTest() {
                         <div className="relative">
                             <button
                                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                                className="bg-white border border-gray-200 text-gray-500 hover:text-gray-700 flex items-center gap-2 px-6 h-11 rounded-xl text-[14px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                                className="bg-white border border-gray-200 text-gray-500 hover:text-gray-700 flex items-center gap-2 px-4 sm:px-6 h-10 sm:h-11 rounded-xl text-xs sm:text-[14px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                             >
                                 <SlidersHorizontal className="w-4 h-4 text-gray-400" />
                                 Filters
@@ -460,42 +460,42 @@ export default function LabTest() {
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     {/* Card 1 */}
-                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px] flex flex-col justify-between">
+                    <div className="bg-[#f3f4ff] rounded-2xl p-5 sm:p-6 relative min-h-[120px] flex flex-col justify-between">
                         <div className="flex justify-between items-start">
-                            <h3 className="text-[#331eb9] text-[15px] font-medium">Total Test</h3>
-                            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9]">
+                            <h3 className="text-[#331eb9] text-sm sm:text-[15px] font-medium">Total Test</h3>
+                            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9] shrink-0">
                                 <Users className="w-4 h-4" fill="#331eb9" />
                             </div>
                         </div>
-                        <div className="text-3xl font-bold text-[#150d5e]">
+                        <div className="text-2xl sm:text-3xl font-bold text-[#150d5e] mt-2">
                             {isLoading ? "..." : totalCount}
                         </div>
                     </div>
 
                     {/* Card 2 */}
-                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px] flex flex-col justify-between">
+                    <div className="bg-[#f3f4ff] rounded-2xl p-5 sm:p-6 relative min-h-[120px] flex flex-col justify-between">
                         <div className="flex justify-between items-start">
-                            <h3 className="text-[#331eb9] text-[15px] font-medium">Total Department</h3>
-                            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9]">
+                            <h3 className="text-[#331eb9] text-sm sm:text-[15px] font-medium">Total Department</h3>
+                            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9] shrink-0">
                                 <Network className="w-4 h-4" />
                             </div>
                         </div>
-                        <div className="text-3xl font-bold text-[#150d5e]">
+                        <div className="text-2xl sm:text-3xl font-bold text-[#150d5e] mt-2">
                             {departments.length}
                         </div>
                     </div>
 
                     {/* Card 3 */}
-                    <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px] flex flex-col justify-between">
+                    <div className="bg-[#f3f4ff] rounded-2xl p-5 sm:p-6 relative min-h-[120px] flex flex-col justify-between sm:col-span-2 lg:col-span-1">
                         <div className="flex justify-between items-start">
-                            <h3 className="text-[#331eb9] text-[15px] font-medium">Completed Test</h3>
-                            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9]">
+                            <h3 className="text-[#331eb9] text-sm sm:text-[15px] font-medium">Completed Test</h3>
+                            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center text-[#331eb9] shrink-0">
                                 <ClipboardCheck className="w-4 h-4" />
                             </div>
                         </div>
-                        <div className="text-3xl font-bold text-[#150d5e]">
+                        <div className="text-2xl sm:text-3xl font-bold text-[#150d5e] mt-2">
                             {isLoading ? "..." : completedCount}
                         </div>
                     </div>
@@ -503,20 +503,20 @@ export default function LabTest() {
 
                 {/* Table Container */}
                 <div className="bg-white border border-[#eef0f6] rounded-2xl overflow-hidden shadow-sm mb-6">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse min-w-[700px]">
                             <thead>
-                                <tr className="bg-[#f4f6fd]/80 border-b border-[#eef0f6] text-gray-500 font-medium text-[14px]">
-                                    <th className="py-4.5 px-8">Test Name</th>
-                                    <th className="py-4.5 px-8">Short Name</th>
-                                    <th className="py-4.5 px-8">TAT-(Hours)</th>
-                                    <th className="py-4.5 px-8">Price</th>
-                                    <th className="py-4.5 px-8">Available</th>
-                                    <th className="py-4.5 px-8">Received</th>
-                                    <th className="py-4.5 px-8">Action</th>
+                                <tr className="bg-[#f4f6fd]/80 border-b border-[#eef0f6] text-gray-500 font-medium text-xs sm:text-[14px]">
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">Test Name</th>
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">Short Name</th>
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">TAT-(Hours)</th>
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">Price</th>
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">Available</th>
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">Received</th>
+                                    <th className="py-3.5 px-4 sm:px-6 lg:px-8">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#eef0f6] text-[15px]">
+                            <tbody className="divide-y divide-[#eef0f6] text-xs sm:text-[15px]">
                                 {isLoading ? (
                                     <tr>
                                         <td colSpan="7" className="py-12 text-center text-gray-400 font-medium">
@@ -534,7 +534,7 @@ export default function LabTest() {
                                     </tr>
                                 ) : tests.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" className="py-12 text-center text-gray-400 font-medium text-[15px]">
+                                        <td colSpan="7" className="py-12 text-center text-gray-400 font-medium text-xs sm:text-[15px]">
                                             No lab tests found.
                                         </td>
                                     </tr>
@@ -544,36 +544,36 @@ export default function LabTest() {
                                         const testId = test.id !== undefined ? test.id : index;
                                         return (
                                             <tr key={testId} className="hover:bg-[#f8f9fc]/50 transition-colors">
-                                                <td className="py-4 px-8 text-gray-700 font-medium">{getTestName(test)}</td>
-                                                <td className="py-4 px-8 text-gray-700 font-medium">{test.shortName}</td>
-                                                <td className="py-4 px-8 text-gray-600">{test.TAT}</td>
-                                                <td className="py-4 px-8 text-gray-600">&#8358;{test.price}</td>
-                                                <td className="py-4 px-8">
-                                                    <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold ${isAvailable
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8 text-gray-700 font-medium">{getTestName(test)}</td>
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8 text-gray-700 font-medium">{test.shortName}</td>
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8 text-gray-600">{test.TAT}</td>
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8 text-gray-600">&#8358;{test.price}</td>
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${isAvailable
                                                         ? "bg-[#e2f6e9] text-[#27ae60]"
                                                         : "bg-[#ffebee] text-[#e74c3c]"
                                                         }`}>
                                                         {isAvailable ? "True" : "False"}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 px-8 text-gray-500">{getDate(test)}</td>
-                                                <td className="py-4 px-8">
-                                                    <div className="flex items-center justify-between gap-4">
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8 text-gray-500">{getDate(test)}</td>
+                                                <td className="py-3.5 px-4 sm:px-6 lg:px-8">
+                                                    <div className="flex items-center justify-between gap-3">
                                                         {/* Toggle switch */}
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1.5">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleToggleAvailability(testId)}
-                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${isAvailable ? "bg-[#27ae60]" : "bg-gray-300"
+                                                                className={`relative inline-flex h-5.5 w-10 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${isAvailable ? "bg-[#27ae60]" : "bg-gray-300"
                                                                     }`}
                                                                 title={isAvailable ? "Turn Off" : "Turn On"}
                                                             >
                                                                 <span
-                                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAvailable ? "translate-x-6" : "translate-x-1"
+                                                                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isAvailable ? "translate-x-5" : "translate-x-1"
                                                                         }`}
                                                                 />
                                                             </button>
-                                                            <span className={`text-xs font-semibold ${isAvailable ? "text-[#27ae60]" : "text-gray-400"}`}>
+                                                            <span className={`text-[11px] font-semibold ${isAvailable ? "text-[#27ae60]" : "text-gray-400"}`}>
                                                                 {isAvailable ? "On" : "Off"}
                                                             </span>
                                                         </div>
@@ -586,7 +586,7 @@ export default function LabTest() {
                                                                     e.stopPropagation();
                                                                     setActiveMenuId(activeMenuId === testId ? null : testId);
                                                                 }}
-                                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                                                                className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                                                                 title="More options"
                                                             >
                                                                 <MoreVertical className="w-4 h-4" />
@@ -595,22 +595,22 @@ export default function LabTest() {
                                                             {activeMenuId === testId && (
                                                                 <div
                                                                     onClick={(e) => e.stopPropagation()}
-                                                                    className="absolute right-0 top-9 w-36 bg-white border border-gray-100 rounded-xl shadow-xl z-30 py-1.5 text-sm overflow-hidden"
+                                                                    className="absolute right-0 top-8 w-36 bg-white border border-gray-100 rounded-xl shadow-xl z-30 py-1.5 text-xs sm:text-sm overflow-hidden"
                                                                 >
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => handleOpenUpdateModal({ ...test, _idx: index })}
-                                                                        className="w-full text-left px-3.5 py-2 text-gray-700 hover:bg-[#f3f4ff] hover:text-[#331eb9] flex items-center gap-2.5 font-medium transition-colors cursor-pointer"
+                                                                        className="w-full text-left px-3.5 py-2 text-gray-700 hover:bg-[#f3f4ff] hover:text-[#331eb9] flex items-center gap-2 font-medium transition-colors cursor-pointer"
                                                                     >
-                                                                        <Pencil className="w-4 h-4 text-gray-400" />
+                                                                        <Pencil className="w-3.5 h-3.5 text-gray-400" />
                                                                         <span>Update</span>
                                                                     </button>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => handleOpenDeleteModal({ ...test, _idx: index })}
-                                                                        className="w-full text-left px-3.5 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2.5 font-medium transition-colors cursor-pointer"
+                                                                        className="w-full text-left px-3.5 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium transition-colors cursor-pointer"
                                                                     >
-                                                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                                                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
                                                                         <span>Delete</span>
                                                                     </button>
                                                                 </div>
@@ -634,29 +634,29 @@ export default function LabTest() {
                 </div>
 
                 {/* Pagination Section */}
-                <div className="flex justify-between items-center text-sm text-gray-500 py-2 px-2">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-500 py-2 px-2">
                     {/* Dropdown at Bottom Left */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <span>Showing</span>
                         <span className="font-semibold text-gray-700">{showStart}-{showEnd}</span>
                         <span>out of {totalItems}</span>
-                        <span className="ml-2 text-gray-400">| Limit:</span>
+                        <span className="ml-1 text-gray-400">| Limit:</span>
                         <div className="relative">
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                className="appearance-none bg-[#f8f9fc] border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-gray-700 font-medium focus:outline-none cursor-pointer"
+                                className="appearance-none bg-[#f8f9fc] border border-gray-200 rounded-lg pl-3 pr-8 py-1 text-gray-700 font-medium focus:outline-none cursor-pointer text-xs"
                             >
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
                                 <option value={50}>50</option>
                             </select>
-                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
                         </div>
                     </div>
 
                     {/* Pagination Numbers at Bottom Right */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
@@ -678,7 +678,7 @@ export default function LabTest() {
                                 <button
                                     key={idx}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`w-8 h-8 rounded-lg font-medium flex items-center justify-center cursor-pointer transition-colors ${isActive
+                                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-medium text-xs sm:text-sm flex items-center justify-center cursor-pointer transition-colors ${isActive
                                         ? "bg-[#0f0b4d] text-white"
                                         : "text-gray-600 hover:bg-gray-50"
                                         }`}
@@ -697,6 +697,7 @@ export default function LabTest() {
                         </button>
                     </div>
                 </div>
+
 
             </div>
 

@@ -197,56 +197,56 @@ export default function LabProfile() {
         )}
 
         {/* Top Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4 sm:gap-6">
           {/* Profile Overview Card */}
-          <div className="border border-[#e7e7e7] rounded-xl p-6 bg-white flex flex-col sm:flex-row items-center sm:justify-between gap-6">
+          <div className="border border-[#e7e7e7] rounded-xl p-4 sm:p-6 bg-white flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
             <div className="flex flex-col items-center shrink-0">
               {preview ? (
                 <img
                   src={preview}
                   alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover bg-gray-100 border border-[#e7e7e7] mb-3"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover bg-gray-100 border border-[#e7e7e7] mb-2 sm:mb-3"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-[#f0f2f8] border border-[#e7e7e7] mb-3 flex items-center justify-center text-[#9a9db0]">
-                  <User className="w-12 h-12 stroke-[1.5]" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#f0f2f8] border border-[#e7e7e7] mb-2 sm:mb-3 flex items-center justify-center text-[#9a9db0]">
+                  <User className="w-10 h-10 sm:w-12 sm:h-12 stroke-[1.5]" />
                 </div>
               )}
-              <h2 className="text-[#3d3d3d] text-lg font-medium">
+              <h2 className="text-[#3d3d3d] text-base sm:text-lg font-medium text-center">
                 {form.companyName || "Olivex Lab"}
               </h2>
             </div>
 
-            <div className="flex bg-[#f7f7fb] rounded-xl divide-x divide-[#e7e7e7] border border-[#e7e7e7] w-full py-4 text-center">
-              <div className="flex flex-col items-center flex-1 px-2 sm:px-4">
-                <span className="text-[#888888] text-xs sm:text-sm mb-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-[#f7f7fb] rounded-xl border border-[#e7e7e7] w-full p-3 sm:p-4 text-center">
+              <div className="flex flex-col items-center p-1 sm:p-2 border-r sm:border-r border-b sm:border-b-0 border-[#e7e7e7]">
+                <span className="text-[#888888] text-xs mb-1">
                   Location
                 </span>
-                <span className="text-[#331eb9] font-medium text-xs sm:text-sm truncate max-w-[100px]">
+                <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.location || "N/A"}
                 </span>
               </div>
-              <div className="flex flex-col items-center flex-1 px-2 sm:px-4">
-                <span className="text-[#888888] text-xs sm:text-sm mb-1">
+              <div className="flex flex-col items-center p-1 sm:p-2 border-b sm:border-b-0 sm:border-r border-[#e7e7e7]">
+                <span className="text-[#888888] text-xs mb-1">
                   Experience
                 </span>
-                <span className="text-[#331eb9] font-medium text-xs sm:text-sm">
+                <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.yearsOfService || "N/A"}
                 </span>
               </div>
-              <div className="flex flex-col items-center flex-1 px-2 sm:px-4">
-                <span className="text-[#888888] text-xs sm:text-sm mb-1">
+              <div className="flex flex-col items-center p-1 sm:p-2 border-r sm:border-r-0 lg:border-r border-[#e7e7e7]">
+                <span className="text-[#888888] text-xs mb-1">
                   Awards
                 </span>
-                <span className="text-[#331eb9] font-medium text-xs sm:text-sm">
+                <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.awards || "N/A"}
                 </span>
               </div>
-              <div className="flex flex-col items-center flex-1 px-2 sm:px-4">
-                <span className="text-[#888888] text-xs sm:text-sm mb-1">
+              <div className="flex flex-col items-center p-1 sm:p-2">
+                <span className="text-[#888888] text-xs mb-1">
                   Phone Num
                 </span>
-                <span className="text-[#331eb9] font-medium text-xs sm:text-sm truncate max-w-[110px]">
+                <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.phoneNumber || "N/A"}
                 </span>
               </div>
@@ -255,7 +255,7 @@ export default function LabProfile() {
 
           {/* Picture Upload Area */}
           <div
-            className="border border-[#e7e7e7] border-dashed rounded-xl flex flex-col items-center justify-center p-6 relative bg-white cursor-pointer"
+            className="border border-[#e7e7e7] border-dashed rounded-xl flex flex-col items-center justify-center p-4 sm:p-6 relative bg-white cursor-pointer hover:bg-gray-50/50 transition-colors"
             onClick={handleImageClick}
             style={{
               backgroundImage:
@@ -271,14 +271,14 @@ export default function LabProfile() {
               className="hidden"
               onChange={handleImageChange}
             />
-            <div className="flex flex-col items-center w-full z-10 bg-white/80 backdrop-blur-sm p-4 py-5 rounded-xl">
-              <Upload className="w-5 h-5 text-[#888888] mb-2" />
-              <p className="text-[13px] text-[#888888] mb-0.5">
+            <div className="flex flex-col items-center w-full z-10 bg-white/80 backdrop-blur-sm p-3 sm:p-4 py-4 sm:py-5 rounded-xl text-center">
+              <Upload className="w-5 h-5 text-[#888888] mb-1.5" />
+              <p className="text-xs sm:text-[13px] text-[#888888] mb-0.5 font-medium">
                 {preview
                   ? "Change profile picture"
                   : "Upload your profile picture"}
               </p>
-              <p className="text-[11px] text-[#a0a0a0] mb-5">
+              <p className="text-[10px] text-[#a0a0a0] mb-4">
                 or click to browse
               </p>
               <button
@@ -288,7 +288,7 @@ export default function LabProfile() {
                   handleSaveInformation(e);
                 }}
                 disabled={loading}
-                className="bg-[#150d5e] text-white py-2.5 px-6 rounded-lg text-[13px] w-full font-medium hover:bg-[#1a1a4b]/90 transition-colors flex items-center justify-center disabled:opacity-60"
+                className="bg-[#150d5e] text-white py-2.5 px-4 sm:px-6 rounded-lg text-xs sm:text-[13px] w-full font-medium hover:bg-[#1a1a4b]/90 transition-colors flex items-center justify-center disabled:opacity-60 cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -304,31 +304,31 @@ export default function LabProfile() {
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Company Information Form */}
-          <div className="border border-[#e7e7e7] rounded-xl p-6 lg:p-8 bg-white">
-            <h3 className="text-[#464646] font-medium mb-6">
+          <div className="border border-[#e7e7e7] rounded-xl p-4 sm:p-6 lg:p-8 bg-white">
+            <h3 className="text-[#464646] font-medium text-sm sm:text-base mb-4 sm:mb-6">
               Company Information
             </h3>
 
             <form
               onSubmit={handleSaveInformation}
-              className="flex flex-col gap-5"
+              className="flex flex-col gap-4 sm:gap-5"
             >
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] text-[#888888]">Name</label>
+              <div className="flex flex-col gap-1 sm:gap-1.5">
+                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">Name</label>
                 <input
                   type="text"
                   name="companyName"
                   value={form.companyName}
                   onChange={handleChange}
                   placeholder="Olivex Center"
-                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] text-[#888888]">
+              <div className="flex flex-col gap-1 sm:gap-1.5">
+                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
                   Company Location
                 </label>
                 <input
@@ -337,12 +337,12 @@ export default function LabProfile() {
                   value={form.location}
                   onChange={handleChange}
                   placeholder="E.g Ikeja, Lagos"
-                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] text-[#888888]">
+              <div className="flex flex-col gap-1 sm:gap-1.5">
+                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
                   Company Address
                 </label>
                 <input
@@ -351,12 +351,12 @@ export default function LabProfile() {
                   value={form.companyAddress}
                   onChange={handleChange}
                   placeholder="No 12, Siju street, Ikeja, Lagos"
-                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] text-[#888888]">
+              <div className="flex flex-col gap-1 sm:gap-1.5">
+                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
                   Email address
                 </label>
                 <input
@@ -365,12 +365,12 @@ export default function LabProfile() {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="info@olivexlab.com"
-                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] text-[#888888]">
+              <div className="flex flex-col gap-1 sm:gap-1.5">
+                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
                   Phone number
                 </label>
                 <input
@@ -379,13 +379,13 @@ export default function LabProfile() {
                   value={form.phoneNumber}
                   onChange={handleChange}
                   placeholder="09012345678"
-                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                  className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                 />
               </div>
 
-              <div className="flex gap-4">
-                <div className="flex flex-col gap-1.5 flex-1">
-                  <label className="text-[13px] text-[#888888]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1 sm:gap-1.5">
+                  <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
                     Experience
                   </label>
                   <input
@@ -394,27 +394,27 @@ export default function LabProfile() {
                     value={form.yearsOfService}
                     onChange={handleChange}
                     placeholder="12 Years"
-                    className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                    className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5 flex-1">
-                  <label className="text-[13px] text-[#888888]">Awards</label>
+                <div className="flex flex-col gap-1 sm:gap-1.5">
+                  <label className="text-xs sm:text-[13px] text-[#888888] font-medium">Awards</label>
                   <input
                     type="text"
                     name="awards"
                     value={form.awards}
                     onChange={handleChange}
                     placeholder="8"
-                    className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none transition-colors w-full"
+                    className="bg-[#f7f7fb] border border-transparent focus:border-[#e7e7e7] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none transition-colors w-full"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-0.5 mt-2">
-                <label className="text-[13px] text-[#3d3d3d] font-medium">
+              <div className="flex flex-col gap-0.5 mt-1 sm:mt-2">
+                <label className="text-xs sm:text-[13px] text-[#3d3d3d] font-medium">
                   About Laboratory
                 </label>
-                <p className="text-[11px] text-[#888888] mb-2">
+                <p className="text-[10px] text-[#888888] mb-1.5">
                   Write a brief information about your laboratory
                 </p>
                 <textarea
@@ -423,14 +423,14 @@ export default function LabProfile() {
                   onChange={handleChange}
                   rows="4"
                   placeholder="Enter a description..."
-                  className="bg-white border border-[#e7e7e7] focus:border-[#d0d0d0] rounded-lg px-4 py-3 text-sm text-[#3d3d3d] outline-none resize-none transition-colors w-full"
+                  className="bg-white border border-[#e7e7e7] focus:border-[#d0d0d0] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#3d3d3d] outline-none resize-none transition-colors w-full"
                 ></textarea>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-[#150d5e] text-white py-3 rounded-lg text-sm font-medium hover:bg-[#1a1a4b]/90 transition-colors flex items-center justify-center disabled:opacity-60 mt-2"
+                className="bg-[#150d5e] text-white py-3 rounded-lg text-xs sm:text-sm font-medium hover:bg-[#1a1a4b]/90 transition-colors flex items-center justify-center disabled:opacity-60 mt-2 cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -443,6 +443,7 @@ export default function LabProfile() {
               </button>
             </form>
           </div>
+
 
           {/* Available Appointment */}
           {/* <div className="border border-[#e7e7e7] rounded-xl bg-white flex flex-col overflow-hidden h-full">

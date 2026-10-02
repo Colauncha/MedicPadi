@@ -161,25 +161,26 @@ export default function AddTest() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-0 flex items-center justify-center py-4 px-4 sm:px-6">
-        <div className="relative w-full max-w-[640px] bg-white rounded-3xl border border-gray-150 shadow-sm p-6 sm:p-10">
+      <div className="min-h-0 flex items-center justify-center py-2 sm:py-6 px-2 sm:px-6">
+        <div className="relative w-full max-w-[640px] bg-white rounded-2xl sm:rounded-3xl border border-gray-150 shadow-sm p-5 sm:p-8 md:p-10">
 
           <button
             onClick={handleClose}
-            className="absolute right-6 top-6 sm:right-8 sm:top-8 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer"
+            className="absolute right-4 top-4 sm:right-6 sm:top-6 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer"
           >
-            <X className="w-5 h-5 stroke-[2.5]" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
           </button>
 
-          <div className="text-center mb-8 pt-2">
-            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+          <div className="text-center mb-6 sm:mb-8 pt-1 sm:pt-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">
               New Test
             </h1>
 
-            <p className="text-[#888888] text-[14px] mt-1.5">
+            <p className="text-[#888888] text-xs sm:text-[14px] mt-1">
               Create a new test by putting in details below
             </p>
           </div>
+
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 

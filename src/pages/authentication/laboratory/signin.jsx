@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { loginUser, getUserIdFromToken } from "../../../api/auth.api";
+import { loginUser } from "../../../api/auth.api";
 import google from "../../../assets/google.svg";
 import doctor from "../../../assets/doctor.png";
 import apple from "../../../assets/apple.svg";
@@ -98,16 +98,20 @@ export default function LaboratorySignin() {
   };
 
   return (
-    <div className="p-8 bg-[#E6E2F2]">
-      <div className="flex min-h-screen bg-white font-sans">
-        <div className="hidden lg:flex flex-col w-1/2 p-12 relative overflow-hidden items-center justify-center">
-          <img src={doctor} alt="" />
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8 bg-[#E6E2F2] flex items-center justify-center">
+      <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden font-sans min-h-[520px]">
+        <div className="hidden lg:flex flex-col w-1/2 p-8 sm:p-12 relative overflow-hidden items-center justify-center bg-[#fcfcfd]">
+          <img
+            src={doctor}
+            alt="Doctor"
+            className="object-contain max-h-[480px]"
+          />
         </div>
 
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-          <div className="w-full max-w-[490px] bg-white rounded-2xl p-8 sm:p-12 border border-[#B0B0B0]">
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-medium leading-8 text-[#121212] mb-2">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-10">
+          <div className="w-full max-w-[460px] bg-white rounded-2xl p-6 sm:p-10 border border-[#B0B0B0] shadow-sm">
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="text-xl sm:text-2xl font-medium leading-8 text-[#121212] mb-1.5">
                 Welcome Back
               </h1>
               <p className="text-[#888888] text-xs leading-4">
@@ -116,18 +120,18 @@ export default function LaboratorySignin() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-200">
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs sm:text-sm rounded-lg border border-red-200">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div>
-                <label className="block text-sm leading-5 text-[#989898] mb-1.5">
+                <label className="block text-xs sm:text-sm leading-5 text-[#989898] mb-1">
                   Email
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <svg
                       className="h-5 w-5 text-[#D1D1D1]"
                       fill="none"
@@ -148,20 +152,17 @@ export default function LaboratorySignin() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="johndoe34@gmail.com"
-                    className="w-full text-[#B0B0B0] leading-6 pl-11 pr-4 py-3.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="w-full text-sm text-[#3d3d3d] leading-6 pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   />
                 </div>
-                <p className="text-xs text-[#989898] leading-4 mt-1.5">
-                  This is a hint to help the user
-                </p>
               </div>
 
               <div>
-                <label className="block text-sm leading-5 text-[#989898] mb-1.5 font-medium">
+                <label className="block text-xs sm:text-sm leading-5 text-[#989898] mb-1 font-medium">
                   Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <svg
                       className="h-5 w-5 text-[#D1D1D1]"
                       fill="none"
@@ -182,25 +183,30 @@ export default function LaboratorySignin() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Type in your password"
-                    className="w-full text-[#B0B0B0] leading-6 pl-11 pr-12 py-3.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="w-full text-sm text-[#3d3d3d] leading-6 pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#D1D1D1] hover:text-gray-600 transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#D1D1D1] hover:text-gray-600 transition-colors"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                <p className="text-xs text-[#989898] leading-4 mt-1.5">
-                  This is a hint to help the user
-                </p>
+              </div>
+
+              <div className="flex justify-end pt-1">
+                <Link to="/laboratory-forgot-password">
+                  <span className="text-[#150D5E] leading-4 hover:underline text-xs font-medium">
+                    Forgot Password?
+                  </span>
+                </Link>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center bg-[#150D5E] text-white leading-6 py-3.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1A5A] disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center bg-[#150D5E] text-white font-medium text-sm leading-6 py-3 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1A5A] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -212,44 +218,36 @@ export default function LaboratorySignin() {
                 )}
               </button>
 
-              <div className="flex justify-end">
-                <Link to="/laboratory-forgot-password">
-                  <span className="text-[#150D5E] leading-4 hover:underline text-xs">
-                    Forgot Password
-                  </span>
-                </Link>
-              </div>
-
-              <div className="flex items-center my-6">
-                <div className="flex-grow h-px bg-[#888888] border"></div>
-                <span className="flex-shrink-0 px-4 text-xs text-[#888888]">
+              <div className="flex items-center my-4">
+                <div className="flex-grow h-px bg-gray-200"></div>
+                <span className="flex-shrink-0 px-3 text-xs text-[#888888]">
                   Or continue with
                 </span>
-                <div className="flex-grow h-px bg-[#888888] border"></div>
+                <div className="flex-grow h-px bg-gray-200"></div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center gap-3 justify-center py-4 border border-[#150D5E] rounded-lg transition-colors"
+                  className="flex items-center gap-2.5 justify-center py-3 border border-[#150D5E] rounded-lg transition-colors hover:bg-gray-50 text-sm font-medium cursor-pointer"
                 >
                   <img src={google} alt="google" className="w-5 h-5" />
-                  <span className="leading-6 text-[#150D5E]">Google</span>
+                  <span className="text-[#150D5E]">Google</span>
                 </button>
 
                 <button
                   type="button"
-                  className="flex items-center gap-3 justify-center py-4 border border-[#150D5E] rounded-lg transition-colors"
+                  className="flex items-center gap-2.5 justify-center py-3 border border-[#150D5E] rounded-lg transition-colors hover:bg-gray-50 text-sm font-medium cursor-pointer"
                 >
                   <img src={apple} alt="apple" className="w-5 h-5" />
-                  <span className="leading-6 text-[#150D5E]">Apple</span>
+                  <span className="text-[#150D5E]">Apple</span>
                 </button>
               </div>
 
-              <p className="text-center text-sm leading-5 text-[#454545] mt-8">
-                Don't have an existing account?{" "}
+              <p className="text-center text-xs sm:text-sm leading-5 text-[#454545] pt-4">
+                Don't have an account?{" "}
                 <Link to="/laboratory-signup">
-                  <span className="text-[#150D5E] leading-5 hover:underline">
+                  <span className="text-[#150D5E] font-medium hover:underline">
                     Sign up
                   </span>
                 </Link>

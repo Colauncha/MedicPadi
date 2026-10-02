@@ -200,29 +200,29 @@ export default function LabDepartment() {
             <div className="w-full max-w-[1300px] mx-auto pb-10">
 
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-2xl font-bold text-[#150d5e]">Departments</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                        <h1 className="text-xl sm:text-2xl font-bold text-[#150d5e]">Departments</h1>
                         <div className="relative w-full sm:w-[320px]">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="search department, code"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full h-11 pl-11 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-sm placeholder:text-[#c4c4c4]"
+                                className="w-full h-10 sm:h-11 pl-10 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-xs sm:text-sm placeholder:text-[#c4c4c4]"
                             />
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap sm:flex-nowrap">
                         <button
                             onClick={() => navigate("/labdashboard/department/add")}
-                            className="bg-[#0f0b4d] text-white flex items-center gap-2 px-6 h-11 rounded-xl text-[14px] font-medium hover:bg-[#1a1a4b]/90 transition-colors shadow-sm cursor-pointer"
+                            className="flex-1 sm:flex-none bg-[#0f0b4d] text-white flex items-center justify-center gap-2 px-4 sm:px-6 h-10 sm:h-11 rounded-xl text-xs sm:text-[14px] font-medium hover:bg-[#1a1a4b]/90 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
                         >
                             <Plus className="w-4 h-4" />
                             Add New Department
                         </button>
-                        <button className="bg-white border border-gray-200 text-gray-500 hover:text-gray-700 flex items-center gap-2 px-6 h-11 rounded-xl text-[14px] font-medium hover:bg-gray-50 transition-colors cursor-pointer">
+                        <button className="bg-white border border-gray-200 text-gray-500 hover:text-gray-700 flex items-center gap-2 px-4 sm:px-6 h-10 sm:h-11 rounded-xl text-xs sm:text-[14px] font-medium hover:bg-gray-50 transition-colors cursor-pointer">
                             <SlidersHorizontal className="w-4 h-4 text-gray-400" />
                             Filters
                         </button>
@@ -236,16 +236,16 @@ export default function LabDepartment() {
                         <span>Loading departments...</span>
                     </div>
                 ) : error ? (
-                    <div className="bg-red-50 border border-red-200 text-red-600 rounded-2xl p-6 text-center font-medium">
+                    <div className="bg-red-50 border border-red-200 text-red-600 rounded-2xl p-6 text-center font-medium text-xs sm:text-sm">
                         {error}
                     </div>
                 ) : departments.length === 0 ? (
-                    <div className="bg-white border border-[#eef0f6] rounded-3xl p-12 text-center text-gray-400 font-medium">
+                    <div className="bg-white border border-[#eef0f6] rounded-3xl p-8 sm:p-12 text-center text-gray-400 font-medium text-xs sm:text-sm">
                         No departments found.
                     </div>
                 ) : (
                     /* Departments Grid */
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {filteredDepartments.map((dept, index) => {
                             const deptId = dept.id || index + 1;
                             const isActive = activeDepts[deptId] !== undefined ? activeDepts[deptId] : true;
@@ -256,22 +256,22 @@ export default function LabDepartment() {
                             return (
                                 <div
                                     key={deptId}
-                                    className="bg-[#fcfcfd] border border-[#eef0f6] rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                                    className="bg-[#fcfcfd] border border-[#eef0f6] rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
                                 >
 
                                     {/* Top Section: Name, Code & Toggle */}
                                     <div>
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="text-base font-semibold text-[#1a1a4b]">{getDeptName(dept)}</h3>
-                                                <span className="text-[11px] font-bold text-[#331eb9] tracking-wider block mt-0.5">
+                                        <div className="flex justify-between items-start mb-3 sm:mb-4">
+                                            <div className="pr-2 min-w-0">
+                                                <h3 className="text-sm sm:text-base font-semibold text-[#1a1a4b] truncate">{getDeptName(dept)}</h3>
+                                                <span className="text-[10px] sm:text-[11px] font-bold text-[#331eb9] tracking-wider block mt-0.5">
                                                     {getDeptCode(dept)}
                                                 </span>
                                             </div>
                                             {/* Switch Toggle */}
                                             <div
                                                 onClick={() => toggleDept(deptId)}
-                                                className={`w-9 h-5 rounded-full p-0.5 cursor-pointer flex items-center transition-colors duration-200 ${isActive ? "bg-[#0f0b4d]" : "bg-gray-200"
+                                                className={`w-9 h-5 rounded-full p-0.5 cursor-pointer flex items-center shrink-0 transition-colors duration-200 ${isActive ? "bg-[#0f0b4d]" : "bg-gray-200"
                                                     }`}
                                             >
                                                 <div
@@ -282,35 +282,35 @@ export default function LabDepartment() {
                                         </div>
 
                                         {/* Main Metrics Row */}
-                                        <div className="grid grid-cols-3 gap-2 mt-6 mb-6">
+                                        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-4 mb-4 sm:mt-6 sm:mb-6">
                                             <div>
-                                                <span className="text-lg font-bold text-[#1a1a4b] block leading-none">
+                                                <span className="text-base sm:text-lg font-bold text-[#1a1a4b] block leading-none">
                                                     {getTestsOffered(dept)}
                                                 </span>
-                                                <span className="text-[10px] text-gray-400 font-medium block mt-1">
+                                                <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium block mt-1">
                                                     tests offered
                                                 </span>
                                             </div>
                                             <div>
-                                                <span className="text-lg font-bold text-[#1a1a4b] block leading-none">
+                                                <span className="text-base sm:text-lg font-bold text-[#1a1a4b] block leading-none">
                                                     {getStaffAssigned(dept)}
                                                 </span>
-                                                <span className="text-[10px] text-gray-400 font-medium block mt-1">
+                                                <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium block mt-1">
                                                     staff assigned
                                                 </span>
                                             </div>
                                             <div>
-                                                <span className="text-lg font-bold text-[#1a1a4b] block leading-none whitespace-nowrap">
+                                                <span className="text-base sm:text-lg font-bold text-[#1a1a4b] block leading-none whitespace-nowrap">
                                                     {getTAT(dept)}
                                                 </span>
-                                                <span className="text-[10px] text-gray-400 font-medium block mt-1">
+                                                <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium block mt-1">
                                                     turnaround time
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Today's Test Progress Row */}
-                                        <div className="mb-6">
+                                        <div className="mb-4 sm:mb-6">
                                             <div className="flex justify-between items-center text-xs text-gray-400 mb-1.5 font-medium">
                                                 <span>Today's test</span>
                                                 <span>{todayCount}/{totalCount}</span>
@@ -329,21 +329,21 @@ export default function LabDepartment() {
                                         <button
                                             type="button"
                                             onClick={() => handleOpenUpdateModal(dept, index)}
-                                            className="flex-1 bg-white border border-[#0f0b4d] text-[#0f0b4d] text-xs font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-center cursor-pointer"
+                                            className="flex-1 bg-white border border-[#0f0b4d] text-[#0f0b4d] text-xs font-semibold py-2 sm:py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-center cursor-pointer"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => navigate("/labdashboard/test")}
-                                            className="flex-1 bg-[#0f0b4d] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#150f61] transition-colors text-center cursor-pointer"
+                                            className="flex-1 bg-[#0f0b4d] text-white text-xs font-semibold py-2 sm:py-2.5 rounded-lg hover:bg-[#150f61] transition-colors text-center cursor-pointer whitespace-nowrap"
                                         >
-                                            View Department
+                                            View Dept
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleOpenDeleteModal(dept, index)}
-                                            className="w-10 h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer shrink-0"
+                                            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer shrink-0"
                                             title="Delete Department"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -355,6 +355,7 @@ export default function LabDepartment() {
                         })}
                     </div>
                 )}
+
 
             </div>
 
