@@ -44,9 +44,26 @@ export default function PharmacySignin() {
 
       console.log("Login successful", response);
 
-      const user = response?.user || response;
+      // Save email
+      localStorage.setItem("userEmail", formData.email);
 
-      if (user?.isProfileComplete === true) {
+      // Get the user ID belonging to THIS account
+      const userId = response?.user_id || localStorage.getItem("userId");
+
+      if (!userId) {
+        throw new Error("User ID was not found.");
+      }
+
+      // Always update the active user's ID
+      localStorage.setItem("userId", userId);
+
+      // IMPORTANT:
+      // Each user's profile gets its own localStorage key
+      const profileKey = `pharmacyProfile_${userId}`;
+
+      const profile = localStorage.getItem(profileKey);
+
+      if (profile) {
         navigate("/pharmdashboard");
       } else {
         navigate("/pharmacy-profile");

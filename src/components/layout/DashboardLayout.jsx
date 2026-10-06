@@ -43,7 +43,8 @@ export default function DashboardLayout({
 
   const [labProfileData, setLabProfileData] = useState(() => {
     try {
-      const saved = localStorage.getItem("labProfile");
+      const userId = localStorage.getItem("userId");
+      const saved = localStorage.getItem(`labProfile_${userId}`);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -51,7 +52,8 @@ export default function DashboardLayout({
   });
   const [pharmProfileData, setPharmProfileData] = useState(() => {
     try {
-      const saved = localStorage.getItem("pharmacyProfile");
+      const userId = localStorage.getItem("userId");
+      const saved = localStorage.getItem(`pharmacyProfile_${userId}`);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;

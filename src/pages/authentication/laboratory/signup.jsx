@@ -19,6 +19,7 @@ export default function LaboratorySignup() {
     role: "lab",
     phoneNumber: "",
     confirmPassword: "",
+    fullName: "laboratory",
   });
 
   const [errors, setErrors] = useState({
@@ -74,7 +75,6 @@ export default function LaboratorySignup() {
 
       console.log("SIGNUP RESPONSE:", result);
 
-      // Get access token
       const userId = result?.user_id;
 
       if (!userId) {
@@ -108,7 +108,11 @@ export default function LaboratorySignup() {
     <div className="min-h-screen p-3 sm:p-6 lg:p-8 bg-[#E6E2F2] flex items-center justify-center">
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden font-sans min-h-[520px]">
         <div className="hidden lg:flex flex-col w-1/2 p-8 sm:p-12 relative overflow-hidden items-center justify-center bg-[#fcfcfd]">
-          <img src={doctor} alt="Doctor" className="object-contain max-h-[480px]" />
+          <img
+            src={doctor}
+            alt="Doctor"
+            className="object-contain max-h-[480px]"
+          />
         </div>
 
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-10">
@@ -345,4 +349,3 @@ export default function LaboratorySignup() {
     </div>
   );
 }
-

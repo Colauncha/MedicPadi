@@ -47,44 +47,23 @@ export default function LaboratorySignin() {
       // Save email
       localStorage.setItem("userEmail", formData.email);
 
-      // Get the access token from the actual response structure
-      const token = response?.token?.access_token;
+      // Get the user ID belonging to THIS account
+      const userId = response?.user_id || localStorage.getItem("userId");
 
-      if (!token) {
-        throw new Error("Access token was not returned by the server.");
+      if (!userId) {
+        throw new Error("User ID was not found.");
       }
 
-      // Save token
-      localStorage.setItem("token", token);
+      // Always update the active user's ID
+      localStorage.setItem("userId", userId);
 
-      // Decode JWT payload to get user ID from `sub`
-      try {
-        const payload = token.split(".")[1];
+      // IMPORTANT:
+      // Each user's profile gets its own localStorage key
+      const profileKey = `labProfile_${userId}`;
 
-        const decodedPayload = JSON.parse(
-          atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
-        );
+      const profile = localStorage.getItem(profileKey);
 
-        const userId = decodedPayload?.sub;
-
-        if (!userId) {
-          throw new Error("User ID was not found in the access token.");
-        }
-
-        // Save user ID
-        localStorage.setItem("userId", userId);
-
-        console.log("Saved userId:", userId);
-        console.log("Saved token:", token);
-      } catch (decodeError) {
-        console.error("Failed to decode access token:", decodeError);
-        throw new Error("Could not retrieve user ID from the access token.");
-      }
-      const user = response?.user || response;
-      console.log(user);
-
-      // navigate("/labdashboard");
-      if (user?.isProfileComplete === true) {
+      if (profile) {
         navigate("/labdashboard");
       } else {
         navigate("/laboratory-profile");

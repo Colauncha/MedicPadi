@@ -58,31 +58,55 @@ export default function LaboratoryProfile() {
     setError("");
     setLoading(true);
 
-    const userEmail = localStorage.getItem("userEmail") || "";
-    const userPhone = localStorage.getItem("userPhone") || "";
-
-    const profilePayload = {
-      ...formData,
-      email: userEmail,
-      phoneNumber: userPhone,
-      name: formData.companyName, // mapped for generic endpoints
-      avatarSrc: preview,
-    };
-
-    // Save locally so dashboard & header update immediately
-    localStorage.setItem("labProfile", JSON.stringify(profilePayload));
-    window.dispatchEvent(new Event("profileUpdate"));
-
     try {
+      const userEmail = localStorage.getItem("userEmail") || "";
+      const userPhone = localStorage.getItem("userPhone") || "";
+      const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
-      if (token) {
-        await createProfile(profilePayload);
+
+      if (!userId) {
+        throw new Error("User ID not found. Please sign in again.");
       }
+
+      if (!token) {
+        throw new Error(
+          "Authentication token not found. Please sign in again.",
+        );
+      }
+
+      const profilePayload = {
+        ...formData,
+        user_id: userId,
+        email: userEmail,
+        phoneNumber: userPhone,
+        name: formData.companyName,
+        avatarSrc: preview || "",
+      };
+
+      console.log("PROFILE PAYLOAD:", profilePayload);
+
+      // Create/update profile on the backend
+      const response = await createProfile(profilePayload);
+
+      console.log("PROFILE CREATED:", response);
+
+      // Save locally only after the API request succeeds
+      localStorage.setItem(
+        `labProfile_${userId}`,
+        JSON.stringify(profilePayload),
+      );
+
+      // Tell other components (header/dashboard) that the profile changed
+      window.dispatchEvent(new Event("profileUpdate"));
+
+      // Go to dashboard
+      navigate("/labdashboard");
     } catch (err) {
-      console.warn("API profile update warning:", err.message);
+      console.error("Profile creation failed:", err);
+
+      setError(err?.message || "Failed to create profile. Please try again.");
     } finally {
       setLoading(false);
-      navigate("/labdashboard");
     }
   };
 
@@ -97,7 +121,11 @@ export default function LaboratoryProfile() {
               className="h-9 object-contain"
             />
           </div>
-          <img src={doctor} alt="Doctor" className="object-contain max-h-[460px]" />
+          <img
+            src={doctor}
+            alt="Doctor"
+            className="object-contain max-h-[460px]"
+          />
         </div>
 
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-10">
@@ -255,4 +283,3 @@ export default function LaboratoryProfile() {
     </div>
   );
 }
-

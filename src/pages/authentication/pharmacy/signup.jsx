@@ -74,8 +74,6 @@ export default function PharmacySignup() {
 
       const userId = result?.user_id;
 
-      console.log("USER ID FROM TOKEN:", userId);
-
       if (!userId) {
         throw new Error("User ID could not be extracted from the token.");
       }

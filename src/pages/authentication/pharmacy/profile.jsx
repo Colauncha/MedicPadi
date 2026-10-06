@@ -53,65 +53,54 @@ export default function PharmacyProfile() {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   setLoading(true);
-
-  //   const userEmail = localStorage.getItem("userEmail") || "";
-  //   const userPhone = localStorage.getItem("userPhone") || "";
-
-  //   const profilePayload = {
-  //     ...formData,
-  //     email: userEmail,
-  //     phoneNumber: userPhone,
-  //     name: formData.companyName,
-  //     avatarSrc: preview,
-  //   };
-
-  //   // Save locally so dashboard & header update immediately
-  //   localStorage.setItem("pharmacyProfile", JSON.stringify(profilePayload));
-  //   window.dispatchEvent(new Event("profileUpdate"));
-
-  //   try {
-  //     const token = localStorage.getItem("userId");
-  //     if (token) {
-  //       await createProfile(profilePayload);
-  //     }
-  //   } catch (err) {
-  //     console.warn("API profile update warning:", err.message);
-  //   } finally {
-  //     setLoading(false);
-  //     navigate("/pharmdashboard");
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const userEmail = localStorage.getItem("userEmail") || "";
-    const userPhone = localStorage.getItem("userPhone") || "";
-
-    const profilePayload = {
-      ...formData,
-      email: userEmail,
-      phoneNumber: userPhone,
-      name: formData.companyName,
-      avatarSrc: preview,
-    };
-
-    // Save locally so dashboard & header update immediately
-    localStorage.setItem("pharmacyProfile", JSON.stringify(profilePayload));
-    window.dispatchEvent(new Event("profileUpdate"));
-
     try {
-      await createProfile(profilePayload);
+      const userEmail = localStorage.getItem("userEmail") || "";
+      const userPhone = localStorage.getItem("userPhone") || "";
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      if (!userId) {
+        throw new Error("User ID not found. Please sign in again.");
+      }
+
+      if (!token) {
+        throw new Error(
+          "Authentication token not found. Please sign in again.",
+        );
+      }
+
+      const profilePayload = {
+        ...formData,
+        user_id: userId,
+        email: userEmail,
+        phoneNumber: userPhone,
+        name: formData.companyName,
+        avatarSrc: preview || "",
+      };
+
+      // Create/update profile on the backend
+      const response = await createProfile(profilePayload);
+
+      // Save locally only after the API request succeeds
+      localStorage.setItem(
+        `pharmacyProfile_${userId}`,
+        JSON.stringify(profilePayload),
+      );
+
+      // Tell other components (header/dashboard) that the profile changed
+      window.dispatchEvent(new Event("profileUpdate"));
+
+      // Go to pharmacy dashboard
       navigate("/pharmdashboard");
     } catch (err) {
-      console.warn("API profile creation warning:", err.message);
-      setError(err.message || "Failed to save pharmacy profile.");
+      console.error("Profile creation failed:", err);
+
+      setError(err?.message || "Failed to create profile. Please try again.");
     } finally {
       setLoading(false);
     }

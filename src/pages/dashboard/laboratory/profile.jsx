@@ -28,11 +28,12 @@ export default function LabProfile() {
   });
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
     const userEmail = localStorage.getItem("userEmail") || "";
     const userPhone = localStorage.getItem("userPhone") || "";
 
     // Load local storage first for speed and consistency
-    const saved = localStorage.getItem("labProfile");
+    const saved = localStorage.getItem(`labProfile_${userId}`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -219,33 +220,25 @@ export default function LabProfile() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-[#f7f7fb] rounded-xl border border-[#e7e7e7] w-full p-3 sm:p-4 text-center">
               <div className="flex flex-col items-center p-1 sm:p-2 border-r sm:border-r border-b sm:border-b-0 border-[#e7e7e7]">
-                <span className="text-[#888888] text-xs mb-1">
-                  Location
-                </span>
+                <span className="text-[#888888] text-xs mb-1">Location</span>
                 <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.location || "N/A"}
                 </span>
               </div>
               <div className="flex flex-col items-center p-1 sm:p-2 border-b sm:border-b-0 sm:border-r border-[#e7e7e7]">
-                <span className="text-[#888888] text-xs mb-1">
-                  Experience
-                </span>
+                <span className="text-[#888888] text-xs mb-1">Experience</span>
                 <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.yearsOfService || "N/A"}
                 </span>
               </div>
               <div className="flex flex-col items-center p-1 sm:p-2 border-r sm:border-r-0 lg:border-r border-[#e7e7e7]">
-                <span className="text-[#888888] text-xs mb-1">
-                  Awards
-                </span>
+                <span className="text-[#888888] text-xs mb-1">Awards</span>
                 <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.awards || "N/A"}
                 </span>
               </div>
               <div className="flex flex-col items-center p-1 sm:p-2">
-                <span className="text-[#888888] text-xs mb-1">
-                  Phone Num
-                </span>
+                <span className="text-[#888888] text-xs mb-1">Phone Num</span>
                 <span className="text-[#331eb9] font-semibold text-xs sm:text-sm truncate w-full">
                   {form.phoneNumber || "N/A"}
                 </span>
@@ -316,7 +309,9 @@ export default function LabProfile() {
               className="flex flex-col gap-4 sm:gap-5"
             >
               <div className="flex flex-col gap-1 sm:gap-1.5">
-                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">Name</label>
+                <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
+                  Name
+                </label>
                 <input
                   type="text"
                   name="companyName"
@@ -398,7 +393,9 @@ export default function LabProfile() {
                   />
                 </div>
                 <div className="flex flex-col gap-1 sm:gap-1.5">
-                  <label className="text-xs sm:text-[13px] text-[#888888] font-medium">Awards</label>
+                  <label className="text-xs sm:text-[13px] text-[#888888] font-medium">
+                    Awards
+                  </label>
                   <input
                     type="text"
                     name="awards"
@@ -443,7 +440,6 @@ export default function LabProfile() {
               </button>
             </form>
           </div>
-
 
           {/* Available Appointment */}
           {/* <div className="border border-[#e7e7e7] rounded-xl bg-white flex flex-col overflow-hidden h-full">
