@@ -47,6 +47,9 @@ export default function LaboratorySignin() {
       // Save email
       localStorage.setItem("userEmail", formData.email);
 
+      // Save token
+      localStorage.setItem("token", response?.token.access_token);
+
       // Get the user ID belonging to THIS account
       const userId = response?.user_id || localStorage.getItem("userId");
 
