@@ -356,13 +356,22 @@ export const updateProfile = async (profileData) => {
 
     const data = await response.json();
 
+    console.log("UPDATE PROFILE STATUS:", response.status);
+    console.log("UPDATE PROFILE RESPONSE:", data);
+    console.log("UPDATE PROFILE PAYLOAD:", profileData);
+
     if (!response.ok) {
-      throw new Error(data.message || "Failed to update profile");
+      throw new Error(
+        data?.message ||
+          data?.error ||
+          JSON.stringify(data) ||
+          "Failed to update profile"
+      );
     }
 
     return data;
   } catch (error) {
-    console.error("Update Profile Error:", error.message);
+    console.error("Update Profile Error:", error);
     throw error;
   }
 };
