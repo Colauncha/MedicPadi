@@ -1,57 +1,73 @@
-import { Apple, PlayCircle } from "lucide-react";
+import iosImg from "../../assets/ios.png";
+import androidImg from "../../assets/google.png";
+import ctaImg from "../../assets/ctaimg.png";
 
 export default function CtaBanner() {
   return (
-    <section className="max-w-[1240px] mx-auto px-6 lg:px-10 pb-20">
-      <div className="rounded-2xl bg-[#0E0A38] px-8 sm:px-14 py-14 grid lg:grid-cols-2 gap-10 items-center overflow-hidden">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-4 max-w-sm">
+    <section className="w-full max-w-[1240px] mx-auto px-5 sm:px-6 lg:px-10 pb-20">
+      <div className="relative overflow-hidden rounded-2xl bg-[#17105E] px-6 py-6 sm:px-10 sm:py-8 lg:px-12 lg:py-9 grid grid-cols-1 lg:grid-cols-2 items-center gap-4 lg:gap-0">
+
+        <div className="relative z-10 w-full max-w-[440px]">
+          <h2 className="text-2xl sm:text-3xl font-semibold leading-tight text-white mb-3 max-w-[400px]">
             Your first consult can start in minutes
           </h2>
-          <p className="text-sm text-white/60 leading-6 max-w-sm mb-8">
-            Download Medicpadi and get matched with a doctor today. No
-            waiting room, no photocopied prescriptions.
+
+          <p className="text-xs sm:text-sm text-white/70 leading-5 max-w-[380px] mb-7">
+            Download Medicpadi and get matched with a doctor today.
+            No waiting room, no photocopied prescriptions.
           </p>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+        
             <a
               href="#"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-white text-sm font-medium text-[#121212]"
+              aria-label="Download Medicpadi on the App Store"
+              className="flex items-center gap-2.5 bg-[#F7F6FF] rounded-md px-3 py-2 sm:px-4 min-h-[42px] w-fit min-w-[158px] hover:bg-white transition-colors"
             >
-              <Apple className="w-4 h-4" />
-              <span>
+              <img
+                src={iosImg}
+                alt=""
+                className="w-4 h-4 object-contain shrink-0"
+              />
+
+              <span className="text-[#17105E] text-xs leading-tight font-medium">
                 Download on iOS
-                <span className="block text-[10px] text-[#888888] font-normal">
+                <span className="block text-[10px] text-gray-500 font-normal mt-0.5">
                   App Store
                 </span>
               </span>
             </a>
+
+        
             <a
               href="#"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-white text-sm font-medium text-[#121212]"
+              aria-label="Download Medicpadi on Google Play"
+              className="flex items-center gap-2.5 bg-[#F7F6FF] rounded-md px-3 py-2 sm:px-4 min-h-[42px] w-fit min-w-[158px] hover:bg-white transition-colors"
             >
-              <PlayCircle className="w-4 h-4" />
-              <span>
+              <img
+                src={androidImg}
+                alt=""
+                className="w-4 h-4 object-contain shrink-0"
+              />
+
+              <span className="text-[#17105E] text-xs leading-tight font-medium">
                 Download on Android
-                <span className="block text-[10px] text-[#888888] font-normal">
-                  Google Store
+                <span className="block text-[10px] text-gray-500 font-normal mt-0.5">
+                  Google Play
                 </span>
               </span>
             </a>
           </div>
         </div>
 
-        {/* CSS-crafted phone mockup -- no source image available */}
-        <div className="hidden lg:flex justify-end">
-          <div className="w-[160px] bg-white/95 rounded-[24px] p-3 shadow-2xl -rotate-6">
-            <div className="w-full h-6 rounded-full bg-[#150D5E]/10 mb-3" />
-            <div className="grid grid-cols-3 gap-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-9 rounded-lg bg-[#F8F8FF]" />
-              ))}
-            </div>
-          </div>
+        <div className="w-full flex items-center justify-center lg:justify-end">
+          <img
+            src={ctaImg}
+            alt="Medicpadi mobile app displayed on smartphones"
+            className="block w-full max-w-[400px] sm:max-w-[440px] lg:max-w-[480px] h-auto object-contain"
+          />
         </div>
+
       </div>
     </section>
   );
