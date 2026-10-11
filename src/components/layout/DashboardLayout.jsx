@@ -143,7 +143,7 @@ export default function DashboardLayout({
           { name: "Dashboard", icon: LayoutDashboard, path: prefix },
           { name: "Product", icon: Package, path: `${prefix}/product` },
           { name: "Order", icon: ShoppingCart, path: `${prefix}/order` },
-          { name: "Customers", icon: Users, path: `${prefix}/customers` },
+          // { name: "Customers", icon: Users, path: `${prefix}/customers` },
           { name: "Payments", icon: CreditCard, path: `${prefix}/payments` },
         ]
       : activeRole === "laboratory"

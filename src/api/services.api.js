@@ -22,7 +22,6 @@ export const createLabTests = async (formData) => {
     console.error("Add Lab Test Error:", error.message);
     throw error;
   }
-
 };
 
 export const listLabTests = async () => {
@@ -36,7 +35,6 @@ export const listLabTests = async () => {
     });
 
     const data = await response.json();
-
 
     if (!response.ok) {
       throw new Error(data.message || "Lab Test failed");
@@ -119,7 +117,6 @@ export const deleteLabtests = async (id) => {
   }
 };
 
-
 export const addPharmacyDrugs = async (formData) => {
   try {
     const { category: _, composition: __, ...restData } = formData;
@@ -173,9 +170,123 @@ export const listPharmacyDrugs = async () => {
   }
 };
 
-export const PharmacyDrugsById = async () => { };
-export const updatePharmacyDrugs = async () => { };
-export const deletePharmacyDrugs = async () => { };
+export const pharmacyDrugsById = async (id) => {
+  try {
+    const response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch pharmacy drug");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Fetch pharmacy drug Error:", error.message);
+    throw error;
+  }
+};
+
+export const updatePharmacyDrugs = async (id, formData) => {
+  try {
+    const { category: _, composition: __, ...restData } = formData;
+
+    let response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(restData),
+    });
+
+    if (response.status === 404 || response.status === 405) {
+      response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(restData),
+      });
+    }
+
+    const data = await response.json();
+
+    console.log("UPDATE PHARMACY DRUG RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Update Pharmacy Drug failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Update Pharmacy Drug Error:", error.message);
+    throw error;
+  }
+};
+
+export const deletePharmacyDrugs = async (id) => {
+  try {
+    const response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Delete Pharmacy Drug failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Delete Pharmacy Drug Error:", error.message);
+    throw error;
+  }
+};
+
+export const drugUploadPicture = async (id, formData) => {
+  try {
+    const body =
+      formData instanceof FormData
+        ? formData
+        : formData instanceof File
+        ? (() => {
+            const fd = new FormData();
+            fd.append("file", formData);
+            fd.append("image", formData);
+            return fd;
+          })()
+        : formData;
+
+    const response = await fetch(`/api/services/pharmacy/drugs/${id}/image`, {
+      method: "POST",
+      credentials: "include",
+      body,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to upload drug image");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Upload drug image Error:", error.message);
+    throw error;
+  }
+};
 
 export const createLabDepartments = async (formData) => {
   try {
@@ -201,7 +312,6 @@ export const createLabDepartments = async (formData) => {
     console.error("Add Lab Test Error:", error.message);
     throw error;
   }
-
 };
 
 export const listLabDepartments = async () => {
@@ -295,6 +405,139 @@ export const deleteLabDepartments = async (id) => {
     return data;
   } catch (error) {
     console.error("Delete Lab Department Error:", error.message);
+    throw error;
+  }
+};
+
+export const createDrugCategory = async (formData) => {
+  try {
+    const response = await fetch("/api/services/pharmacy/categories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    console.log("ADD DRUG CATEGORY RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Add Drug Category failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Add Drug Category Error:", error.message);
+    throw error;
+  }
+};
+
+export const listDrugCategories = async () => {
+  try {
+    const response = await fetch("/api/services/pharmacy/categories", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    console.log("DRUG CATEGORIES RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Drug Categories failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Drug Categories Error:", error.message);
+    throw error;
+  }
+};
+
+export const pharmacyDrugCategoriesById = async (id) => {
+  try {
+    const response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch drug categories");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Fetch drug categories Error:", error.message);
+    throw error;
+  }
+};
+
+export const updateDrugCategory = async (id, formData) => {
+  try {
+    let response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
+
+    // If PATCH is not supported, fallback to PUT
+    if (response.status === 404 || response.status === 405) {
+      response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+    }
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Update Drug Category failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Update Drug Category Error:", error.message);
+    throw error;
+  }
+};
+
+export const deleteDrugCategory = async (id) => {
+  try {
+    const response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Delete Drug Category failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Delete Drug Category Error:", error.message);
     throw error;
   }
 };

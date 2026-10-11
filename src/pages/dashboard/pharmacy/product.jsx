@@ -11,12 +11,22 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Loader2,
+  Edit2,
+  Trash2,
+  FolderPlus,
 } from "lucide-react";
-import { listPharmacyDrugs } from "../../../api/services.api";
+import {
+  listPharmacyDrugs,
+  listDrugCategories,
+  createDrugCategory,
+  updateDrugCategory,
+  deleteDrugCategory,
+} from "../../../api/services.api";
 import AddProduct from "./addProduct";
 
 export default function ProductList() {
-  const [selectedCategory, setSelectedCategory] = useState("Antibiotics");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddProductPage, setShowAddProductPage] = useState(false);
@@ -28,92 +38,186 @@ export default function ProductList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // Category management state
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryFormData, setCategoryFormData] = useState({
+    name: "",
+    description: "",
+  });
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+  const [activeCategoryMenu, setActiveCategoryMenu] = useState(null);
+
+  // Delete category confirmation modal state
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedCategory, statusFilter, itemsPerPage]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const res = await listPharmacyDrugs();
-        let list = [];
-        if (Array.isArray(res)) {
-          list = res;
-        } else if (res && Array.isArray(res.data)) {
-          list = res.data;
-        } else if (res && Array.isArray(res.drugs)) {
-          list = res.drugs;
-        } else if (res && typeof res === "object") {
-          const arrayProp = Object.values(res).find((val) =>
-            Array.isArray(val),
-          );
-          if (arrayProp) {
-            list = arrayProp;
-          }
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await listPharmacyDrugs();
+      let list = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res && Array.isArray(res.data)) {
+        list = res.data;
+      } else if (res && Array.isArray(res.drugs)) {
+        list = res.drugs;
+      } else if (res && typeof res === "object") {
+        const arrayProp = Object.values(res).find((val) => Array.isArray(val));
+        if (arrayProp) {
+          list = arrayProp;
         }
-        setProducts(list);
-      } catch (err) {
-        console.error("Failed to load pharmacy drugs:", err);
-        setError(err.message || "Failed to load products");
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchProducts();
-  }, []);
-
-  // Form State for Add Product
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    dosage: "500mg",
-    category: "Antibiotics",
-    quantity: 100,
-    expiryDate: "2026-12-31",
-    status: "In stock",
-    price: "8000",
-  });
-
-  const getCategoryCount = (categoryName) => {
-    return products.filter(
-      (p) => p.category?.toLowerCase() === categoryName.toLowerCase(),
-    ).length;
+      setProducts(list);
+    } catch (err) {
+      console.error("Failed to load pharmacy drugs:", err);
+      setError(err.message || "Failed to load products");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const categories = [
-    {
-      name: "Antibiotics",
-      count: isLoading ? "..." : getCategoryCount("Antibiotics"),
-      desc: "Antibiotics products",
-    },
-    {
-      name: "Pain Reliver",
-      count: isLoading ? "..." : getCategoryCount("Pain Reliver"),
-      desc: "Pain reliever products",
-    },
-    {
-      name: "Supplements",
-      count: isLoading ? "..." : getCategoryCount("Supplements"),
-      desc: "Supplement products",
-    },
-    {
-      name: "Diabetes Care",
-      count: isLoading ? "..." : getCategoryCount("Diabetes Care"),
-      desc: "Diabetes products",
-    },
-  ];
+  const fetchCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const res = await listDrugCategories();
+      let list = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res && Array.isArray(res.data)) {
+        list = res.data;
+      } else if (res && Array.isArray(res.categories)) {
+        list = res.categories;
+      } else if (res && typeof res === "object") {
+        const arrayProp = Object.values(res).find((val) => Array.isArray(val));
+        if (arrayProp) {
+          list = arrayProp;
+        }
+      }
+      setCategories(list);
+    } catch (err) {
+      console.error("Failed to load drug categories:", err);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  // Close category 3-dots dropdown menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveCategoryMenu(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // Category CRUD Handlers
+  const handleOpenAddCategory = () => {
+    setEditingCategory(null);
+    setCategoryFormData({ name: "", description: "" });
+    setCategoryError("");
+    setShowCategoryModal(true);
+  };
+
+  const handleOpenEditCategory = (cat) => {
+    setEditingCategory(cat);
+    setCategoryFormData({
+      name: cat.name || "",
+      description: cat.description || "",
+    });
+    setCategoryError("");
+    setShowCategoryModal(true);
+  };
+
+  const handleSaveCategory = async (e) => {
+    e.preventDefault();
+    if (!categoryFormData.name.trim()) {
+      setCategoryError("Please enter a category name.");
+      return;
+    }
+
+    try {
+      setIsSavingCategory(true);
+      setCategoryError("");
+
+      const payload = {
+        name: categoryFormData.name.trim(),
+        description: categoryFormData.description.trim(),
+      };
+
+      if (editingCategory) {
+        await updateDrugCategory(editingCategory.id || editingCategory._id, payload);
+      } else {
+        await createDrugCategory(payload);
+      }
+
+      setShowCategoryModal(false);
+      setEditingCategory(null);
+      setCategoryFormData({ name: "", description: "" });
+      await fetchCategories();
+    } catch (err) {
+      console.error("Failed to save category:", err);
+      setCategoryError(err.message || "Failed to save category.");
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = (cat) => {
+    setCategoryToDelete(cat);
+    setDeleteError("");
+  };
+
+  const handleConfirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    const catId = categoryToDelete.id || categoryToDelete._id;
+    if (!catId) return;
+
+    try {
+      setIsDeletingCategory(true);
+      setDeleteError("");
+
+      await deleteDrugCategory(catId);
+      if (
+        selectedCategory.toLowerCase() ===
+        (categoryToDelete.name || "").toLowerCase()
+      ) {
+        setSelectedCategory("All");
+      }
+      setCategoryToDelete(null);
+      await fetchCategories();
+    } catch (err) {
+      console.error("Failed to delete category:", err);
+      setDeleteError(
+        err.message || "Failed to delete category. Please try again."
+      );
+    } finally {
+      setIsDeletingCategory(false);
+    }
+  };
 
   // Calculated Stats
   const totalProductsCount = products.length;
   const lowStockCount = products.filter(
     (p) =>
       p.status?.toLowerCase() === "low stock" ||
-      (p.quantity !== undefined && p.quantity > 0 && p.quantity <= 15),
+      (p.quantity !== undefined && p.quantity > 0 && p.quantity <= 15)
   ).length;
   const outOfStockCount = products.filter(
-    (p) => p.status?.toLowerCase() === "out of stock" || p.quantity === 0,
+    (p) => p.status?.toLowerCase() === "out of stock" || p.quantity === 0
   ).length;
 
   const formatPrice = (price) => {
@@ -122,46 +226,12 @@ export default function ProductList() {
     return `₦${Number(price).toLocaleString()}`;
   };
 
-  // Handle Add Product Submit
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    if (!newProduct.name) return;
-
-    const randomId = Math.floor(100000 + Math.random() * 900000).toString();
-    const formattedPrice = `₦${Number(newProduct.price).toLocaleString()}`;
-    const formattedDate = newProduct.expiryDate.split("-").reverse().join("-");
-
-    const productToAdd = {
-      id: randomId,
-      name: newProduct.name,
-      dosage: newProduct.dosage,
-      category: newProduct.category,
-      quantity: Number(newProduct.quantity),
-      expiryDate: formattedDate,
-      status: newProduct.status,
-      price: formattedPrice,
-    };
-
-    setProducts((prev) => [productToAdd, ...prev]);
-    setShowAddModal(false);
-    // Reset form
-    setNewProduct({
-      name: "",
-      dosage: "500mg",
-      category: "Antibiotics",
-      quantity: 100,
-      expiryDate: "2026-12-31",
-      status: "In stock",
-      price: "8000",
-    });
-  };
-
   // Filter products by selected category, search term, and status filter
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      !product.category ||
       !selectedCategory ||
-      product.category.toLowerCase() === selectedCategory.toLowerCase();
+      selectedCategory === "All" ||
+      (product.category || "").toLowerCase() === selectedCategory.toLowerCase();
 
     const matchesSearch =
       (product.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -179,8 +249,6 @@ export default function ProductList() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-  const showStart = totalItems === 0 ? 0 : startIndex + 1;
-  const showEnd = Math.min(endIndex, totalItems);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -220,16 +288,16 @@ export default function ProductList() {
   const handleAddProductFromPage = (productData) => {
     const randomId = Math.floor(100000 + Math.random() * 900000).toString();
     const numericPrice =
-      Number(productData.price.replace(/[^0-9]/g, "")) || 1500;
+      Number(String(productData.price).replace(/[^0-9]/g, "")) || 1500;
     const formattedPrice = `₦${numericPrice.toLocaleString()}`;
 
     const productToAdd = {
       id: randomId,
-      name: productData.medicine,
-      dosage: "500mg",
-      category: productData.category,
-      quantity: 100, // Default quantity
-      expiryDate: "31-12-2026", // Default expiry
+      name: productData.name || productData.medicine,
+      dosage: productData.dosage || "500mg",
+      category: productData.category || "Uncategorized",
+      quantity: 100,
+      expiryDate: "31-12-2026",
       status: "In stock",
       price: formattedPrice,
     };
@@ -242,6 +310,7 @@ export default function ProductList() {
     <DashboardLayout>
       {showAddProductPage ? (
         <AddProduct
+          categories={categories}
           onDone={() => setShowAddProductPage(false)}
           onAddProduct={handleAddProductFromPage}
         />
@@ -318,112 +387,189 @@ export default function ProductList() {
               </div>
             </div>
 
-            {/* Product Category Cards Grid (4 in a row, repeating) */}
-            <div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {categories.map((cat, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedCategory(cat.name)}
-                    className={`rounded-2xl p-5 border cursor-pointer transition-all duration-300 flex items-center justify-between ${
-                      selectedCategory === cat.name
-                        ? "bg-[#EEECF9] border-[#6F6BD6] shadow-sm scale-[1.02]"
-                        : "bg-[#F8F9FC] border-[#eef0f6] hover:bg-[#EEECF9]/50"
-                    }`}
-                  >
-                    <div>
-                      <span className="text-[#6F6BD6] text-xs font-bold uppercase tracking-wider">
-                        {cat.name}
-                      </span>
-                      <h4 className="text-[#150D5E] text-2xl font-bold my-1">
-                        {cat.count}
-                      </h4>
-                      <p className="text-gray-400 text-xs">{cat.desc}</p>
-                    </div>
+            {/* Drug Categories Section (Option 2) */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-[#150D5E]">
+                    Drug Categories
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    Filter products by category or manage your drug classifications
+                  </p>
+                </div>
 
-                    {/* Pill bottle inline graphic */}
-                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm relative shrink-0">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="w-6 h-6 text-[#6F6BD6]"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect x="7" y="8" width="10" height="13" rx="2" />
-                        <rect x="9" y="3" width="6" height="5" rx="1" />
-                        <line x1="7" y1="12" x2="17" y2="12" />
-                        <circle cx="12" cy="16" r="1.5" fill="currentColor" />
-                      </svg>
-
-                      {/* Floating 3 dots icon */}
-                      <div className="absolute -top-1.5 -right-1.5 text-gray-400">
-                        <MoreVertical className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                <button
+                  type="button"
+                  onClick={handleOpenAddCategory}
+                  className="self-start sm:self-auto bg-[#EEECF9] hover:bg-[#E2DEFA] text-[#150D5E] border border-[#150D5E]/20 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-4 h-4 text-[#150D5E]" />
+                  <span>Add Category</span>
+                </button>
               </div>
 
-              {/* Dummy visual second row categories for aesthetics to match the wireframe */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-4 opacity-95">
-                {categories.map((cat, idx) => (
-                  <div
-                    key={idx + 4}
-                    className="bg-[#F8F9FC] border border-[#eef0f6] rounded-2xl p-5 flex items-center justify-between opacity-80 cursor-not-allowed hover:bg-gray-50"
-                  >
-                    <div>
-                      <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">
-                        {cat.name}
-                      </span>
-                      <h4 className="text-gray-400 text-2xl font-bold my-1">
-                        {cat.count}
-                      </h4>
-                      <p className="text-gray-400 text-xs">{cat.desc}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm relative opacity-60">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="w-6 h-6 text-gray-400"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <rect x="7" y="8" width="10" height="13" rx="2" />
-                        <rect x="9" y="3" width="6" height="5" rx="1" />
-                      </svg>
-                      <div className="absolute -top-1.5 -right-1.5 text-gray-300">
-                        <MoreVertical className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Dummy visual third row categories */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-4 opacity-40">
-                {categories.map((cat, idx) => (
-                  <div
-                    key={idx + 8}
-                    className="bg-[#F8F9FC] border border-[#eef0f6] rounded-2xl p-4 flex items-center justify-between"
-                  >
-                    <span className="text-gray-400 text-xs font-bold">
-                      {cat.name}
+              {/* Category Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* "All Products" Card */}
+                <div
+                  onClick={() => setSelectedCategory("All")}
+                  className={`rounded-2xl p-5 border cursor-pointer transition-all duration-200 flex items-center justify-between ${
+                    selectedCategory === "All"
+                      ? "bg-[#EEECF9] border-[#6F6BD6] shadow-sm scale-[1.01]"
+                      : "bg-[#F8F9FC] border-[#eef0f6] hover:bg-[#EEECF9]/40"
+                  }`}
+                >
+                  <div>
+                    <span className="text-[#6F6BD6] text-xs font-bold uppercase tracking-wider">
+                      All Products
                     </span>
-                    <MoreVertical className="w-4 h-4 text-gray-300" />
+                    <h4 className="text-[#150D5E] text-2xl font-bold my-1">
+                      {isLoading ? "..." : totalProductsCount}
+                    </h4>
+                    <p className="text-gray-400 text-xs">All inventory drugs</p>
                   </div>
-                ))}
+
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+                    <Package className="w-6 h-6 text-[#6F6BD6]" />
+                  </div>
+                </div>
+
+                {/* Dynamic Category Cards */}
+                {isLoadingCategories ? (
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <div
+                      key={`cat-skeleton-${idx}`}
+                      className="bg-[#F8F9FC] border border-[#eef0f6] rounded-2xl p-5 flex items-center justify-between animate-pulse"
+                    >
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 bg-gray-200 rounded w-20"></div>
+                        <div className="h-6 bg-gray-200 rounded w-12"></div>
+                        <div className="h-2.5 bg-gray-200 rounded w-28"></div>
+                      </div>
+                      <div className="w-12 h-12 rounded-full bg-gray-200"></div>
+                    </div>
+                  ))
+                ) : categories.length > 0 ? (
+                  categories.map((cat) => {
+                    const count = products.filter(
+                      (p) =>
+                        (p.category || "").toLowerCase() ===
+                        (cat.name || "").toLowerCase()
+                    ).length;
+                    const isSelected =
+                      selectedCategory.toLowerCase() ===
+                      (cat.name || "").toLowerCase();
+                    const catId = cat.id || cat._id;
+                    const isMenuOpen = activeCategoryMenu === catId;
+
+                    return (
+                      <div
+                        key={catId || cat.name}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className={`rounded-2xl p-5 border cursor-pointer transition-all duration-200 flex items-center justify-between relative ${
+                          isSelected
+                            ? "bg-[#EEECF9] border-[#6F6BD6] shadow-sm scale-[1.01]"
+                            : "bg-[#F8F9FC] border-[#eef0f6] hover:bg-[#EEECF9]/40"
+                        }`}
+                      >
+                        <div className="flex-1 pr-2 min-w-0">
+                          <span className="text-[#6F6BD6] text-xs font-bold uppercase tracking-wider block truncate">
+                            {cat.name}
+                          </span>
+                          <h4 className="text-[#150D5E] text-2xl font-bold my-1">
+                            {isLoading ? "..." : count}
+                          </h4>
+                          <p
+                            className="text-gray-400 text-xs truncate"
+                            title={cat.description || "No description"}
+                          >
+                            {cat.description || "No description"}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm">
+                            <Package className="w-5 h-5 text-[#6F6BD6]" />
+                          </div>
+
+                          {/* 3-dots Menu */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveCategoryMenu(isMenuOpen ? null : catId);
+                              }}
+                              className="p-1 rounded-lg text-gray-400 hover:text-[#150D5E] hover:bg-white transition-colors cursor-pointer"
+                              title="Category options"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </button>
+
+                            {isMenuOpen && (
+                              <div
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 top-full mt-1 w-32 bg-white rounded-xl shadow-xl border border-gray-100 z-30 py-1 text-sm animate-in fade-in zoom-in-95 duration-150"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveCategoryMenu(null);
+                                    handleOpenEditCategory(cat);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-gray-700 hover:bg-[#EEECF9] hover:text-[#150D5E] flex items-center gap-2 text-xs font-semibold cursor-pointer"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveCategoryMenu(null);
+                                    handleDeleteCategory(cat);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50 flex items-center gap-2 text-xs font-semibold cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Delete</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div
+                    onClick={handleOpenAddCategory}
+                    className="col-span-full sm:col-span-2 lg:col-span-3 border-2 border-dashed border-gray-200 rounded-2xl p-5 flex items-center justify-center gap-3 text-gray-400 hover:border-[#6F6BD6] hover:text-[#6F6BD6] transition-all cursor-pointer bg-white"
+                  >
+                    <FolderPlus className="w-5 h-5" />
+                    <span className="text-sm font-semibold">
+                      No categories yet. Click to add your first category
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Antibiotics List Table Card */}
+            {/* Products Table Card */}
             <div className="bg-white border border-[#eef0f6] rounded-2xl p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <h2 className="text-2xl font-bold text-[#150D5E]">
-                  {selectedCategory}
-                </h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-[#150D5E]">
+                    {selectedCategory === "All" ? "All Products" : selectedCategory}
+                  </h2>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Showing{" "}
+                    <span className="font-semibold text-gray-700">
+                      {filteredProducts.length}
+                    </span>{" "}
+                    drug{filteredProducts.length === 1 ? "" : "s"}
+                  </p>
+                </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                   {/* Search Bar */}
@@ -431,7 +577,7 @@ export default function ProductList() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                       type="text"
-                      placeholder="search product"
+                      placeholder="Search product"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full h-10 pl-9 pr-4 bg-[#f8f9fc] border border-[#eef0f6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-sm"
@@ -441,17 +587,17 @@ export default function ProductList() {
                   {/* Add New Products Button */}
                   <button
                     onClick={() => setShowAddProductPage(true)}
-                    className="bg-[#150D5E] hover:bg-[#201584] text-white px-5 h-10 rounded-xl font-semibold flex items-center gap-2 text-sm shadow-sm transition-all"
+                    className="bg-[#150D5E] hover:bg-[#201584] text-white px-5 h-10 rounded-xl font-semibold flex items-center gap-2 text-sm shadow-sm transition-all cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add New Products</span>
+                    <span>Add New Product</span>
                   </button>
 
                   {/* Filters Button */}
                   <div className="relative">
                     <button
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                      className="border border-[#eef0f6] hover:bg-gray-50 text-gray-600 px-5 h-10 rounded-xl font-semibold flex items-center gap-2 text-sm transition-all"
+                      className="border border-[#eef0f6] hover:bg-gray-50 text-gray-600 px-5 h-10 rounded-xl font-semibold flex items-center gap-2 text-sm transition-all cursor-pointer"
                     >
                       <SlidersHorizontal className="w-4 h-4" />
                       <span>Filters</span>
@@ -470,7 +616,7 @@ export default function ProductList() {
                                 setStatusFilter(status);
                                 setShowFilterDropdown(false);
                               }}
-                              className={`w-full text-left px-4 py-2 text-sm hover:bg-[#EEECF9] hover:text-[#150D5E] transition-colors ${
+                              className={`w-full text-left px-4 py-2 text-sm hover:bg-[#EEECF9] hover:text-[#150D5E] transition-colors cursor-pointer ${
                                 statusFilter === status
                                   ? "bg-[#EEECF9] text-[#150D5E] font-bold"
                                   : "text-gray-700"
@@ -478,7 +624,7 @@ export default function ProductList() {
                             >
                               {status}
                             </button>
-                          ),
+                          )
                         )}
                       </div>
                     )}
@@ -508,7 +654,7 @@ export default function ProductList() {
                           className="py-12 text-center text-gray-400 font-medium"
                         >
                           <div className="flex items-center justify-center gap-2">
-                            <div className="w-5 h-5 border-2 border-[#150D5E] border-t-transparent rounded-full animate-spin"></div>
+                            <Loader2 className="w-5 h-5 animate-spin text-[#150D5E]" />
                             <span>Loading products...</span>
                           </div>
                         </td>
@@ -546,7 +692,7 @@ export default function ProductList() {
                           statusStr.toLowerCase() === "low stock";
                         return (
                           <tr
-                            key={i}
+                            key={prod.id || i}
                             className="border-b border-[#EEF0F6] hover:bg-[#F8F9FC] transition-colors duration-150 text-[15px] text-[#1a1a4b]"
                           >
                             <td className="py-4 px-6 font-semibold">
@@ -583,7 +729,7 @@ export default function ProductList() {
                               {formatPrice(prod.price)}
                             </td>
                             <td className="py-4 px-6">
-                              <button className="text-[#6F6BD6] hover:underline font-semibold text-sm">
+                              <button className="text-[#6F6BD6] hover:underline font-semibold text-sm cursor-pointer">
                                 View details
                               </button>
                             </td>
@@ -608,21 +754,16 @@ export default function ProductList() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-[#EEF0F6]">
                 <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                   <span>Showing</span>
-                  <span className="font-bold text-gray-700">
-                    {showStart}-{showEnd}
-                  </span>
-                  <span>of</span>
-                  <span className="font-bold text-gray-700">{totalItems}</span>
-                  <span className="ml-2 text-gray-400">| Limit:</span>
                   <select
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                    className="bg-[#f8f9fc] border border-[#eef0f6] rounded-lg px-2 py-0.5 text-gray-700 outline-none focus:ring-1 focus:ring-[#150D5E]"
+                    className="bg-[#f8f9fc] border border-[#eef0f6] rounded-lg px-2.5 py-1 text-gray-700 outline-none focus:ring-1 focus:ring-[#150D5E] cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
                     <option value={50}>50</option>
                   </select>
+                  <span>of {totalItems}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -631,7 +772,7 @@ export default function ProductList() {
                       setCurrentPage((prev) => Math.max(prev - 1, 1))
                     }
                     disabled={currentPage === 1}
-                    className="w-8 h-8 rounded-lg border border-[#eef0f6] flex items-center justify-center text-gray-400 hover:bg-[#EEECF9] hover:text-[#150D5E] disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                    className="w-8 h-8 rounded-lg border border-[#eef0f6] flex items-center justify-center text-gray-400 hover:bg-[#EEECF9] hover:text-[#150D5E] disabled:opacity-50 disabled:hover:bg-transparent transition-all cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -640,7 +781,7 @@ export default function ProductList() {
                     if (page === "...") {
                       return (
                         <span
-                          key={idx}
+                          key={`ellipsis-${idx}`}
                           className="text-gray-400 px-1 font-bold text-sm select-none"
                         >
                           ...
@@ -650,9 +791,9 @@ export default function ProductList() {
                     const isActive = page === currentPage;
                     return (
                       <button
-                        key={idx}
+                        key={`page-${page}`}
                         onClick={() => setCurrentPage(page)}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shadow-sm transition-all ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shadow-sm transition-all cursor-pointer ${
                           isActive
                             ? "bg-[#150D5E] text-white"
                             : "border border-[#eef0f6] text-gray-600 hover:bg-[#EEECF9] hover:text-[#150D5E]"
@@ -667,8 +808,8 @@ export default function ProductList() {
                     onClick={() =>
                       setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                     }
-                    disabled={currentPage === totalPages}
-                    className="w-8 h-8 rounded-lg border border-[#eef0f6] flex items-center justify-center text-gray-400 hover:bg-[#EEECF9] hover:text-[#150D5E] disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                    disabled={currentPage >= totalPages}
+                    className="w-8 h-8 rounded-lg border border-[#eef0f6] flex items-center justify-center text-gray-400 hover:bg-[#EEECF9] hover:text-[#150D5E] disabled:opacity-50 disabled:hover:bg-transparent transition-all cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -677,173 +818,172 @@ export default function ProductList() {
             </div>
           </div>
 
-          {/* Add New Product Modal */}
-          {showAddModal && (
+          {/* Add / Edit Category Modal (Carrying Name & Description) */}
+          {showCategoryModal && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200">
+              <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200">
                 {/* Modal Header */}
                 <div className="bg-[#150D5E] text-white px-6 py-5 flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Add New Product</h3>
+                  <div>
+                    <h3 className="text-lg font-bold">
+                      {editingCategory ? "Edit Drug Category" : "Add Drug Category"}
+                    </h3>
+                    <p className="text-xs text-white/70 mt-0.5">
+                      {editingCategory
+                        ? "Update category details"
+                        : "Enter the category name and description"}
+                    </p>
+                  </div>
                   <button
-                    onClick={() => setShowAddModal(false)}
-                    className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+                    type="button"
+                    onClick={() => {
+                      setShowCategoryModal(false);
+                      setCategoryError("");
+                    }}
+                    className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10 cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Modal Body */}
+                {/* Modal Form */}
                 <form
-                  onSubmit={handleAddProduct}
-                  className="p-6 flex flex-col gap-5"
+                  onSubmit={handleSaveCategory}
+                  className="p-6 flex flex-col gap-4"
                 >
+                  {categoryError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-medium">
+                      {categoryError}
+                    </div>
+                  )}
+
+                  {/* Field 1: Category Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Medicine Name
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7C7A9E] mb-1.5">
+                      Category Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Paracetamol"
-                      value={newProduct.name}
+                      placeholder="e.g. Antibiotics, Analgesics, Vitamins"
+                      value={categoryFormData.name}
                       onChange={(e) =>
-                        setNewProduct({ ...newProduct, name: e.target.value })
+                        setCategoryFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
                       }
-                      className="w-full px-4 h-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 focus:border-[#150D5E] text-sm"
+                      className="w-full h-11 px-4 bg-[#f8f9fc] border border-[#eef0f6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 text-sm font-medium text-gray-800"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Dosage
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. 500mg"
-                        value={newProduct.dosage}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            dosage: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 h-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 focus:border-[#150D5E] text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Category
-                      </label>
-                      <select
-                        value={newProduct.category}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            category: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 h-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 focus:border-[#150D5E] text-sm bg-white"
-                      >
-                        <option>Antibiotics</option>
-                        <option>Pain Reliver</option>
-                        <option>Supplements</option>
-                        <option>Diabetes Care</option>
-                      </select>
-                    </div>
+                  {/* Field 2: Description */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7C7A9E] mb-1.5">
+                      Description
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="Enter a brief description of what drugs fall into this category..."
+                      value={categoryFormData.description}
+                      onChange={(e) =>
+                        setCategoryFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      className="w-full p-4 bg-[#f8f9fc] border border-[#eef0f6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 text-sm font-medium text-gray-800 resize-none"
+                    />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Quantity (Units)
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        min="0"
-                        value={newProduct.quantity}
-                        onChange={(e) => {
-                          const qty = Number(e.target.value);
-                          let status = "In stock";
-                          if (qty === 0) status = "Out of stock";
-                          else if (qty < 20) status = "Low stock";
-                          setNewProduct({
-                            ...newProduct,
-                            quantity: qty,
-                            status,
-                          });
-                        }}
-                        className="w-full px-4 h-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 focus:border-[#150D5E] text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Unit Price (₦)
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        min="1"
-                        placeholder="e.g. 8000"
-                        value={newProduct.price}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            price: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 h-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 focus:border-[#150D5E] text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={newProduct.expiryDate}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            expiryDate: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 h-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#150D5E]/20 focus:border-[#150D5E] text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Auto-Status
-                      </label>
-                      <div className="h-11 px-4 border border-gray-100 bg-gray-50 rounded-xl flex items-center text-sm font-semibold text-[#150D5E]">
-                        {newProduct.status}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Modal Footer Buttons */}
-                  <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                  {/* Modal Action Buttons */}
+                  <div className="flex items-center gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => setShowAddModal(false)}
-                      className="px-5 h-11 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 text-sm transition-all"
+                      onClick={() => {
+                        setShowCategoryModal(false);
+                        setCategoryError("");
+                      }}
+                      className="flex-1 h-11 border border-gray-200 hover:bg-gray-50 rounded-xl font-semibold text-gray-600 text-sm transition-all cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-5 h-11 bg-[#150D5E] hover:bg-[#201584] text-white rounded-xl font-semibold text-sm shadow-sm transition-all"
+                      disabled={isSavingCategory || !categoryFormData.name.trim()}
+                      className="flex-1 h-11 bg-[#150D5E] hover:bg-[#201584] text-white rounded-xl font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      Add Product
+                      {isSavingCategory ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Saving...</span>
+                        </>
+                      ) : editingCategory ? (
+                        "Update Category"
+                      ) : (
+                        "Save Category"
+                      )}
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Delete Confirmation Modal */}
+          {categoryToDelete && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200 p-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                  <Trash2 className="w-7 h-7" />
+                </div>
+
+                <h3 className="text-xl font-bold text-[#150D5E]">
+                  Delete Category?
+                </h3>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-gray-800">
+                    "{categoryToDelete.name}"
+                  </span>
+                  ? This action cannot be undone.
+                </p>
+
+                {deleteError && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-medium text-center">
+                    {deleteError}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 mt-6">
+                  <button
+                    type="button"
+                    disabled={isDeletingCategory}
+                    onClick={() => {
+                      setCategoryToDelete(null);
+                      setDeleteError("");
+                    }}
+                    className="flex-1 h-11 border border-gray-200 hover:bg-gray-50 rounded-xl font-semibold text-gray-600 text-sm transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isDeletingCategory}
+                    onClick={handleConfirmDeleteCategory}
+                    className="flex-1 h-11 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {isDeletingCategory ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      "Delete"
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}
