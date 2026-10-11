@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
 
-// Landing page components
+// Landing page
 import Home from "./pages/HomePage/Home.jsx";
 
 // Doctor authentication pages
@@ -41,6 +41,7 @@ import PharmOrder from "./pages/dashboard/pharmacy/order";
 import PharmCustomer from "./pages/dashboard/pharmacy/customers";
 import PharmPayment from "./pages/dashboard/pharmacy/payments";
 
+// Waitlist
 import WaitlistPage from "./Pages/WaitlistPage";
 
 // Doctor dashboard pages
@@ -56,8 +57,10 @@ import ReportPage from "./pages/dashboard/doctorsPage/ReportPage";
 function App() {
   return (
     <Routes>
+      {/* Landing page */}
       <Route path="/" element={<Home />} />
 
+      {/* Doctor authentication */}
       <Route path="/doctor-signup" element={<DoctorSignup />} />
       <Route path="/doctor-signin" element={<DoctorSignin />} />
       <Route
@@ -66,6 +69,7 @@ function App() {
       />
       <Route path="/doctor-profile" element={<DoctorProfile />} />
 
+      {/* Laboratory authentication */}
       <Route path="/laboratory-signup" element={<LaboratorySignup />} />
       <Route path="/laboratory-signin" element={<LaboratorySignin />} />
       <Route
@@ -74,6 +78,7 @@ function App() {
       />
       <Route path="/laboratory-profile" element={<LaboratoryProfile />} />
 
+      {/* Pharmacy authentication */}
       <Route path="/pharmacy-signup" element={<PharmacySignup />} />
       <Route path="/pharmacy-signin" element={<PharmacySignin />} />
       <Route
@@ -82,14 +87,21 @@ function App() {
       />
       <Route path="/pharmacy-profile" element={<PharmacyProfile />} />
 
+      {/* Laboratory dashboard */}
       <Route path="/labdashboard" element={<LabDashboard />} />
       <Route path="/labdashboard/patient" element={<LabPatient />} />
       <Route path="/labdashboard/profile" element={<LabProfile />} />
       <Route path="/labdashboard/test" element={<LabTest />} />
       <Route path="/labdashboard/test/add" element={<AddTest />} />
       <Route path="/labdashboard/department" element={<LabDepartment />} />
-      <Route path="/labdashboard/department/add" element={<AddDepartment />} />
-      <Route path="/labdashboard/appointments" element={<LabAppointment />} />
+      <Route
+        path="/labdashboard/department/add"
+        element={<AddDepartment />}
+      />
+      <Route
+        path="/labdashboard/appointments"
+        element={<LabAppointment />}
+      />
       <Route path="/labdashboard/reports" element={<LabReport />} />
       <Route
         path="/labdashboard/policy"
@@ -104,13 +116,17 @@ function App() {
         element={<LabPlaceholder title="Settings" />}
       />
 
+      {/* Pharmacy dashboard */}
       <Route path="/pharmdashboard" element={<PharmDashboard />} />
       <Route path="/pharmdashboard/product" element={<PharmProduct />} />
       <Route path="/pharmdashboard/order" element={<PharmOrder />} />
       <Route path="/pharmdashboard/customers" element={<PharmCustomer />} />
       <Route path="/pharmdashboard/payments" element={<PharmPayment />} />
 
+      {/* Waitlist */}
       <Route path="/waitlist" element={<WaitlistPage />} />
+
+      {/* Doctor dashboard */}
       <Route path="/docdashboard" element={<DashboardPage />} />
       <Route path="/docdashboard/patient" element={<PatientList />} />
       <Route path="/docdashboard/patient/:id" element={<PatientDetails />} />
@@ -122,3 +138,4 @@ function App() {
 }
 
 export default App;
+

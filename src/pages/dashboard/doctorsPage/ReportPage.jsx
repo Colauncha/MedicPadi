@@ -22,26 +22,142 @@ function AvatarPlaceholder({ name }) {
   );
 }
 
-function UploadPanel() {
+
+function UploadPanel({ onUploaded }) {
   const [dragOver, setDragOver] = useState(false);
-  const [fileName, setFileName] = useState(null);
-  const [reportName, setReportName] = useState("");
-  const [reportDate, setReportDate] = useState("");
-  const [doctorName, setDoctorName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [patientId, setPatientId] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const inputClass =
     "w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 focus:outline-none focus:border-[#150D5E]";
 
-  const labelClass =
-    "text-xs font-medium text-gray-700 mb-1 block";
+  const labelClass = "text-xs font-medium text-gray-700 mb-1 block";
+
+  const handleFile = (file) => {
+    setError("");
+    setMessage("");
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setSelectedFile(null);
+      setError("Please select a PDF, DOC, or DOCX file.");
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      setSelectedFile(null);
+      setError("The file must not exceed 20 MB.");
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (!patientId.trim()) {
+      setError("Please enter the patient's ID.");
+      return;
+    }
+
+    if (!selectedFile) {
+      setError("Please select a report to upload.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError("Your session has expired. Please log in again.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("patient_id", patientId.trim());
+    formData.append("source_type", "upload");
+    formData.append("document", selectedFile);
+
+    try {
+      setIsUploading(true);
+
+      const response = await fetch("/api/ehr/records", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const responseText = await response.text();
+
+console.log("UPLOAD STATUS:", response.status);
+console.log("UPLOAD RESPONSE:", responseText);
+
+let data = {};
+
+try {
+  data = JSON.parse(responseText);
+} catch {
+  data = { message: responseText };
+}
+
+if (!response.ok) {
+  throw new Error(
+    data?.message || `Upload failed (${response.status}).`
+  );
+}
+
+      setMessage("Report uploaded successfully.");
+      setSelectedFile(null);
+      setPatientId("");
+
+      const fileInput = document.getElementById("report-file-input");
+      if (fileInput) fileInput.value = "";
+
+      if (onUploaded) onUploaded();
+    } catch (err) {
+      setError(err.message || "Something went wrong during upload.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
-    <div className="w-[260px] flex-shrink-0 border-l border-gray-100 p-5 flex flex-col gap-4 overflow-y-auto">
+    <form
+      onSubmit={handleUpload}
+      className="w-[260px] flex-shrink-0 border-l border-gray-100 p-5 flex flex-col gap-4 overflow-y-auto"
+    >
       <p className="text-xs font-medium text-[#1A1A2E] text-center">
         Kindly upload patient report below
       </p>
 
-      {/* Drop Zone */}
+      <div>
+        <label className={labelClass} htmlFor="report-patient-id">
+          Patient ID
+        </label>
+        <input
+          id="report-patient-id"
+          type="text"
+          value={patientId}
+          onChange={(e) => setPatientId(e.target.value)}
+          placeholder="Enter patient's ID"
+          className={inputClass}
+        />
+      </div>
+
       <label
         htmlFor="report-file-input"
         onDragOver={(e) => {
@@ -52,12 +168,7 @@ function UploadPanel() {
         onDrop={(e) => {
           e.preventDefault();
           setDragOver(false);
-
-          const file = e.dataTransfer.files[0];
-
-          if (file) {
-            setFileName(file.name);
-          }
+          handleFile(e.dataTransfer.files[0]);
         }}
         className={`border-2 border-dashed rounded-lg min-h-[110px] flex flex-col items-center justify-center gap-2 cursor-pointer p-4 transition-colors ${
           dragOver
@@ -68,23 +179,12 @@ function UploadPanel() {
         <input
           id="report-file-input"
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
+          accept=".pdf,.doc,.docx"
           className="hidden"
-          onChange={(e) => {
-            const file = e.target.files[0];
-
-            if (file) {
-              setFileName(file.name);
-            }
-          }}
+          onChange={(e) => handleFile(e.target.files[0])}
         />
 
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
           <path
             d="M12 16V8M12 8L9 11M12 8L15 11"
             stroke="#BE122D"
@@ -92,7 +192,6 @@ function UploadPanel() {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-
           <path
             d="M20 16.7C21.2 15.9 22 14.5 22 13C22 10.8 20.2 9 18 9C17.5 9 17 9.1 16.6 9.3C15.8 7.3 13.9 6 11.8 6C8.9 6 6.5 8.1 6.5 10.8C6.5 11 6.5 11.2 6.6 11.4C5.1 12 4 13.4 4 15C4 17.2 5.8 19 8 19H19C19.4 19 19.7 18.9 20 18.7"
             stroke="#BE122D"
@@ -102,71 +201,47 @@ function UploadPanel() {
         </svg>
 
         <span className="text-[11px] text-gray-400 text-center leading-relaxed">
-          {fileName ? (
-            <span className="text-[#BE122D] font-medium">
-              {fileName}
+          {selectedFile ? (
+            <span className="text-[#BE122D] font-medium break-all">
+              {selectedFile.name}
             </span>
           ) : (
             <>
               Upload your file
               <br />
-              <span className="text-[#BE122D]">
-                or click to browse
-              </span>
+              <span className="text-[#BE122D]">or click to browse</span>
             </>
           )}
         </span>
       </label>
 
-      <div className="flex flex-col gap-3">
-        <div>
-          <label className={labelClass}>
-            Report Name
-          </label>
+      <p className="text-[10px] text-gray-400">
+        Accepted formats: PDF, DOC, DOCX. Maximum size: 20 MB.
+      </p>
 
-          <input
-            type="text"
-            placeholder="E.g Sugar level test"
-            value={reportName}
-            onChange={(e) => setReportName(e.target.value)}
-            className={inputClass}
-          />
-        </div>
+      {error && (
+        <p role="alert" className="text-xs text-red-600">
+          {error}
+        </p>
+      )}
 
-        <div>
-          <label className={labelClass}>
-            Date of Report
-          </label>
+      {message && (
+        <p role="status" className="text-xs text-green-700">
+          {message}
+        </p>
+      )}
 
-          <input
-            type="date"
-            value={reportDate}
-            onChange={(e) => setReportDate(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className={labelClass}>
-            Doctor Name
-          </label>
-
-          <input
-            type="text"
-            placeholder="E.g John Doe"
-            value={doctorName}
-            onChange={(e) => setDoctorName(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <button className="w-full bg-[#150D5E] text-white text-sm font-semibold py-3 rounded-lg hover:bg-[#1a1275] transition-colors">
-        Upload
+      <button
+        type="submit"
+        disabled={isUploading}
+        className="w-full bg-[#150D5E] text-white text-sm font-semibold py-3 rounded-lg hover:bg-[#1a1275] disabled:opacity-60 transition-colors"
+      >
+        {isUploading ? "Uploading..." : "Upload"}
       </button>
-    </div>
+    </form>
   );
 }
+
 
 function ReportRow({ report }) {
   return (
@@ -245,6 +320,7 @@ function ReportPage() {
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [prescriptionError, setPrescriptionError] = useState("");
   const [selectedLabReport, setSelectedLabReport] = useState(null);
+  const [refreshReports, setRefreshReports] = useState(0);
 
   // ==========================================
   // FETCH MEDICAL REPORTS
@@ -420,7 +496,7 @@ function ReportPage() {
     };
 
     fetchMedicalReports();
-  }, []);
+  }, [refreshReports]);
 
   // ==========================================
   // FETCH LAB REPORTS
@@ -1112,7 +1188,9 @@ const filteredPrescriptions = prescriptions.filter((prescription) => {
             </div>
 
             {/* Right: Upload Panel */}
-            <UploadPanel />
+            <UploadPanel
+  onUploaded={() => setRefreshReports((prev) => prev + 1)}
+/>
 
           </div>
         </div>
