@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import StatsBar from "./StatsBar";
+import heroImg from "../../assets/hero1.png";
 
 const STATS = [
   { value: "500+", label: "Doctor's Online" },
@@ -11,7 +12,7 @@ const STATS = [
 export default function Hero() {
   return (
     <section className="bg-[#F7F7FB]">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 pt-16 pb-20">
+      <div className="max-w-[1440px] mx-auto px-16 lg:px-18 pt-2 pb-20">
         
         <div className="flex flex-col lg:grid lg:grid-cols-[738fr_592fr] lg:gap-8 items-center lg:items-start">
           <div className="order-2 lg:order-1 lg:pt-10">
@@ -45,35 +46,13 @@ export default function Hero() {
             <StatsBar stats={STATS} />
           </div>
 
-          <div className="order-2 lg:order-1 w-full max-w-[420px] lg:max-w-none mx-auto lg:mx-0 relative aspect-[592/560] overflow-visible">
-            <img
-              src="/images/ellipse_28.png"
-              alt=""
-              aria-hidden="true"
-              className="absolute left-[0] top-[0] w-[90.8%] h-[89.7%] object-contain z-0"
-            />
-
-            <img
-            src="/images/iPad-Pro.png"
-            alt="Medicpadi dashboard on tablet"
-            className="relative left-[-56%] top-[-8%] w-[98.9%] h-[90.9%] object-contain z-10"
-            // className="absolute left-[-30%] top-[0%] w-[90%] h-[90.9%] sm:w-[520px] object-contain z-10"
-            // className="absolute left-[-50%] top-[0%] w-[98%] h-[90.9%] sm:w-[520px] object-contain z-20 -rotate-31"
-          />
-
-            {/* <img
-              src="/images/iPad-Pro.png"
-              alt="Medicpadi dashboard on tablet"
-              className="absolute left-[-69.9%] top-[3.6%] w-[134.8%] h-[92.9%] object-contain z-10 rotate-[31deg]"
-            /> */}
-            
-
-            <img
-              src="/images/iPhone-13.png"
-              alt="Medicpadi appointment view on phone"
-              className="absolute left-0 top-[-10%] w-full h-full object-contain z-20"
-            />
-          </div>
+<div className="order-2 lg:order-1 w-full max-w-[600px] lg:max-w-none mx-auto lg:mx-0 relative aspect-[592/560] overflow-visible lg:scale-[1.3] lg:origin-center">
+  <img
+    src={heroImg}
+    alt="Medicpadi hero"
+    className="relative w-full h-full object-contain z-10"
+  />
+</div>
         </div>
       </div>
     </section>

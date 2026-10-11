@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Link } from "react-router";
+import roleImg from "../../assets/roleImg.png"
 // import rectangle_16 from "../../../public/images/Rectangle_16.png";
 // import iPad-Pro from "../../../public/images/iPad-Pro.png";
 
@@ -82,13 +83,13 @@ export default function RoleTabs() {
   return (
     <section className="mx-auto px-8 lg:px-10 py-20 bg-[#F1EFF8]">
       <div className="text-center mx-auto mb-12 bg-[#F1EFF8]">
-        <p className="text-xs font-medium tracking-wide text-[#150D5E]/70 mb-3">
+        <p className="text-xs font-medium tracking-wide text-[#121212]/70 mb-3">
           One Record, Four Roles
         </p>
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#121212] mb-4">
           Built for the patient. Wired for the people treating them
         </h2>
-        <p className="text-[#454545] leading-7">
+        <p className="text-[#454545] leading-5 text-sm">
           Patients get an app made for booking and following care. Doctors,labs,
           and pharmacies get a web portal built for volume — every action
           updates the same record in real time.
@@ -139,7 +140,7 @@ export default function RoleTabs() {
         </div>
 
         {/* CSS-crafted doctor profile card -- no source image available */}
-        <div className="relative flex justify-center">
+        {/* <div className="relative flex justify-center">
           <div className="w-full max-w-sm bg-[#E9EAFE] rounded-2xl shadow-lg border border-[#ECECEC] p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 rounded-full bg-[#150D5E]/10" />
@@ -165,7 +166,16 @@ export default function RoleTabs() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
+      
+{/* Role image */}
+<div className="relative flex justify-center">
+  <img
+    src={roleImg}
+    alt="Medicpadi platform for patients, doctors, labs, and pharmacies"
+    className="w-full h-auto object-contain"
+  />
+</div>
       </div>
     </section>
   );
