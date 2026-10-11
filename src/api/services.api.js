@@ -119,7 +119,7 @@ export const deleteLabtests = async (id) => {
 
 export const addPharmacyDrugs = async (formData) => {
   try {
-    const { category: _, composition: __, ...restData } = formData;
+    const { category: _, ...restData } = formData;
 
     const response = await fetch("/api/services/pharmacy/drugs", {
       method: "POST",
@@ -195,7 +195,7 @@ export const pharmacyDrugsById = async (id) => {
 
 export const updatePharmacyDrugs = async (id, formData) => {
   try {
-    const { category: _, composition: __, ...restData } = formData;
+    const { category: _, ...restData } = formData;
 
     let response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
       method: "PATCH",
@@ -261,13 +261,13 @@ export const drugUploadPicture = async (id, formData) => {
       formData instanceof FormData
         ? formData
         : formData instanceof File
-        ? (() => {
-            const fd = new FormData();
-            fd.append("file", formData);
-            fd.append("image", formData);
-            return fd;
-          })()
-        : formData;
+          ? (() => {
+              const fd = new FormData();
+              fd.append("file", formData);
+              fd.append("image", formData);
+              return fd;
+            })()
+          : formData;
 
     const response = await fetch(`/api/services/pharmacy/drugs/${id}/image`, {
       method: "POST",

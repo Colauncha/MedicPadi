@@ -92,24 +92,19 @@ const normalizeTransaction = (txn, index) => {
 
   // Status
   const rawStatus = String(
-    txn.status || txn.payment_status || txn.paymentStatus || "Pending"
+    txn.status || txn.payment_status || txn.paymentStatus || "Pending",
   ).toLowerCase();
   let status = "Pending";
   if (
     ["paid", "success", "successful", "completed", "complete"].includes(
-      rawStatus
+      rawStatus,
     )
   ) {
     status = "Paid";
   } else if (
-    [
-      "failed",
-      "fail",
-      "declined",
-      "cancelled",
-      "canceled",
-      "error",
-    ].includes(rawStatus)
+    ["failed", "fail", "declined", "cancelled", "canceled", "error"].includes(
+      rawStatus,
+    )
   ) {
     status = "Failed";
   } else {
@@ -123,7 +118,7 @@ const normalizeTransaction = (txn, index) => {
       txn.paymentMethod ||
       txn.channel ||
       txn.payment_channel ||
-      "Credit card"
+      "Credit card",
   );
   let method = rawMethod;
   const lowerMethod = rawMethod.toLowerCase();
@@ -223,7 +218,9 @@ export default function PaymentList() {
 
   // Dynamic stats calculated from real transactions
   const completedCount = transactions.filter((t) => t.status === "Paid").length;
-  const pendingCount = transactions.filter((t) => t.status === "Pending").length;
+  const pendingCount = transactions.filter(
+    (t) => t.status === "Pending",
+  ).length;
   const failedCount = transactions.filter((t) => t.status === "Failed").length;
 
   const stats = [
@@ -277,8 +274,7 @@ export default function PaymentList() {
   // Accurate table control calculations based on API metadata
   const totalRecords = meta?.total ?? transactions.length;
   const totalPages =
-    meta?.total_pages ||
-    Math.max(1, Math.ceil(totalRecords / (limit || 10)));
+    meta?.total_pages || Math.max(1, Math.ceil(totalRecords / (limit || 10)));
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
@@ -461,7 +457,6 @@ export default function PaymentList() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#EEECF9] text-[#7C7A9E] text-xs font-semibold uppercase tracking-wider">
-                  <th className="py-3.5 px-6 rounded-l-xl">Transaction ID</th>
                   <th className="py-3.5 px-6">Payment Date</th>
                   <th className="py-3.5 px-6">Amount</th>
                   <th className="py-3.5 px-6">Status</th>
@@ -472,7 +467,10 @@ export default function PaymentList() {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-[#7C7A9E]">
+                    <td
+                      colSpan="6"
+                      className="py-12 text-center text-[#7C7A9E]"
+                    >
                       <div className="flex flex-col items-center justify-center gap-2">
                         <Loader2 className="w-6 h-6 animate-spin text-[#150D5E]" />
                         <span className="text-sm font-medium">
@@ -496,11 +494,6 @@ export default function PaymentList() {
                       key={txn.id || i}
                       className="border-b border-[#EEF0F6] hover:bg-[#F8F9FC] transition-colors duration-150 text-[15px] text-[#1a1a4b]"
                     >
-                      <td className="py-4 px-6 font-semibold" title={txn.id}>
-                        <span className="font-mono text-xs sm:text-sm bg-gray-50 text-[#150D5E] px-2.5 py-1 rounded-md border border-gray-100 font-medium">
-                          {txn.shortId}
-                        </span>
-                      </td>
                       <td className="py-4 px-6 text-gray-500">{txn.date}</td>
                       <td className="py-4 px-6 font-bold text-[#150D5E]">
                         {txn.amount}
