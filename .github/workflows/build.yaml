@@ -77,7 +77,8 @@ jobs:
             sudo rm -rf $NEW_RELEASE/dist
 
             # Atomically switch symlink
-            sudo ln -sfn $NEW_RELEASE $CURRENT_LINK
+            sudo ln -sfn $NEW_RELEASE /var/www/current_tmp
+            sudo mv -Tf /var/www/current_tmp $CURRENT_LINK
 
             # Cleanup uploaded archive
             rm /tmp/dist.tar.gz
