@@ -63,10 +63,10 @@ jobs:
             NEW_RELEASE="$RELEASES_DIR/$(date +%Y%m%d%H%M%S)"
 
             # Create releases directory if not exists
-            sudo mkdir -p $RELEASES_DIR
+            # sudo mkdir -p $RELEASES_DIR
 
             # Create new release directory
-            sudo mkdir -p $NEW_RELEASE
+            mkdir -p $NEW_RELEASE
 
             # Extract build into new release
             tar -xzf /tmp/dist.tar.gz -C $NEW_RELEASE
@@ -77,9 +77,6 @@ jobs:
 
             # Atomically switch symlink
             sudo ln -sfn $NEW_RELEASE $CURRENT_LINK
-
-            # Ensure correct permissions (optional)
-            sudo chown -R www-data:www-data $BASE_DIR
 
             # Cleanup uploaded archive
             rm /tmp/dist.tar.gz
