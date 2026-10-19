@@ -73,6 +73,7 @@ jobs:
 
             # Move contents up (dist → root)
             mv $NEW_RELEASE/dist/* $NEW_RELEASE/
+            ls -l $NEW_RELEASE
             sudo rm -rf $NEW_RELEASE/dist
 
             # Atomically switch symlink
