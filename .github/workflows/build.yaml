@@ -1,0 +1,89 @@
+name: Build for medicpadi frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - '.github/*'
+
+jobs:
+  build:
+    name: Builds the output artifact
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/Checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Archive build
+        run: tar -czf dist.tar.gz dist
+
+      - name: Copy build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.MEDICPADI_AWS_HOST }}
+          username: ${{ secrets.MEDICPADI_AWS_USER }}
+          key: ${{ secrets.MEDICPADI_AWS_KEY }}
+          source: "dist.tar.gz"
+          target: "/tmp"
+
+  deploy:
+    name: Deploy to AWS VM via ssh
+    runs-on: ubuntu-latest
+    needs: build
+
+    step:
+      - name: Deploy to AWS VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.MEDICPADI_AWS_HOST }}
+          username: ${{ secrets.MEDICPADI_AWS_USER }}
+          key: ${{ secrets.MEDICPADI_AWS_KEY }}
+          script: |
+            set -e
+
+
+            BASE_DIR="/var/www"
+            RELEASES_DIR="$BASE_DIR/releases/frontend"
+            CURRENT_LINK="$BASE_DIR/current"
+            NEW_RELEASE="$RELEASES_DIR/$(date +%Y%m%d%H%M%S)"
+
+            # Create releases directory if not exists
+            mkdir -p $RELEASES_DIR
+
+            # Create new release directory
+            mkdir -p $NEW_RELEASE
+
+            # Extract build into new release
+            tar -xzf /tmp/dist.tar.gz -C $NEW_RELEASE
+
+            # Move contents up (dist → root)
+            mv $NEW_RELEASE/dist/* $NEW_RELEASE/
+            sudo rm -rf $NEW_RELEASE/dist
+
+            # Atomically switch symlink
+            sudo ln -sfn $NEW_RELEASE $CURRENT_LINK
+
+            # Ensure correct permissions (optional)
+            sudo chown -R www-data:www-data $BASE_DIR
+
+            # Cleanup uploaded archive
+            rm /tmp/dist.tar.gz
+
+            # Optional: keep only last 5 releases
+            cd $RELEASES_DIR
+            ls -dt */ | tail -n +6 | sudo xargs -r rm -rf
