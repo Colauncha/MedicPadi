@@ -63,10 +63,10 @@ jobs:
             NEW_RELEASE="$RELEASES_DIR/$(date +%Y%m%d%H%M%S)"
 
             # Create releases directory if not exists
-            mkdir -p $RELEASES_DIR
+            sudo mkdir -p $RELEASES_DIR
 
             # Create new release directory
-            mkdir -p $NEW_RELEASE
+            sudo mkdir -p $NEW_RELEASE
 
             # Extract build into new release
             tar -xzf /tmp/dist.tar.gz -C $NEW_RELEASE
