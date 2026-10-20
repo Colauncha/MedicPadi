@@ -20,6 +20,7 @@ import doctor from "../../../assets/image.svg";
 
 import { listAppointmentsByStatuses } from "../../../api/appointments.api";
 import { getProfileById } from "../../../api/profile.api";
+import { apiUrl } from "../../../api/apiUrl";
 
 export default function DocDashboard() {
   const navigate = useNavigate();
@@ -206,7 +207,7 @@ useEffect(() => {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-          "/api/orders/test-requisitions",
+          apiUrl("/api/orders/test-requisitions"),
           {
             method: "GET",
             headers: {
@@ -229,7 +230,7 @@ useEffect(() => {
           (data?.data || []).map(async (requisition) => {
             try {
               const detailsResponse = await fetch(
-                `/api/orders/test-requisitions/${requisition.id}`,
+                apiUrl(`/api/orders/test-requisitions/${requisition.id}`),
                 {
                   method: "GET",
                   headers: {
@@ -369,7 +370,7 @@ useEffect(() => {
     console.log("AI PADI TOKEN EXISTS:", !!token);
     console.log("AI PADI TOKEN:", token);
 
-    const response = await fetch("/api/ai/chat", {
+    const response = await fetch(apiUrl("/api/ai/chat"), {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

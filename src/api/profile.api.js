@@ -1,4 +1,6 @@
-const BASE = "/api/profile";
+import { apiUrl } from "./apiUrl";
+
+const BASE = apiUrl("/api/profile");
 
 function authHeaders(extra = {}) {
   const token = localStorage.getItem("token");

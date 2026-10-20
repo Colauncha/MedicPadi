@@ -1,8 +1,10 @@
+import { apiUrl } from "./apiUrl";
+
 export const createUser = async (userData) => {
   try {
     const { confirmPassword: _, ...restData } = userData;
 
-    const response = await fetch("/api/auth", {
+    const response = await fetch(apiUrl("/api/auth"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +29,7 @@ export const createUser = async (userData) => {
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(apiUrl("/api/auth/login"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,7 +56,7 @@ export const logoutUser = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/auth/logout", {
+    const response = await fetch(apiUrl("/api/auth/logout"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -84,7 +86,7 @@ export const requestPasswordReset = async (email) => {
 
   try {
     const response = await fetch(
-      `/api/auth/request-password-reset?email=${encodeURIComponent(email)}`,
+      apiUrl(`/api/auth/request-password-reset?email=${encodeURIComponent(email)}`),
       {
         method: "POST",
         headers: {
@@ -109,7 +111,7 @@ export const requestPasswordReset = async (email) => {
 
 export const resetPassword = async ({ email, otp, newPassword }) => {
   try {
-    const response = await fetch("/api/auth/reset-password", {
+    const response = await fetch(apiUrl("/api/auth/reset-password"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +136,7 @@ export const sendVerificationMail = async (email) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/auth/send-verification-mail", {
+    const response = await fetch(apiUrl("/api/auth/send-verification-mail"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -159,7 +161,7 @@ export const sendVerificationMail = async (email) => {
 export const verifyEmail = async (token) => {
   try {
     const response = await fetch(
-      `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+      apiUrl(`/api/auth/verify-email?token=${encodeURIComponent(token)}`),
       { method: "GET" },
     );
 
@@ -180,7 +182,7 @@ export const updateAccount = async (updates) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/auth/update", {
+    const response = await fetch(apiUrl("/api/auth/update"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -206,7 +208,7 @@ export const adminUpdateAccount = async (userId, updates) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/auth/admin/update", {
+    const response = await fetch(apiUrl("/api/auth/admin/update"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -232,7 +234,7 @@ export const deleteUser = async (userId) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/auth/delete", {
+    const response = await fetch(apiUrl("/api/auth/delete"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -258,7 +260,7 @@ export const getUserWallet = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/auth/wallet", {
+    const response = await fetch(apiUrl("/api/auth/wallet"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -292,7 +294,7 @@ export const createProfile = async (profileData) => {
       throw new Error("User ID not found. Please sign in again.");
     }
 
-    const response = await fetch("/api/profile", {
+    const response = await fetch(apiUrl("/api/profile"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -321,7 +323,7 @@ export const retrieveProfile = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/profile/retrieve", {
+    const response = await fetch(apiUrl("/api/profile/retrieve"), {
       method: "GET",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -345,7 +347,7 @@ export const updateProfile = async (profileData) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/profile", {
+    const response = await fetch(apiUrl("/api/profile"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -382,7 +384,7 @@ export const uploadProfilePicture = async (file) => {
     const imageForm = new FormData();
     imageForm.append("image", file);
 
-    const response = await fetch("/api/profile/profile-picture", {
+    const response = await fetch(apiUrl("/api/profile/profile-picture"), {
       method: "POST",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -407,7 +409,7 @@ export const updateBusinessHours = async (businessHours) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("/api/profile/business-hours", {
+    const response = await fetch(apiUrl("/api/profile/business-hours"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import {
   listAppointmentsByStatuses,
   getAppointment,
 } from "../../../api/appointments.api";
+import { apiUrl } from "../../../api/apiUrl";
 
 function PatientDetails() {
   const navigate = useNavigate();
@@ -112,7 +113,7 @@ function PatientDetails() {
     const fetchMedicalRecords = async () => {
       try {
         const response = await fetch(
-          `/api/ehr/records?patient_id=${id}`,
+          apiUrl(`/api/ehr/records?patient_id=${id}`),
           {
             method: "GET",
             headers: {
@@ -165,7 +166,7 @@ function PatientDetails() {
         setLoadingLabResults(true);
 
         const response = await fetch(
-          "/api/orders/test-requisitions",
+          apiUrl("/api/orders/test-requisitions"),
           {
             method: "GET",
             headers: {
@@ -194,7 +195,7 @@ function PatientDetails() {
 
         for (const requisition of patientRequisitions) {
           const detailsResponse = await fetch(
-            `/api/orders/test-requisitions/${requisition.id}`,
+            apiUrl(`/api/orders/test-requisitions/${requisition.id}`),
             {
               method: "GET",
               headers: {

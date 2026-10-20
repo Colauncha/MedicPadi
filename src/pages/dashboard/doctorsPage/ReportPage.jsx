@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { getProfileById } from "../../../api/profile.api";
+import { apiUrl } from "../../../api/apiUrl";
 
 const tabs = ["Medical Reports", "Lab Reports", "Prescription"];
 
@@ -263,7 +264,7 @@ function ReportPage() {
         }
 
         const response = await fetch(
-          "/api/ehr/records",
+          apiUrl("/api/ehr/records"),
           {
             method: "GET",
             headers: {
@@ -439,7 +440,7 @@ function ReportPage() {
         }
 
         const response = await fetch(
-          "/api/orders/test-requisitions",
+          apiUrl("/api/orders/test-requisitions"),
           {
             method: "GET",
             headers: {
@@ -480,7 +481,7 @@ function ReportPage() {
                 try {
                   const detailsResponse =
                     await fetch(
-                      `/api/orders/test-requisitions/${requisition.id}`,
+                      apiUrl(`/api/orders/test-requisitions/${requisition.id}`),
                       {
                         method: "GET",
                         headers: {
@@ -691,7 +692,7 @@ useEffect(() => {
       }
 
       const response = await fetch(
-        "/api/orders/prescriptions",
+        apiUrl("/api/orders/prescriptions"),
         {
           method: "GET",
           headers: {
