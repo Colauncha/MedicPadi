@@ -1,8 +1,9 @@
 import { apiUrl } from "./apiUrl";
+import { Fetch } from "./Fetch";
 
 export const listDrugRequisitions = async () => {
   try {
-    const response = await fetch(apiUrl("/api/orders/drug-requisitions"), {
+    const response = await Fetch(apiUrl("/api/orders/drug-requisitions"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +28,7 @@ export const listDrugRequisitions = async () => {
 
 export const labStats = async () => {
   try {
-    const response = await fetch(apiUrl("/api/orders/stats/lab"), {
+    const response = await Fetch(apiUrl("/api/orders/stats/lab"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export const labStats = async () => {
 
 export const pharmacyStats = async () => {
   try {
-    const response = await fetch(apiUrl("/api/orders/stats/pharmacy"), {
+    const response = await Fetch(apiUrl("/api/orders/stats/pharmacy"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -77,7 +78,7 @@ export const pharmacyStats = async () => {
 
 export const testRequisitions = async () => {
   try {
-    const response = await fetch(apiUrl("/api/orders/test-requisitions"), {
+    const response = await Fetch(apiUrl("/api/orders/test-requisitions"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +104,7 @@ export const testRequisitions = async () => {
 export const patientsTestRequisitions = async (labId) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(
+    const response = await Fetch(
       apiUrl(`/api/orders/test-requisitions/lab/${labId}/patients`),
       {
         method: "GET",

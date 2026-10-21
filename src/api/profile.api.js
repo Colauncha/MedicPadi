@@ -1,4 +1,5 @@
 import { apiUrl } from "./apiUrl";
+import { Fetch } from "./Fetch";
 
 const BASE = apiUrl("/api/profile");
 
@@ -21,7 +22,7 @@ async function handleResponse(response, fallbackMessage) {
 // POST /api/profile 
 export const createProfile = async (profileData) => {
   try {
-    const response = await fetch(BASE, {
+    const response = await Fetch(BASE, {
       method: "POST",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(profileData),
@@ -36,7 +37,7 @@ export const createProfile = async (profileData) => {
 // GET /api/profile/retrieve 
 export const retrieveProfile = async () => {
   try {
-    const response = await fetch(`${BASE}/retrieve`, {
+    const response = await Fetch(`${BASE}/retrieve`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -50,7 +51,7 @@ export const retrieveProfile = async () => {
 // PATCH /api/profile 
 export const updateProfile = async (profileData) => {
   try {
-    const response = await fetch(BASE, {
+    const response = await Fetch(BASE, {
       method: "PATCH",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(profileData),
@@ -65,7 +66,7 @@ export const updateProfile = async (profileData) => {
 // DELETE /api/profile 
 export const deleteProfile = async () => {
   try {
-    const response = await fetch(BASE, {
+    const response = await Fetch(BASE, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -80,7 +81,7 @@ export const deleteProfile = async () => {
 export const getProfileById = async (id, role) => {
   try {
     const query = role ? `?role=${encodeURIComponent(role)}` : "";
-    const response = await fetch(`${BASE}/${id}${query}`, {
+    const response = await Fetch(`${BASE}/${id}${query}`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -94,7 +95,7 @@ export const getProfileById = async (id, role) => {
 // GET /api/profile/doctors/speciality
 export const getDoctorSpecialities = async () => {
   try {
-    const response = await fetch(`${BASE}/doctors/speciality`, {
+    const response = await Fetch(`${BASE}/doctors/speciality`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -111,7 +112,7 @@ export const uploadProfilePicture = async (file) => {
     const imageForm = new FormData();
     imageForm.append("image", file);
 
-    const response = await fetch(`${BASE}/profile-picture`, {
+    const response = await Fetch(`${BASE}/profile-picture`, {
       method: "POST",
       headers: authHeaders(),
       body: imageForm,
@@ -142,7 +143,7 @@ export const uploadProfilePicture = async (file) => {
 // PATCH /api/profile/settings 
 export const updateSettings = async (settings) => {
   try {
-    const response = await fetch(`${BASE}/settings`, {
+    const response = await Fetch(`${BASE}/settings`, {
       method: "PATCH",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(settings),
@@ -157,7 +158,7 @@ export const updateSettings = async (settings) => {
 // PATCH /api/profile/education 
 export const updateEducation = async (education) => {
   try {
-    const response = await fetch(`${BASE}/education`, {
+    const response = await Fetch(`${BASE}/education`, {
       method: "PATCH",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ education }),
@@ -172,7 +173,7 @@ export const updateEducation = async (education) => {
 // PATCH /api/profile/business-hours
 export const updateBusinessHours = async (businessHours) => {
   try {
-    const response = await fetch(`${BASE}/business-hours`, {
+    const response = await Fetch(`${BASE}/business-hours`, {
       method: "PATCH",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(businessHours),
@@ -191,7 +192,7 @@ export const listReviews = async (params = {}) => {
       Object.entries(params).filter(([, v]) => v !== undefined && v !== null),
     ).toString();
 
-    const response = await fetch(`${BASE}/reviews${query ? `?${query}` : ""}`, {
+    const response = await Fetch(`${BASE}/reviews${query ? `?${query}` : ""}`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -205,7 +206,7 @@ export const listReviews = async (params = {}) => {
 // GET /api/profile/reviews/{id}
 export const getReviewById = async (id) => {
   try {
-    const response = await fetch(`${BASE}/reviews/${id}`, {
+    const response = await Fetch(`${BASE}/reviews/${id}`, {
       method: "GET",
       headers: authHeaders(),
     });

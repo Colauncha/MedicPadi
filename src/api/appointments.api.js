@@ -1,4 +1,5 @@
 import { apiUrl } from "./apiUrl";
+import { Fetch } from "./Fetch";
 
 const BASE = apiUrl("/api/orders/appointments");
 
@@ -21,7 +22,7 @@ async function handleResponse(response, fallbackMessage) {
 // GET /api/orders/appointments 
 export const listAppointmentsByStatus = async (status) => {
   try {
-    const response = await fetch(`${BASE}?status=${encodeURIComponent(status)}`, {
+    const response = await Fetch(`${BASE}?status=${encodeURIComponent(status)}`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -42,7 +43,7 @@ export const listAppointmentsByStatuses = async (statuses) => {
 
 export const getAppointment = async (id) => {
   try {
-    const response = await fetch(`${BASE}/${id}`, {
+    const response = await Fetch(`${BASE}/${id}`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -56,7 +57,7 @@ export const getAppointment = async (id) => {
 
 export const updateAppointment = async (id, updates) => {
   try {
-    const response = await fetch(`${BASE}/${id}`, {
+    const response = await Fetch(`${BASE}/${id}`, {
       method: "PATCH",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(updates),
@@ -71,7 +72,7 @@ export const updateAppointment = async (id, updates) => {
 
 export const cancelAppointment = async (id) => {
   try {
-    const response = await fetch(`${BASE}/${id}`, {
+    const response = await Fetch(`${BASE}/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -85,7 +86,7 @@ export const cancelAppointment = async (id) => {
 
 export const acceptAppointment = async (id) => {
   try {
-    const response = await fetch(`${BASE}/${id}/accept`, {
+    const response = await Fetch(`${BASE}/${id}/accept`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -99,7 +100,7 @@ export const acceptAppointment = async (id) => {
 
 export const completeAppointment = async (id) => {
   try {
-    const response = await fetch(`${BASE}/${id}/complete`, {
+    const response = await Fetch(`${BASE}/${id}/complete`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -114,7 +115,7 @@ export const completeAppointment = async (id) => {
 // GET /api/orders/appointments/{id}/signature 
 export const getAppointmentSignature = async (id) => {
   try {
-    const response = await fetch(`${BASE}/${id}/signature`, {
+    const response = await Fetch(`${BASE}/${id}/signature`, {
       method: "GET",
       headers: authHeaders(),
     });
@@ -127,7 +128,7 @@ export const getAppointmentSignature = async (id) => {
 };
 export const getDoctorStats = async () => {
   try {
-    const response = await fetch(`${BASE.replace("/appointments", "")}/stats/doctor`, {
+    const response = await Fetch(`${BASE.replace("/appointments", "")}/stats/doctor`, {
       method: "GET",
       headers: authHeaders(),
     });

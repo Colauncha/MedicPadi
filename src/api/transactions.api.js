@@ -1,4 +1,5 @@
 import { apiUrl } from "./apiUrl";
+import { Fetch } from "./Fetch";
 
 export const listTransactions = async (page = 1, limit = 10) => {
   try {
@@ -7,7 +8,7 @@ export const listTransactions = async (page = 1, limit = 10) => {
     if (limit) query.append("limit", limit);
     const queryString = query.toString() ? `?${query.toString()}` : "";
 
-    const response = await fetch(apiUrl(`/api/transactions${queryString}`), {
+    const response = await Fetch(apiUrl(`/api/transactions${queryString}`), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
