@@ -1,4 +1,5 @@
 import { apiUrl } from "./apiUrl";
+import { Fetch } from "./Fetch";
 
 export const createUser = async (userData) => {
   try {
@@ -29,7 +30,7 @@ export const createUser = async (userData) => {
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await fetch(apiUrl("/api/auth/login"), {
+    const response = await Fetch(apiUrl("/api/auth/login"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export const logoutUser = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/auth/logout"), {
+    const response = await Fetch(apiUrl("/api/auth/logout"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -85,7 +86,7 @@ export const requestPasswordReset = async (email) => {
   }
 
   try {
-    const response = await fetch(
+    const response = await Fetch(
       apiUrl(`/api/auth/request-password-reset?email=${encodeURIComponent(email)}`),
       {
         method: "POST",
@@ -111,7 +112,7 @@ export const requestPasswordReset = async (email) => {
 
 export const resetPassword = async ({ email, otp, newPassword }) => {
   try {
-    const response = await fetch(apiUrl("/api/auth/reset-password"), {
+    const response = await Fetch(apiUrl("/api/auth/reset-password"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -136,7 +137,7 @@ export const sendVerificationMail = async (email) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/auth/send-verification-mail"), {
+    const response = await Fetch(apiUrl("/api/auth/send-verification-mail"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -160,7 +161,7 @@ export const sendVerificationMail = async (email) => {
 
 export const verifyEmail = async (token) => {
   try {
-    const response = await fetch(
+    const response = await Fetch(
       apiUrl(`/api/auth/verify-email?token=${encodeURIComponent(token)}`),
       { method: "GET" },
     );
@@ -182,7 +183,7 @@ export const updateAccount = async (updates) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/auth/update"), {
+    const response = await Fetch(apiUrl("/api/auth/update"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -208,7 +209,7 @@ export const adminUpdateAccount = async (userId, updates) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/auth/admin/update"), {
+    const response = await Fetch(apiUrl("/api/auth/admin/update"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -234,7 +235,7 @@ export const deleteUser = async (userId) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/auth/delete"), {
+    const response = await Fetch(apiUrl("/api/auth/delete"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -260,7 +261,7 @@ export const getUserWallet = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/auth/wallet"), {
+    const response = await Fetch(apiUrl("/api/auth/wallet"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -294,7 +295,7 @@ export const createProfile = async (profileData) => {
       throw new Error("User ID not found. Please sign in again.");
     }
 
-    const response = await fetch(apiUrl("/api/profile"), {
+    const response = await Fetch(apiUrl("/api/profile"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -323,7 +324,7 @@ export const retrieveProfile = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/profile/retrieve"), {
+    const response = await Fetch(apiUrl("/api/profile/retrieve"), {
       method: "GET",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -347,7 +348,7 @@ export const updateProfile = async (profileData) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/profile"), {
+    const response = await Fetch(apiUrl("/api/profile"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -384,7 +385,7 @@ export const uploadProfilePicture = async (file) => {
     const imageForm = new FormData();
     imageForm.append("image", file);
 
-    const response = await fetch(apiUrl("/api/profile/profile-picture"), {
+    const response = await Fetch(apiUrl("/api/profile/profile-picture"), {
       method: "POST",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -409,7 +410,7 @@ export const updateBusinessHours = async (businessHours) => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(apiUrl("/api/profile/business-hours"), {
+    const response = await Fetch(apiUrl("/api/profile/business-hours"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
