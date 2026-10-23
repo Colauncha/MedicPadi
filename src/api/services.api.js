@@ -414,7 +414,7 @@ export const deleteLabDepartments = async (id) => {
 
 export const createDrugCategory = async (formData) => {
   try {
-    const response = await Fetch(apiUrl("/api/services/pharmacy/categories"), {
+    const response = await fetch(apiUrl("/api/services/pharmacy/categories"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -440,7 +440,7 @@ export const createDrugCategory = async (formData) => {
 
 export const listDrugCategories = async () => {
   try {
-    const response = await Fetch(apiUrl("/api/services/pharmacy/categories"), {
+    const response = await fetch(apiUrl("/api/services/pharmacy/categories"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
