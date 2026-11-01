@@ -1,6 +1,9 @@
+import { apiUrl } from "./apiUrl";
+import { Fetch } from "./Fetch";
+
 export const createLabTests = async (formData) => {
   try {
-    const response = await fetch("/api/services/lab/tests", {
+    const response = await Fetch(apiUrl("/api/services/lab/tests"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +29,7 @@ export const createLabTests = async (formData) => {
 
 export const listLabTests = async () => {
   try {
-    const response = await fetch("/api/services/lab/tests", {
+    const response = await Fetch(apiUrl("/api/services/lab/tests"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -49,7 +52,7 @@ export const listLabTests = async () => {
 
 export const labTestsById = async (id) => {
   try {
-    const response = await fetch(`/api/services/lab/tests/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/lab/tests/${id}`), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +63,7 @@ export const labTestsById = async (id) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch lab test");
+      throw new Error(data.message || "Failed to Fetch lab test");
     }
 
     return data;
@@ -72,7 +75,7 @@ export const labTestsById = async (id) => {
 
 export const updateLabTests = async (id, formData) => {
   try {
-    const response = await fetch(`/api/services/lab/tests/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/lab/tests/${id}`), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -96,7 +99,7 @@ export const updateLabTests = async (id, formData) => {
 
 export const deleteLabtests = async (id) => {
   try {
-    const response = await fetch(`/api/services/lab/tests/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/lab/tests/${id}`), {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -121,7 +124,7 @@ export const addPharmacyDrugs = async (formData) => {
   try {
     const { category: _, ...restData } = formData;
 
-    const response = await fetch("/api/services/pharmacy/drugs", {
+    const response = await Fetch(apiUrl("/api/services/pharmacy/drugs"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -147,7 +150,7 @@ export const addPharmacyDrugs = async (formData) => {
 
 export const listPharmacyDrugs = async () => {
   try {
-    const response = await fetch("/api/services/pharmacy/drugs", {
+    const response = await Fetch(apiUrl("/api/services/pharmacy/drugs"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -172,7 +175,7 @@ export const listPharmacyDrugs = async () => {
 
 export const pharmacyDrugsById = async (id) => {
   try {
-    const response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/pharmacy/drugs/${id}`), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -183,7 +186,7 @@ export const pharmacyDrugsById = async (id) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch pharmacy drug");
+      throw new Error(data.message || "Failed to Fetch pharmacy drug");
     }
 
     return data;
@@ -197,7 +200,7 @@ export const updatePharmacyDrugs = async (id, formData) => {
   try {
     const { category: _, ...restData } = formData;
 
-    let response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+    let response = await Fetch(apiUrl(`/api/services/pharmacy/drugs/${id}`), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -207,7 +210,7 @@ export const updatePharmacyDrugs = async (id, formData) => {
     });
 
     if (response.status === 404 || response.status === 405) {
-      response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+      response = await Fetch(apiUrl(`/api/services/pharmacy/drugs/${id}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -234,7 +237,7 @@ export const updatePharmacyDrugs = async (id, formData) => {
 
 export const deletePharmacyDrugs = async (id) => {
   try {
-    const response = await fetch(`/api/services/pharmacy/drugs/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/pharmacy/drugs/${id}`), {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -269,7 +272,7 @@ export const drugUploadPicture = async (id, formData) => {
             })()
           : formData;
 
-    const response = await fetch(`/api/services/pharmacy/drugs/${id}/image`, {
+    const response = await Fetch(apiUrl(`/api/services/pharmacy/drugs/${id}/image`), {
       method: "POST",
       credentials: "include",
       body,
@@ -290,7 +293,7 @@ export const drugUploadPicture = async (id, formData) => {
 
 export const createLabDepartments = async (formData) => {
   try {
-    const response = await fetch("/api/services/lab/departments", {
+    const response = await Fetch(apiUrl("/api/services/lab/departments"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -316,7 +319,7 @@ export const createLabDepartments = async (formData) => {
 
 export const listLabDepartments = async () => {
   try {
-    const response = await fetch("/api/services/lab/departments", {
+    const response = await Fetch(apiUrl("/api/services/lab/departments"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -341,7 +344,7 @@ export const listLabDepartments = async () => {
 
 export const labDepartmentsById = async (id) => {
   try {
-    const response = await fetch(`/api/services/lab/departments/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/lab/departments/${id}`), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -352,7 +355,7 @@ export const labDepartmentsById = async (id) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch lab department");
+      throw new Error(data.message || "Failed to Fetch lab department");
     }
 
     return data;
@@ -364,7 +367,7 @@ export const labDepartmentsById = async (id) => {
 
 export const updateLabDepartments = async (id, formData) => {
   try {
-    const response = await fetch(`/api/services/lab/departments/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/lab/departments/${id}`), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -388,7 +391,7 @@ export const updateLabDepartments = async (id, formData) => {
 
 export const deleteLabDepartments = async (id) => {
   try {
-    const response = await fetch(`/api/services/lab/departments/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/lab/departments/${id}`), {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -411,7 +414,7 @@ export const deleteLabDepartments = async (id) => {
 
 export const createDrugCategory = async (formData) => {
   try {
-    const response = await fetch("/api/services/pharmacy/categories", {
+    const response = await fetch(apiUrl("/api/services/pharmacy/categories"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -437,7 +440,7 @@ export const createDrugCategory = async (formData) => {
 
 export const listDrugCategories = async () => {
   try {
-    const response = await fetch("/api/services/pharmacy/categories", {
+    const response = await fetch(apiUrl("/api/services/pharmacy/categories"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -462,7 +465,7 @@ export const listDrugCategories = async () => {
 
 export const pharmacyDrugCategoriesById = async (id) => {
   try {
-    const response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/pharmacy/categories/${id}`), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -473,7 +476,7 @@ export const pharmacyDrugCategoriesById = async (id) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch drug categories");
+      throw new Error(data.message || "Failed to Fetch drug categories");
     }
 
     return data;
@@ -485,7 +488,7 @@ export const pharmacyDrugCategoriesById = async (id) => {
 
 export const updateDrugCategory = async (id, formData) => {
   try {
-    let response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+    let response = await Fetch(apiUrl(`/api/services/pharmacy/categories/${id}`), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -496,7 +499,7 @@ export const updateDrugCategory = async (id, formData) => {
 
     // If PATCH is not supported, fallback to PUT
     if (response.status === 404 || response.status === 405) {
-      response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+      response = await Fetch(apiUrl(`/api/services/pharmacy/categories/${id}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -521,7 +524,7 @@ export const updateDrugCategory = async (id, formData) => {
 
 export const deleteDrugCategory = async (id) => {
   try {
-    const response = await fetch(`/api/services/pharmacy/categories/${id}`, {
+    const response = await Fetch(apiUrl(`/api/services/pharmacy/categories/${id}`), {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

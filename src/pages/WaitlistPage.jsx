@@ -5,6 +5,7 @@ import doctorImg from "../assets/images/Doctor.png";
 import pharmacistImg from "../assets/images/Pharmacist.png";
 import laboratoryImg from "../assets/images/Laboratory.png";
 import patientImg from "../assets/images/Patient.png";
+import { apiUrl } from "../api/apiUrl";
 
 /* ─── Static Data ─────────────────────────────────────────── */
 
@@ -78,7 +79,7 @@ const WaitlistPage = () => {
     setApiError("");
 
     try {
-      const response = await fetch("https://api.medicpadi.com/api/auth", {
+      const response = await fetch(apiUrl("/api/auth"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

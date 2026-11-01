@@ -45,7 +45,7 @@ export default function DoctorSignin() {
       // For token
       const token = response?.access_token || response?.accessToken || response?.token;
       if (token) {
-        localStorage.setItem("token", token);
+        localStorage.setItem("token", token.access_token);
       } else {
         console.warn(
           "No token found in login response — check the actual field name and update this line.",
