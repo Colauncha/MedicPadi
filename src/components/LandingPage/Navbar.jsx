@@ -3,10 +3,10 @@ import { Link } from "react-router";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "For patients", href: "#patients" },
-  { label: "For doctors", href: "#doctors" },
-  { label: "For labs", href: "#labs" },
-  { label: "For pharmacies", href: "#pharmacies" },
+  // { label: "For patients", href: "#patients" },
+  { label: "For doctors", href: "/doctor-signin" },
+  { label: "For labs", href: "/laboratory-signin" },
+  { label: "For pharmacies", href: "/pharmacy-signin" },
   { label: "How it works", href: "#how-it-works" },
 ];
 
@@ -17,9 +17,9 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-[#E7E7E7]">
       <div className="max-w-[1240px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-10 h-16 sm:h-20">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img 
-            src="/MedicPadi_logo1.png" 
-            alt="Medicpadi" 
+          <img
+            src="/MedicPadi_logo1.png"
+            alt="Medicpadi"
             className="w-[160px] sm:w-[212px] h-[36px] sm:h-[48px] object-contain"
           />
         </Link>
@@ -59,7 +59,11 @@ export default function Navbar() {
           className="lg:hidden p-2 rounded-lg text-[#150D5E] hover:bg-[#F8F8FF] transition-colors focus:outline-none"
           aria-label="Toggle Navigation Menu"
         >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
       </div>
 
@@ -98,4 +102,4 @@ export default function Navbar() {
       )}
     </header>
   );
-}
+}
