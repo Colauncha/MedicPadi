@@ -162,7 +162,7 @@ export default function DashboardLayout({
               icon: CalendarDays,
               path: `${prefix}/appointments`,
             },
-            { name: "Reports", icon: FileText, path: `${prefix}/reports` },
+            // { name: "Reports", icon: FileText, path: `${prefix}/reports` },
           ]
         : [
             { name: "Dashboard", icon: LayoutDashboard, path: prefix },
