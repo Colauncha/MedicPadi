@@ -12,7 +12,7 @@ function Sidebar({ active, setActive }) {
 <button
   type="button"
   onClick={() => navigate("/")}
-  className="w-[188px] h-[43px] flex items-center px-3 mb-10 cursor-pointer"
+  className="relative z-20 w-[188px] h-[43px] flex items-center px-3 mb-10 cursor-pointer pointer-events-auto"
   aria-label="Go to MedicPadi homepage"
 >
   <img

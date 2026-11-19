@@ -336,18 +336,26 @@ const displayName =
         }`}
       >
         <div className="p-6 lg:p-8 flex items-center justify-between">
-          <img
-            src={logo}
-            alt="Medic Padi"
-            className="h-8 lg:h-9 object-contain"
-          />
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-lg"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+  <button
+    type="button"
+    onClick={() => navigate("/")}
+    className="cursor-pointer"
+    aria-label="Go to MedicPadi homepage"
+  >
+    <img
+      src={logo}
+      alt="Medic Padi"
+      className="h-8 lg:h-9 object-contain pointer-events-none"
+    />
+  </button>
+
+  <button
+    onClick={() => setIsSidebarOpen(false)}
+    className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-lg"
+  >
+    <X className="w-5 h-5" />
+  </button>
+</div>
 
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-2 pb-10 custom-scrollbar">
           <div className="mb-8">
