@@ -3,6 +3,7 @@ import "./App.css";
 
 // Landing page
 import Home from "./pages/HomePage/Home.jsx";
+import PortalLogin from "./pages/Portal/PortalLogin.jsx";
 
 // Doctor authentication pages
 import DoctorSignup from "./pages/authentication/doctors/signup";
@@ -51,6 +52,10 @@ import PatientDetails from "./pages/dashboard/doctorsPage/PatientDetails";
 import Profile from "./pages/dashboard/doctorsPage/Profile";
 import AppointmentPage from "./pages/dashboard/doctorsPage/AppointmentPage";
 import ReportPage from "./pages/dashboard/doctorsPage/ReportPage";
+import NotificationsPage from "./pages/dashboard/doctorsPage/NotificationsPage";
+import Policy from "./pages/dashboard/doctorsPage/Policy";
+import HelpCenter from "./pages/dashboard/doctorsPage/HelpCenter";
+import Settings from "./pages/dashboard/doctorsPage/Settings";
 
 // import VideoCallPage from "./pages/dashboard/doctorsPage/videoCallPage";
 
@@ -59,6 +64,7 @@ function App() {
     <Routes>
       {/* Landing page */}
       <Route path="/" element={<Home />} />
+      <Route path="/portals" element={<PortalLogin />} />
 
       {/* Doctor authentication */}
       <Route path="/doctor-signup" element={<DoctorSignup />} />
@@ -133,6 +139,10 @@ function App() {
       <Route path="/docdashboard/profile" element={<Profile />} />
       <Route path="/docdashboard/appointments" element={<AppointmentPage />} />
       <Route path="/docdashboard/reports" element={<ReportPage />} />
+      <Route path="/docdashboard/notifications" element={<NotificationsPage />} />
+      <Route path="/docdashboard/policy" element={<Policy />} />
+      <Route path="/docdashboard/help" element={<HelpCenter />} />
+      <Route path="/docdashboard/settings" element={<Settings />} />
     </Routes>
   );
 }

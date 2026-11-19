@@ -9,13 +9,18 @@ function Sidebar({ active, setActive }) {
     <aside className="w-[224px] min-h-[1140px] flex-shrink-0 flex flex-col px-3 pt-14 pb-6 gap-10 bg-[#F3F4FF] border-r border-[#D1D1D1]">
       
       {/* Logo */}
-      <div className="w-[188px] h-[43px] flex items-center font-bold px-3 mb-10">
-        <img
-          src="/src/assets/images/WaitlistLogo.png"
-          alt="Medicpadi Logo"
-          className="h-full object-contain"
-        />
-      </div>
+<button
+  type="button"
+  onClick={() => navigate("/")}
+  className="w-[188px] h-[43px] flex items-center px-3 mb-10 cursor-pointer"
+  aria-label="Go to MedicPadi homepage"
+>
+  <img
+    src="/src/assets/images/WaitlistLogo.png"
+    alt="MedicPadi Logo"
+    className="h-full object-contain pointer-events-none"
+  />
+</button>
 
       {/* Main Nav */}
       <div className="w-[189px] min-h-[368px] flex flex-col gap-4 p-[16px_8px] border border-[#D1D1D1]">
@@ -23,27 +28,35 @@ function Sidebar({ active, setActive }) {
         Main Menu
       </p>
       <nav className="flex flex-col w-[173px] h-[288px] gap-[22px]">
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => {
-              setActive(item.id);
-              if (item.id === "dashboard") navigate("/dashboard/docdashboard");
-              if (item.id === "patient") navigate("/dashboard/patients");
-              if (item.id === "profile") navigate("/dashboard/profile");
-              if (item.id === "appointments") navigate("/dashboard/appointments");
-              if (item.id === "reports") navigate("/dashboard/reports");
-            }}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-md font-medium transition-all ${
-              active === item.id
-                ? "bg-[#150D5E] text-white shadow-md"
-                : "text-[#150D5E] hover:bg-[#150D5E] hover:text-white"
-            }`}
-          >
-            <Icon name={item.icon} className="w-4 h-4" />
-            {item.label}
-          </button>
-        ))}
+        
+{NAV_ITEMS.map((item) => (
+  <button
+    key={item.id}
+    onClick={() => {
+      setActive(item.id);
+
+      const routes = {
+        dashboard: "/docdashboard",
+        patient: "/docdashboard/patient",
+        profile: "/docdashboard/profile",
+        appointments: "/docdashboard/appointments",
+        reports: "/docdashboard/reports",
+      };
+
+      if (routes[item.id]) {
+        navigate(routes[item.id]);
+      }
+    }}
+    className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-md font-medium transition-all ${
+      active === item.id
+        ? "bg-[#150D5E] text-white shadow-md"
+        : "text-[#150D5E] hover:bg-[#150D5E] hover:text-white"
+    }`}
+  >
+    <Icon name={item.icon} className="w-4 h-4" />
+    {item.label}
+  </button>
+))}
       </nav>
       </div>
 
@@ -53,16 +66,33 @@ function Sidebar({ active, setActive }) {
           Help Center
         </p>
         <div className="flex flex-col w-[173px] h-[288px] gap-[22px]">
-          {HELP_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-md text-[#150D5E] hover:bg-[#150D5E] hover:text-white transition-all"
-            >
-              <Icon name={item.icon} className="w-4 h-4" />
-              {item.label}
-            </button>
-          ))}
+          
+{HELP_ITEMS.map((item) => (
+  <button
+    key={item.id}
+    onClick={() => {
+      setActive(item.id);
 
+      const routes = {
+        policy: "/docdashboard/policy",
+        help: "/docdashboard/help",
+        settings: "/docdashboard/settings",
+      };
+
+      if (routes[item.id]) {
+        navigate(routes[item.id]);
+      }
+    }}
+    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-md transition-all ${
+      active === item.id
+        ? "bg-[#150D5E] text-white shadow-md"
+        : "text-[#150D5E] hover:bg-[#150D5E] hover:text-white"
+    }`}
+  >
+    <Icon name={item.icon} className="w-4 h-4" />
+    {item.label}
+  </button>
+))}
           {/* Log Out */}
           <button className="flex items-center gap-3 text-md text-[#BE122D] hover:opacity-90 transition-all mt-2">
             <Icon name="logout" className="w-4 h-4" />

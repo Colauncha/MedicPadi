@@ -40,13 +40,13 @@ export default function Navbar() {
         {/* Desktop Buttons */}
         <div className="hidden lg:flex items-center gap-3 shrink-0">
           <Link
-            to="/doctor-signin"
+            to="/portals"
             className="inline-flex items-center px-5 py-2.5 rounded-lg border border-[#150D5E] text-sm text-[#150D5E] hover:bg-[#F8F8FF] transition-colors font-medium"
           >
             Portal Login
           </Link>
           <Link
-            to="/doctor-signup"
+            to="/portals"
             className="inline-flex items-center px-5 py-2.5 rounded-lg bg-[#150D5E] text-sm text-white hover:bg-[#1A1170] transition-colors font-medium"
           >
             Get the app
@@ -84,7 +84,7 @@ export default function Navbar() {
           </nav>
           <div className="flex flex-col gap-3">
             <Link
-              to="/doctor-signin"
+              to="/portals"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full text-center py-3 rounded-lg border border-[#150D5E] text-sm text-[#150D5E] font-semibold hover:bg-[#F8F8FF] transition-colors"
             >

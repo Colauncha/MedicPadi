@@ -344,40 +344,35 @@ export const retrieveProfile = async () => {
   }
 };
 
+
 export const updateProfile = async (profileData) => {
-  try {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    const response = await Fetch(apiUrl("/api/profile"), {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      body: JSON.stringify(profileData),
-    });
+  const response = await Fetch(apiUrl("/api/profile"), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(profileData),
+  });
 
-    const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
-    console.log("UPDATE PROFILE STATUS:", response.status);
-    console.log("UPDATE PROFILE RESPONSE:", data);
-    console.log("UPDATE PROFILE PAYLOAD:", profileData);
+  if (!response.ok) {
+    console.error("Profile validation details:", data);
+    console.error("HTTP status:", response.status);
 
-    if (!response.ok) {
-      throw new Error(
-        data?.message ||
-          data?.error ||
-          JSON.stringify(data) ||
-          "Failed to update profile"
-      );
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Update Profile Error:", error);
-    throw error;
+    throw new Error(
+      typeof data.message === "string"
+        ? data.message
+        : JSON.stringify(data.message || data)
+    );
   }
+
+  return data;
 };
+
 
 export const uploadProfilePicture = async (file) => {
   try {
