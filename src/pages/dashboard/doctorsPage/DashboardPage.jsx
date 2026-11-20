@@ -50,67 +50,116 @@ const [loadingAi, setLoadingAi] = useState(false);
   // ================================
   // FETCH DOCTOR STATISTICS
   // ===============================
+// useEffect(() => {
+//   const fetchStats = async () => {
+//     try {
+//       setLoadingStats(true);
+//       setStatsError("");
+
+//       const appointments = await listAppointmentsByStatuses([
+//         "pending",
+//         "scheduled",
+//         "confirmed",
+//         "completed",
+//         "cancelled",
+//       ]);
+
+//       console.log("ALL APPOINTMENTS FOR STATS:", appointments);
+
+//       // Get unique patient IDs
+//       const uniquePatientIds = [
+//         ...new Set(
+//           appointments
+//             .map((appointment) => appointment.patient_id)
+//             .filter(Boolean)
+//         ),
+//       ];
+
+//       // Calculate statistics from appointment data
+//       const totalPatients = uniquePatientIds.length;
+
+//       const totalAppointments = appointments.length;
+
+//       const scheduledAppointments = appointments.filter(
+//         (appointment) =>
+//           appointment.status === "scheduled" ||
+//           appointment.status === "confirmed"
+//       ).length;
+
+//       const calculatedStats = {
+//         totalPatients,
+//         totalAppointments,
+//         scheduledAppointments,
+//         weeklyChanges: {
+//           totalPatients: {
+//             percentChange: 0,
+//           },
+//           totalAppointments: {
+//             percentChange: 0,
+//           },
+//           scheduledAppointments: {
+//             percentChange: 0,
+//           },
+//         },
+//       };
+
+//       console.log("CALCULATED DOCTOR STATS:", calculatedStats);
+
+//       setStats(calculatedStats);
+//     } catch (error) {
+//       console.error("DOCTOR STATS ERROR:", error);
+
+//       setStatsError(
+//         error.message || "Failed to load dashboard stats"
+//       );
+//     } finally {
+//       setLoadingStats(false);
+//     }
+//   };
+
+//   fetchStats();
+// }, []);
+
+// ================================
+// FETCH DOCTOR STATISTICS
+// ================================
 useEffect(() => {
   const fetchStats = async () => {
     try {
       setLoadingStats(true);
       setStatsError("");
 
-      const appointments = await listAppointmentsByStatuses([
-        "pending",
-        "scheduled",
-        "confirmed",
-        "completed",
-        "cancelled",
-      ]);
+      const token = localStorage.getItem("token");
 
-      console.log("ALL APPOINTMENTS FOR STATS:", appointments);
-
-      // Get unique patient IDs
-      const uniquePatientIds = [
-        ...new Set(
-          appointments
-            .map((appointment) => appointment.patient_id)
-            .filter(Boolean)
-        ),
-      ];
-
-      // Calculate statistics from appointment data
-      const totalPatients = uniquePatientIds.length;
-
-      const totalAppointments = appointments.length;
-
-      const scheduledAppointments = appointments.filter(
-        (appointment) =>
-          appointment.status === "scheduled" ||
-          appointment.status === "confirmed"
-      ).length;
-
-      const calculatedStats = {
-        totalPatients,
-        totalAppointments,
-        scheduledAppointments,
-        weeklyChanges: {
-          totalPatients: {
-            percentChange: 0,
+      const response = await fetch(
+        apiUrl("/api/orders/stats/doctor"),
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-          totalAppointments: {
-            percentChange: 0,
-          },
-          scheduledAppointments: {
-            percentChange: 0,
-          },
-        },
-      };
+        }
+      );
 
-      console.log("CALCULATED DOCTOR STATS:", calculatedStats);
+      const result = await response.json();
 
-      setStats(calculatedStats);
+      if (!response.ok) {
+        throw new Error(
+          result?.message || "Failed to load doctor statistics"
+        );
+      }
+
+      // Support an API response wrapped in a "data" property
+      const statsData = result?.data ?? result;
+
+      console.log("DOCTOR STATISTICS RESPONSE:", statsData);
+
+      setStats(statsData);
     } catch (error) {
       console.error("DOCTOR STATS ERROR:", error);
-
       setStatsError(
-        error.message || "Failed to load dashboard stats"
+        error.message || "Failed to load dashboard statistics"
       );
     } finally {
       setLoadingStats(false);
@@ -367,9 +416,6 @@ useEffect(() => {
 
     const token = localStorage.getItem("token");
 
-    console.log("AI PADI TOKEN EXISTS:", !!token);
-    console.log("AI PADI TOKEN:", token);
-
     const response = await fetch(apiUrl("/api/ai/chat"), {
       method: "POST",
       headers: {
@@ -432,12 +478,17 @@ useEffect(() => {
         <h1 className="text-3xl font-medium text-[#3d3d3d]">
           Patient Statistic
         </h1>
+        {statsError && (
+          <p className="mt-2 text-sm text-red-600" role="alert">
+            {statsError}
+          </p>
+        )}
       </div>
 
       {/* ================= STATISTICS ================= */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Total Patients */}
-        <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px]">
+        <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[140px]">
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-[#331eb9] text-base">
               Total Patients
@@ -456,7 +507,7 @@ useEffect(() => {
               ? "..."
               : stats?.totalPatients ?? 0}
 
-            <div className="flex items-center text-sm text-[#150d5e] mt-2">
+            {/* <div className="flex items-center text-sm text-[#150d5e] mt-2">
               <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
 
               <span className="font-semibold text-sm mr-1">
@@ -468,12 +519,28 @@ useEffect(() => {
               <span className="text-sm">
                 from last week
               </span>
-            </div>
+            </div> */}
+
+            <div className="flex items-center text-sm text-[#150d5e] mt-2">
+            {stats?.weeklyChanges?.totalPatients?.percentChange != null ? (
+             <>
+            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
+             <span className="font-semibold mr-1">
+               {stats.weeklyChanges.totalPatients.percentChange}%
+             </span>
+             <span>from last week</span>
+           </>
+             ) : (
+            <span className="text-xs text-[#150d5e]">
+               Weekly comparison unavailable
+            </span>
+          )}
+       </div>
           </div>
         </div>
 
         {/* Total Appointments */}
-        <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px]">
+        <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[140px]">
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-[#331eb9] text-base">
               Total Appointments
@@ -492,7 +559,7 @@ useEffect(() => {
               ? "..."
               : stats?.totalAppointments ?? 0}
 
-            <div className="flex items-center text-sm text-[#150d5e] mt-2">
+            {/* <div className="flex items-center text-sm text-[#150d5e] mt-2">
               <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
 
               <span className="font-semibold text-sm mr-1">
@@ -504,12 +571,27 @@ useEffect(() => {
               <span className="text-sm">
                 from last week
               </span>
-            </div>
+            </div> */}
+            <div className="flex items-center text-sm text-[#150d5e] mt-2">
+            {stats?.weeklyChanges?.totalAppointments?.percentChange != null ? (
+             <>
+            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
+             <span className="font-semibold mr-1">
+               {stats.weeklyChanges.totalAppointments.percentChange}%
+             </span>
+             <span>from last week</span>
+           </>
+             ) : (
+            <span className="text-xs text-[#150d5e]">
+               Weekly comparison unavailable
+            </span>
+          )}
+       </div>
           </div>
         </div>
 
         {/* Scheduled Appointments */}
-        <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[132px]">
+        <div className="bg-[#f3f4ff] rounded-2xl p-6 relative h-[140px]">
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-[#331eb9] text-base">
               Appointments Scheduled
@@ -528,7 +610,7 @@ useEffect(() => {
               ? "..."
               : stats?.scheduledAppointments ?? 0}
 
-            <div className="flex items-center text-sm text-[#150d5e] mt-2">
+            {/* <div className="flex items-center text-sm text-[#150d5e] mt-2">
               <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
 
               <span className="font-semibold text-sm mr-1">
@@ -541,7 +623,24 @@ useEffect(() => {
               <span className="text-sm">
                 from last week
               </span>
-            </div>
+            </div> */}
+            
+            <div className="flex items-center text-sm text-[#150d5e] mt-2">
+            {stats?.weeklyChanges?.scheduledAppointments?.percentChange != null ? (
+             <>
+            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
+             <span className="font-semibold mr-1">
+               {stats.weeklyChanges.scheduledAppointments.percentChange}%
+             </span>
+             <span>from last week</span>
+           </>
+             ) : (
+            <span className="text-xs text-[#150d5e]">
+               Weekly comparison unavailable
+            </span>
+          )}
+       </div>
+
           </div>
         </div>
       </div>

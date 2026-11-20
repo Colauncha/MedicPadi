@@ -14,6 +14,7 @@ import {
   Bell,
   Package,
   ShoppingCart,
+  ChevronRight,
   Users,
   CreditCard,
   FlaskConical,
@@ -22,8 +23,10 @@ import {
   X,
 } from "lucide-react";
 import logo from "../../assets/mediclogo2.svg";
-import avatar from "../../assets/image.svg";
+// import avatar from "../../assets/image.svg";
 import { logoutUser, retrieveProfile } from "../../api/auth.api";
+import { globalSearch } from "../../api/search.api";
+
 
 export default function DashboardLayout({
   children,
@@ -35,6 +38,48 @@ export default function DashboardLayout({
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [doctorProfileData, setDoctorProfileData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState({});
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false); 
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  useEffect(() => {
+  const query = searchQuery.trim();
+
+  setSelectedDoctor(null);
+
+  if (query.length < 2) {
+    setSearchResults({});
+    setSearchError("");
+    setShowSearchResults(false);
+    setIsSearching(false);
+    return;
+  }
+
+  const timer = setTimeout(async () => {
+    try {
+      setIsSearching(true);
+      setSearchError("");
+      setShowSearchResults(true);
+
+      const data = await globalSearch(query);
+
+      setSearchResults(data);
+      setShowSearchResults(true);
+    } catch (error) {
+      setSearchError(error.message || "Unable to search.");
+      setSearchResults({});
+      setShowSearchResults(true);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 400);
+
+  return () => clearTimeout(timer);
+}, [searchQuery]);
 
   // Close sidebar on route change
   useEffect(() => {
@@ -176,6 +221,27 @@ export default function DashboardLayout({
             { name: "Reports", icon: FileText, path: `${prefix}/reports` },
           ];
 
+         useEffect(() => {
+  if (activeRole !== "doctor") return;
+
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const loadDoctorProfile = async () => {
+    try {
+      const data = await retrieveProfile();
+
+      if (data) {
+        setDoctorProfileData(data);
+      }
+    } catch (error) {
+      console.error("Failed to load doctor profile:", error.message);
+    }
+  };
+
+  loadDoctorProfile();
+}, [activeRole]);
+
   const helpItems = [
     { name: "Policy", icon: Shield, path: `${prefix}/policy` },
     { name: "Help Center", icon: HelpCircle, path: `${prefix}/help` },
@@ -197,17 +263,36 @@ export default function DashboardLayout({
     }
   };
 
-  const displayName =
-    profileName ||
-    (activeRole === "doctor"
-      ? "Dr. Sarah John"
-      : activeRole === "pharmacy"
-        ? pharmProfileData?.companyName ||
-          pharmProfileData?.name ||
-          "Alpha Pharmacy"
-        : labProfileData?.companyName ||
-          labProfileData?.name ||
-          "Olivex Laboratory Center");
+  
+const doctorFirstName =
+  doctorProfileData?.profile?.firstName ||
+  doctorProfileData?.firstName ||
+  "";
+
+const doctorLastName =
+  doctorProfileData?.profile?.lastName ||
+  doctorProfileData?.lastName ||
+  "";
+
+const doctorName = [doctorFirstName, doctorLastName]
+  .filter(Boolean)
+  .join(" ");
+
+const displayName =
+  profileName ||
+  (activeRole === "doctor"
+    ? doctorName
+      ? `Dr. ${doctorName}`
+      : "Doctor"
+    : activeRole === "pharmacy"
+      ? pharmProfileData?.companyName ||
+        pharmProfileData?.name ||
+        "Alpha Pharmacy"
+      : labProfileData?.companyName ||
+        labProfileData?.name ||
+        "Olivex Laboratory Center");
+
+
   const displaySubtitle =
     profileSubtitle ||
     (activeRole === "doctor"
@@ -217,11 +302,22 @@ export default function DashboardLayout({
         : "View profile");
 
   const displayAvatar =
-    avatarSrc ||
-    (activeRole === "pharmacy"
+  avatarSrc ||
+  (activeRole === "doctor"
+    ? doctorProfileData?.profile?.profilePicture?.url ||
+      doctorProfileData?.profilePicture?.url
+    : activeRole === "pharmacy"
       ? pharmProfileData?.avatarSrc
       : labProfileData?.avatarSrc) ||
-    null;
+  null;
+
+  const hasSearchMatches = Object.values(searchResults).some((result) => {
+  const items = Array.isArray(result)
+    ? result
+    : result?.data || [];
+
+  return items.length > 0;
+});
 
   return (
     <div className="flex h-screen w-full bg-white overflow-hidden text-[#1a1a4b]">
@@ -240,18 +336,26 @@ export default function DashboardLayout({
         }`}
       >
         <div className="p-6 lg:p-8 flex items-center justify-between">
-          <img
-            src={logo}
-            alt="Medic Padi"
-            className="h-8 lg:h-9 object-contain"
-          />
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-lg"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+  <button
+    type="button"
+    onClick={() => navigate("/")}
+    className="cursor-pointer"
+    aria-label="Go to MedicPadi homepage"
+  >
+    <img
+      src={logo}
+      alt="Medic Padi"
+      className="h-8 lg:h-9 object-contain pointer-events-none"
+    />
+  </button>
+
+  <button
+    onClick={() => setIsSidebarOpen(false)}
+    className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-lg"
+  >
+    <X className="w-5 h-5" />
+  </button>
+</div>
 
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-2 pb-10 custom-scrollbar">
           <div className="mb-8">
@@ -315,69 +419,341 @@ export default function DashboardLayout({
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
         {/* Header Topbar */}
-        <header className="h-16 sm:h-20 lg:h-24 flex items-center justify-between px-4 sm:px-6 lg:px-10 border-b border-[#eef0f6] flex-shrink-0 bg-white gap-3">
-          <div className="flex items-center gap-2 flex-1 max-w-[480px]">
-            {/* Hamburger Toggle */}
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-[#150D5E] hover:bg-[#f8f9fc] transition-colors shrink-0"
-              aria-label="Open Navigation Sidebar"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+       
+<header className="h-16 sm:h-20 lg:h-24 flex items-center justify-between px-4 sm:px-6 lg:px-10 border-b border-[#eef0f6] flex-shrink-0 bg-white gap-3">
 
-            {/* Search Input */}
-            <div className="relative w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-              <input
-                type="text"
-                placeholder={
-                  activeRole === "pharmacy"
-                    ? "search products"
-                    : activeRole === "laboratory"
-                      ? location.pathname.endsWith("/department")
-                        ? "search department"
-                        : "search test"
-                      : "search patient"
-                }
-                className="w-full h-10 sm:h-12 pl-10 sm:pl-12 pr-4 bg-[#f8f9fc] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-xs sm:text-[15px]"
-              />
-            </div>
-          </div>
+  {/* Search Area */}
+  <div className="flex items-center gap-2 flex-1 max-w-[480px] min-w-0">
 
-          {/* User Profile & Actions */}
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center">
-              <Bell className="w-5 h-5 sm:w-[22px] sm:h-[22px] fill-current" />
-            </button>
+    {/* Mobile Sidebar Toggle */}
+    <button
+      type="button"
+      onClick={() => setIsSidebarOpen(true)}
+      className="lg:hidden p-2 rounded-xl text-[#150D5E] hover:bg-[#f8f9fc] transition-colors shrink-0"
+      aria-label="Open Navigation Sidebar"
+    >
+      <Menu className="w-6 h-6" />
+    </button>
 
-            <div
-              onClick={() => navigate(`${prefix}/profile`)}
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer pl-2 border-l border-gray-100 hover:opacity-85 transition-opacity"
-              title="View profile"
-            >
-              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#f0f2f8] border border-[#eef0f6] overflow-hidden shrink-0 flex items-center justify-center text-[#9a9db0]">
-                {displayAvatar ? (
+    {/* Global Search */}
+    <div className="relative w-full min-w-0">
+      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onFocus={() => {
+          if (searchQuery.trim().length >= 2) {
+            setShowSearchResults(true);
+          }
+        }}
+        placeholder={
+          activeRole === "pharmacy"
+            ? "Search products"
+            : activeRole === "laboratory"
+              ? location.pathname.endsWith("/department")
+                ? "Search department"
+                : "Search test"
+              : "Search doctors, pharmacies, labs..."
+        }
+        className="w-full h-10 sm:h-12 pl-10 sm:pl-12 pr-4 bg-[#f8f9fc] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a4b]/10 text-xs sm:text-[15px]"
+      />
+
+      {/* Search Results Dropdown */}
+      {showSearchResults && searchQuery.trim().length >= 2 && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-[100] max-h-[480px] overflow-y-auto">
+
+          {isSearching && (
+            <p className="p-4 text-sm text-gray-500">
+              Searching...
+            </p>
+          )}
+
+          {!isSearching && searchError && (
+            <p className="p-4 text-sm text-red-500">
+              {searchError}
+            </p>
+          )}
+
+          {!isSearching && !searchError && !hasSearchMatches && (
+            <p className="p-4 text-sm text-gray-500">
+              No matching results found. Try another keyword.
+            </p>
+          )}
+
+          {/* Search Results by Category */}
+          {!isSearching &&
+            !searchError &&
+            hasSearchMatches &&
+            Object.entries(searchResults).map(([type, result]) => {
+              const items = Array.isArray(result)
+                ? result
+                : result?.data || [];
+
+              if (items.length === 0) return null;
+
+              const heading = {
+                doctors: "Doctors",
+                pharmacies: "Pharmacies",
+                laboratories: "Laboratories",
+                drugs: "Drugs",
+                labTests: "Lab Tests",
+              }[type] || type;
+
+              return (
+                <div key={type} className="p-3 border-b border-gray-100 last:border-b-0">
+
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                    {heading}
+                  </h4>
+
+                  {items.map((item, index) => {
+                    const isDoctor = type === "doctors";
+
+                    const doctorName = [
+                      item.firstName,
+                      item.middleName,
+                      item.lastName,
+                    ]
+                      .filter(Boolean)
+                      .join(" ") ||
+                      item.fullName ||
+                      item.name ||
+                      "Doctor";
+
+                    const resultName = isDoctor
+                      ? doctorName
+                      : item.name || item.title || item.drugName || "Unnamed result";
+
+                    return (
+                      <button
+                        type="button"
+                        key={item.id || item._id || index}
+                        disabled={!isDoctor}
+                        onClick={() => {
+                          if (isDoctor) {
+                            setSelectedDoctor(item);
+                          }
+                        }}
+                        className={`w-full flex items-center gap-3 text-left px-3 py-3 rounded-lg transition-colors ${
+                          isDoctor
+                            ? "hover:bg-gray-50 cursor-pointer"
+                            : "cursor-default"
+                        }`}
+                      >
+                        {item.profilePicture?.url ? (
+                          <img
+                            src={item.profilePicture.url}
+                            alt={resultName}
+                            className="w-10 h-10 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-[#f0f2f8] flex items-center justify-center shrink-0">
+                            <User className="w-5 h-5 text-[#150D5E]" />
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-[#150D5E] truncate">
+                            {resultName}
+                          </p>
+
+                          {isDoctor && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              {item.specialty ||
+                                item.specialization ||
+                                item.designation ||
+                                "Doctor"}
+                            </p>
+                          )}
+
+                          {!isDoctor && item.address && (
+                            <p className="text-xs text-gray-500 mt-1 truncate">
+                              {item.address}
+                            </p>
+                          )}
+                        </div>
+
+                        {isDoctor && (
+                          <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+
+          {/* Selected Doctor Details */}
+          {selectedDoctor && (
+            <div className="border-t border-gray-100 p-4 bg-[#f8f9fc]">
+
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold text-sm text-[#150D5E]">
+                  Doctor Details
+                </h4>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedDoctor(null)}
+                  className="p-1.5 rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                  aria-label="Close doctor details"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Doctor Profile */}
+              <div className="flex items-center gap-3 mb-4">
+                {selectedDoctor.profilePicture?.url ? (
                   <img
-                    src={displayAvatar}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
+                    src={selectedDoctor.profilePicture.url}
+                    alt="Doctor"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-white"
                   />
                 ) : (
-                  <User className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5]" />
+                  <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center">
+                    <User className="w-7 h-7 text-[#150D5E]" />
+                  </div>
                 )}
+
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm text-[#150D5E]">
+                    {[
+                      selectedDoctor.firstName,
+                      selectedDoctor.middleName,
+                      selectedDoctor.lastName,
+                    ]
+                      .filter(Boolean)
+                      .join(" ") ||
+                      selectedDoctor.fullName ||
+                      selectedDoctor.name ||
+                      "Doctor"}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    {selectedDoctor.specialty ||
+                      selectedDoctor.specialization ||
+                      selectedDoctor.designation ||
+                      "Medical Doctor"}
+                  </p>
+                </div>
               </div>
-              <div className="hidden sm:flex flex-col">
-                <h4 className="text-[#3d3d3d] leading-tight font-medium text-sm sm:text-base lg:text-lg truncate max-w-[150px] lg:max-w-[220px]">
-                  {displayName}
-                </h4>
-                <p className="text-xs text-[#464646] mt-0.5 hover:text-[#150d5e] transition-colors truncate">
-                  {displaySubtitle}
-                </p>
+
+              {/* Additional Information */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+
+                {(selectedDoctor.email || selectedDoctor.emailAddress) && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Email</p>
+                    <p className="text-gray-700 break-words">
+                      {selectedDoctor.email || selectedDoctor.emailAddress}
+                    </p>
+                  </div>
+                )}
+
+                {(selectedDoctor.phoneNumber || selectedDoctor.phone) && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Phone</p>
+                    <p className="text-gray-700">
+                      {selectedDoctor.phoneNumber || selectedDoctor.phone}
+                    </p>
+                  </div>
+                )}
+
+                {(selectedDoctor.hospitalName || selectedDoctor.clinicName) && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Workplace</p>
+                    <p className="text-gray-700">
+                      {selectedDoctor.hospitalName || selectedDoctor.clinicName}
+                    </p>
+                  </div>
+                )}
+
+                {selectedDoctor.yearsOfExperience != null && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Experience</p>
+                    <p className="text-gray-700">
+                      {selectedDoctor.yearsOfExperience} years
+                    </p>
+                  </div>
+                )}
+
+                {selectedDoctor.registrationNumber && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">
+                      Registration Number
+                    </p>
+                    <p className="text-gray-700">
+                      {selectedDoctor.registrationNumber}
+                    </p>
+                  </div>
+                )}
+
               </div>
+
+              {selectedDoctor.about && (
+                <div className="mt-4 pt-3 border-t border-gray-200">
+                  <p className="text-xs text-gray-400 mb-1">
+                    About
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {selectedDoctor.about}
+                  </p>
+                </div>
+              )}
+
             </div>
-          </div>
-        </header>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+
+  {/* User Profile & Actions */}
+  <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+
+    <button
+      type="button"
+      onClick={() => navigate(`${prefix}/notifications`)}
+      className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
+      aria-label="View notifications"
+    >
+      <Bell className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
+    </button>
+
+    <button
+      type="button"
+      onClick={() => navigate(`${prefix}/profile`)}
+      className="flex items-center gap-2 sm:gap-3 pl-2 border-l border-gray-100 hover:opacity-85 transition-opacity text-left"
+      title="View profile"
+    >
+      <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#f0f2f8] border border-[#eef0f6] overflow-hidden shrink-0 flex items-center justify-center text-[#9a9db0]">
+        {displayAvatar ? (
+          <img
+            src={displayAvatar}
+            alt="Avatar"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <User className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5]" />
+        )}
+      </div>
+
+      <div className="hidden sm:flex flex-col">
+        <h4 className="text-[#3d3d3d] leading-tight font-medium text-sm sm:text-base lg:text-lg truncate max-w-[150px] lg:max-w-[220px]">
+          {displayName}
+        </h4>
+
+        <p className="text-xs text-[#464646] mt-0.5 truncate">
+          {displaySubtitle}
+        </p>
+      </div>
+    </button>
+
+  </div>
+</header>
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">

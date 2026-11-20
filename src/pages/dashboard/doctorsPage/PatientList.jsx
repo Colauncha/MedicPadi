@@ -174,7 +174,7 @@ const paginatedPatients = filtered.slice(
             <div className="flex-1">
               <p className="text-[10px] text-white/70">Total Patients</p>
               <p className="text-2xl font-bold">
-                {loadingStats ? "..." : stats?.totalPatients ?? 0}
+                {loading ? "..." : patients.length}
               </p>
             </div>
           </div>

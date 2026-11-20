@@ -106,9 +106,10 @@ function Profile() {
     lastName: "",
     gender: "",
     phoneNumber: "",
+    licenceNumber: "",
     speciality: "",
     email: "",
-    about: "",
+    bio: "",
     placeOfWork: "",
     yearsOfService: "",
     awards: "",
@@ -161,15 +162,18 @@ function Profile() {
           lastName: profile.lastName || "",
           gender: profile.gender || "",
           phoneNumber: profile.phoneNumber || "",
+          licenceNumber: profile.licenceNumber || "",
           speciality: profile.speciality || "",
           email: account.email || "",
-          about: profile.bio || "",
+          bio: profile.bio || "",
           placeOfWork: profile.placeOfWork || "",
           yearsOfService: profile.yearsOfService ?? "",
           awards: profile.awards ?? "",
           costPerSession: profile.costPerSession ?? "",
           sessionLength: profile.sessionLength ?? "",
         });
+
+        setPreview(profile.profilePicture?.url ?? "");
 
         const profilePictureUrl =
          data.profilePicture?.url ||
@@ -232,38 +236,73 @@ function Profile() {
     );
   }
 };
-  const handleSaveProfile = async () => {
-    setProfileError("");
-    setProfileSuccess("");
-    setProfileLoading(true);
+  
+const handleSaveProfile = async () => {
+  setProfileError("");
+  setProfileSuccess("");
+  setProfileLoading(true);
 
-    if (!localStorage.getItem("token")) {
-      setProfileError("You are not logged in.");
-      setProfileLoading(false);
-      return;
-    }
+  if (!localStorage.getItem("token")) {
+    setProfileError("You are not logged in.");
+    setProfileLoading(false);
+    return;
+  }
 
-    const profilePayload = {
-      bio: form.about,
-      placeOfWork: form.placeOfWork,
-      yearsOfService: Number(form.yearsOfService) || 0,
-      awards: Number(form.awards) || 0,
-      costPerSession: Number(form.costPerSession) || 0,
-      sessionLength: Number(form.sessionLength) || 0,
-    };
+  const toNumberOrNull = (value) =>
+    value === "" ? null : Number(value);
 
-    console.log("PROFILE PAYLOAD:", profilePayload);
-
-    try {
-      await updateProfile(profilePayload);
-
-      setProfileSuccess("Profile saved successfully!");
-    } catch (err) {
-      setProfileError(err.message || "Failed to update profile.");
-    } finally {
-      setProfileLoading(false);
-    }
+  const profilePayload = {
+    firstName: form.firstName.trim(),
+    lastName: form.lastName.trim(),
+    gender: form.gender,
+    phoneNumber: form.phoneNumber.trim(),
+    licenceNumber: form.licenceNumber.trim(),
+    bio: form.bio,
+    placeOfWork: form.placeOfWork,
+    yearsOfService: toNumberOrNull(form.yearsOfService),
+    awards: toNumberOrNull(form.awards),
+    costPerSession: toNumberOrNull(form.costPerSession),
+    sessionLength: toNumberOrNull(form.sessionLength),
   };
+
+  // Add speciality only after confirming that the
+  // backend accepts it in UpdateDoctorDto.
+  // profilePayload.speciality = form.speciality;
+
+  try {
+    await updateProfile(profilePayload);
+
+    // Retrieve the latest saved profile
+    const updatedData = await retrieveProfile();
+    const profile = updatedData?.profile || {};
+    const account = updatedData?.rest || {};
+
+    setForm((prev) => ({
+      ...prev,
+      firstName: profile.firstName || "",
+      lastName: profile.lastName || "",
+      gender: profile.gender || "",
+      phoneNumber: profile.phoneNumber || "",
+      licenceNumber: profile.licenceNumber || "",
+      speciality: profile.speciality || "",
+      email: account.email || "",
+      bio: profile.bio || "",
+      placeOfWork: profile.placeOfWork || "",
+      yearsOfService: profile.yearsOfService ?? "",
+      awards: profile.awards ?? "",
+      costPerSession: profile.costPerSession ?? "",
+      sessionLength: profile.sessionLength ?? "",
+    }));
+
+    setProfileSuccess("Profile saved successfully!");
+  } catch (err) {
+    setProfileError(
+      err.message || "Failed to update profile."
+    );
+  } finally {
+    setProfileLoading(false);
+  }
+};
 
   const handleSaveAppointment = async () => {
     setAppointmentError("");
@@ -497,8 +536,9 @@ function Profile() {
                   <input
                     name="firstName"
                     value={form.firstName}
-                    disabled
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
+                    onChange={handleChange}
+                    placeholder="Enter first name"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3B4FA8]"
                   />
                 </div>
 
@@ -510,8 +550,9 @@ function Profile() {
                   <input
                     name="lastName"
                     value={form.lastName}
-                    disabled
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
+                    onChange={handleChange}
+                    placeholder="Enter last name"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3B4FA8]"
                   />
                 </div>
 
@@ -525,12 +566,16 @@ function Profile() {
                     Gender
                   </label>
 
-                  <input
+                  <select
                     name="gender"
                     value={form.gender}
-                    disabled
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
-                  />
+                    onChange={handleChange}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3B4FA8]"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
                 </div>
 
                 <div>
@@ -541,10 +586,24 @@ function Profile() {
                   <input
                     name="phoneNumber"
                     value={form.phoneNumber}
-                    disabled
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
+                    onChange={handleChange}
+                    placeholder="Enter phone number"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3B4FA8]"
                   />
                 </div>
+                <div>
+  <label className="text-xs text-gray-400 mb-1 block">
+    Medical Licence Number
+  </label>
+
+  <input
+    name="licenceNumber"
+    value={form.licenceNumber}
+    onChange={handleChange}
+    placeholder="Enter medical licence number"
+    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3B4FA8]"
+  />
+</div>
 
               </div>
 
@@ -559,7 +618,7 @@ function Profile() {
                   value={form.placeOfWork}
                   onChange={handleChange}
                   placeholder="Lagos State University Teaching Hospital"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3B4FA8]"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3B4FA8]"
                 />
               </div>
 
@@ -643,7 +702,7 @@ function Profile() {
                 />
               </div>
 
-              {/* About */}
+              {/* Bio */}
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">
                   About Yourself
@@ -654,8 +713,8 @@ function Profile() {
                 </p>
 
                 <textarea
-                  name="about"
-                  value={form.about}
+                  name="bio"
+                  value={form.bio}
                   onChange={handleChange}
                   placeholder="Enter a description..."
                   rows={3}
