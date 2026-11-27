@@ -383,7 +383,7 @@ const handleViewAppointment = async (appointmentId) => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-5 p-6 bg-gray-50 min-h-screen">
+      <div className="flex flex-col gap-4 sm:gap-5 p-3 sm:p-4 lg:p-6 bg-gray-50 min-h-screen min-w-0 w-full">
 
         {/* =========================
             BREADCRUMB
@@ -408,10 +408,10 @@ const handleViewAppointment = async (appointmentId) => {
         {/* =========================
             TOP SECTION
         ========================= */}
-        <div className="flex gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 w-full min-w-0">
 
           {/* PATIENT SUMMARY */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center gap-6 flex-1">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-5 sm:gap-6 flex-1 min-w-0">
 
             <div className="flex flex-col items-center gap-2 flex-shrink-0">
 
@@ -427,7 +427,7 @@ const handleViewAppointment = async (appointmentId) => {
 
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 flex-wrap w-full min-w-0">
 
               {[
                 {
@@ -476,7 +476,7 @@ const handleViewAppointment = async (appointmentId) => {
           </div>
 
           {/* APPOINTMENT SUMMARY */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 w-[200px] flex-shrink-0">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col gap-3 w-full lg:w-[200px] flex-shrink-0">
 
             <p className="text-xs font-semibold text-gray-500 text-center">
               Appointments
@@ -523,10 +523,10 @@ const handleViewAppointment = async (appointmentId) => {
         {/* =========================
             MIDDLE SECTION
         ========================= */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full min-w-0">
 
           {/* PERSONAL INFORMATION */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col gap-3 min-w-0">
 
             <h3 className="text-sm font-bold text-gray-800">
               Personal Information
@@ -615,7 +615,7 @@ const handleViewAppointment = async (appointmentId) => {
           {/* =========================
               MEDICAL RECORDS
           ========================= */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col gap-3 min-w-0">
 
             <h3 className="text-sm font-bold text-gray-800">
               Medical Records
@@ -692,7 +692,7 @@ const handleViewAppointment = async (appointmentId) => {
           {/* =========================
               LAB RESULTS
           ========================= */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col gap-3 min-w-0">
 
             <h3 className="text-sm font-bold text-gray-800">
               Lab Results
@@ -767,7 +767,7 @@ const handleViewAppointment = async (appointmentId) => {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
 
           {/* TABS */}
-          <div className="flex gap-6 border-b border-gray-100 pb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 border-b border-gray-100 pb-3">
 
             {[
               {
@@ -788,7 +788,7 @@ const handleViewAppointment = async (appointmentId) => {
                 onClick={() =>
                   setActiveTab(tab.key)
                 }
-                className={`text-xs font-semibold pb-1 transition-colors border-b-2 ${
+                className={`text-xs font-semibold text-left sm:text-center pb-2 transition-colors border-b-2 ${
                   activeTab === tab.key
                     ? "text-[#150D5E] border-[#150D5E]"
                     : "text-gray-400 border-transparent hover:text-gray-600"
@@ -841,7 +841,7 @@ const handleViewAppointment = async (appointmentId) => {
                       return (
                         <div
                           key={appt.id}
-                          className="flex items-center gap-6 p-3 rounded-lg border border-gray-100"
+                          className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-3 rounded-lg border border-gray-100"
                         >
 
                           <div className="flex flex-col min-w-[100px]">
@@ -889,7 +889,7 @@ const handleViewAppointment = async (appointmentId) => {
 
                           </div>
 
-                          <div className="ml-auto">
+                          <div className="sm:ml-auto">
 
                             <button
   onClick={() =>
@@ -934,7 +934,7 @@ const handleViewAppointment = async (appointmentId) => {
                       key={
                         record.id || idx
                       }
-                      className="flex items-center gap-3 p-3 rounded-lg border border-gray-100"
+                      className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 rounded-lg border border-gray-100"
                     >
 
                       <div className="w-8 h-8 rounded-full bg-[#F3F4FF] flex items-center justify-center">
@@ -987,9 +987,9 @@ const handleViewAppointment = async (appointmentId) => {
           LAB REPORT POPUP
       ========================= */}
       {selectedLabResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 sm:px-4 overflow-y-auto">
 
-          <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl">
 
             {/* HEADER */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
@@ -1114,9 +1114,9 @@ const handleViewAppointment = async (appointmentId) => {
     APPOINTMENT DETAILS POPUP
 ========================= */}
 {selectedAppointment && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 sm:px-4 overflow-y-auto">
 
-    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+    <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl">
 
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
@@ -1261,9 +1261,9 @@ const handleViewAppointment = async (appointmentId) => {
     MEDICAL RECORD DETAILS POPUP
 ========================= */}
 {selectedMedicalRecord && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 sm:px-4 overflow-y-auto">
 
-    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+    <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl">
 
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
@@ -1395,9 +1395,9 @@ const handleViewAppointment = async (appointmentId) => {
     SEND MESSAGE POPUP
 ========================= */}
 {showMessageModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 sm:px-4 overflow-y-auto">
 
-    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+    <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl">
 
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
@@ -1438,7 +1438,7 @@ const handleViewAppointment = async (appointmentId) => {
           }
           placeholder={`Write a message to ${patient.name}...`}
           rows={5}
-          className="w-full mt-2 border border-gray-200 rounded-lg p-3 text-xs text-gray-700 outline-none focus:border-[#150D5E] resize-none"
+          className="w-full min-w-0 mt-2 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 outline-none focus:border-[#150D5E] resize-none"
         />
 
       </div>

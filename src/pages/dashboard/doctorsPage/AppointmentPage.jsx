@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import {
   listAppointmentsByStatuses,
@@ -349,8 +349,8 @@ const fetchForTab = useCallback(async (tab) => {
           </div>
         )}
 
-        <div className="flex gap-4 h-[calc(100vh-160px)]">
-          <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div className="flex flex-col lg:flex-row gap-4 min-h-0 lg:h-[calc(100dvh-160px)]">
+          <div className="flex-1 min-w-0 min-h-[380px] lg:min-h-0 bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col">
             <div className="flex border-b border-gray-100">
               <button
                 onClick={() => setActiveTab("upcoming")}
@@ -375,7 +375,7 @@ const fetchForTab = useCallback(async (tab) => {
               </button>
             </div>
 
-            <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-2 px-4 py-2 bg-gray-50 text-[11px] text-gray-400 font-medium">
+            <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-2 px-4 py-2 bg-gray-50 text-[11px] text-gray-400 font-medium">
               <span>Date</span>
               <span>Description</span>
               <span>Patient</span>
@@ -397,61 +397,105 @@ const fetchForTab = useCallback(async (tab) => {
               )}
 
               {!loading &&
-                appointments.map((appt) => {
-                  const { date, time } = formatDateTime(
-                    appt.appointment_time
-                  );
+  appointments.map((appt) => {
+    const { date, time } = formatDateTime(
+      appt.appointment_time
+    );
 
-                  return (
-                    <div
-                      key={appt.id}
-                      className={`grid grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-2 items-center px-4 py-3 cursor-pointer transition-colors ${
-                        selectedId === appt.id
-                          ? "bg-[#F3F4FF]"
-                          : "hover:bg-gray-50"
-                      }`}
-                      onClick={() => setSelectedId(appt.id)}
-                    >
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">
-                          {date}
-                        </p>
+    return (
+      <React.Fragment key={appt.id}>
+        {/* Mobile Appointment Card */}
+        <div
+          onClick={() => setSelectedId(appt.id)}
+          className={`md:hidden p-4 border-b border-gray-100 cursor-pointer ${
+            selectedId === appt.id ? "bg-[#F3F4FF]" : "bg-white"
+          }`}
+        >
+          <div className="flex justify-between items-start gap-3 mb-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">
+                {appt.patient
+                  ? `${appt.patient.firstName || ""} ${
+                      appt.patient.lastName || ""
+                    }`.trim() || "Patient"
+                  : "Patient"}
+              </p>
 
-                        <p className="text-[11px] text-gray-400">
-                          {time}
-                        </p>
-                      </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {appt.description || "Consultation"}
+              </p>
+            </div>
 
-                      <span className="text-xs text-[#4A4AFF] font-medium truncate">
-                        {appt.description || "Consultation"}
-                      </span>
+            <StatusBadge status={appt.status} />
+          </div>
 
-                      <span className="text-xs text-gray-600">
-  {appt.patient
-    ? `${appt.patient.firstName || ""} ${
-        appt.patient.lastName || ""
-      }`.trim() || "Patient"
-    : "Patient"}
-</span>
+          <div className="flex justify-between items-center gap-3">
+            <div>
+              <p className="text-xs text-gray-600">{date}</p>
+              <p className="text-[11px] text-gray-400">{time}</p>
+            </div>
 
-                      <StatusBadge status={appt.status} />
+            <button
+              type="button"
+              className="text-xs bg-[#4A4AFF] text-white px-4 py-2 rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedId(appt.id);
+              }}
+            >
+              View
+            </button>
+          </div>
+        </div>
 
-                      <button
-                        className="text-xs bg-[#4A4AFF] text-white px-3 py-1.5 rounded-lg hover:bg-[#3a3aee] transition-colors w-14"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedId(appt.id);
-                        }}
-                      >
-                        View
-                      </button>
-                    </div>
-                  );
-                })}
+        {/* Desktop Appointment Row */}
+        <div
+          className={`hidden md:grid grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-2 items-center px-4 py-3 cursor-pointer transition-colors ${
+            selectedId === appt.id
+              ? "bg-[#F3F4FF]"
+              : "hover:bg-gray-50"
+          }`}
+          onClick={() => setSelectedId(appt.id)}
+        >
+          <div>
+            <p className="text-xs font-medium text-gray-700">
+              {date}
+            </p>
+            <p className="text-[11px] text-gray-400">{time}</p>
+          </div>
+
+          <span className="text-xs text-[#4A4AFF] font-medium truncate">
+            {appt.description || "Consultation"}
+          </span>
+
+          <span className="text-xs text-gray-600">
+            {appt.patient
+              ? `${appt.patient.firstName || ""} ${
+                  appt.patient.lastName || ""
+                }`.trim() || "Patient"
+              : "Patient"}
+          </span>
+
+          <StatusBadge status={appt.status} />
+
+          <button
+            type="button"
+            className="text-xs bg-[#4A4AFF] text-white px-3 py-1.5 rounded-lg w-14"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedId(appt.id);
+            }}
+          >
+            View
+          </button>
+        </div>
+      </React.Fragment>
+    );
+  })}
             </div>
           </div>
 
-          <div className="w-72 bg-white rounded-2xl shadow-sm p-4 flex flex-col">
+          <div className="w-full lg:w-72 min-w-0 min-h-[320px] bg-white rounded-2xl shadow-sm p-4 flex flex-col">
             <p className="text-sm font-semibold text-gray-800 mb-4">
               Appointment Details
             </p>

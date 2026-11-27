@@ -139,7 +139,7 @@ if (!response.ok) {
   return (
     <form
       onSubmit={handleUpload}
-      className="w-[260px] flex-shrink-0 border-l border-gray-100 p-5 flex flex-col gap-4 overflow-y-auto"
+      className="w-full lg:w-[260px] flex-shrink-0 border-t lg:border-t-0 lg:border-l border-gray-100 p-4 sm:p-5 flex flex-col gap-4 overflow-y-auto"
     >
       <p className="text-xs font-medium text-[#1A1A2E] text-center">
         Kindly upload patient report below
@@ -246,7 +246,7 @@ if (!response.ok) {
 
 function ReportRow({ report }) {
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors gap-3">
+    <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-3 sm:px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors gap-3">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <AvatarPlaceholder name={report.name} />
 
@@ -943,14 +943,14 @@ const filteredPrescriptions = prescriptions.filter((prescription) => {
 
   return (
     <DashboardLayout>
-      <div className="p-5 h-full flex flex-col">
+      <div className="p-4 sm:p-5 min-h-full flex flex-col min-w-0">
 
         {/* Card */}
-        <div className="bg-white rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm flex-1 flex flex-col min-w-0 overflow-hidden">
 
           {/* Search bar */}
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-3">
-            <div className="relative w-full max-w-xs">
+          <div className="px-4 sm:px-5 py-3 border-b border-gray-100 flex items-center gap-3">
+            <div className="relative w-full max-w-md">
 
               <svg
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5"
@@ -988,13 +988,13 @@ const filteredPrescriptions = prescriptions.filter((prescription) => {
           </div>
 
           {/* Content */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
 
             {/* Left */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 min-w-0 min-h-[350px] lg:min-h-0 flex flex-col overflow-hidden">
 
               {/* Tabs */}
-              <div className="flex border-b border-gray-100 px-5">
+              <div className="grid grid-cols-3 w-full border-b border-gray-100 px-2 sm:px-5">
 
                 {tabs.map((tab) => (
                   <button
@@ -1002,7 +1002,7 @@ const filteredPrescriptions = prescriptions.filter((prescription) => {
                     onClick={() =>
                       setActiveTab(tab)
                     }
-                    className={`py-3 px-4 text-xs font-medium border-b-2 transition-colors -mb-px ${
+                    className={`py-3 px-1 sm:px-4 w-full text-center text-[11px] sm:text-xs font-medium border-b-2 transition-colors -mb-px ${
                       activeTab === tab
                         ? "border-[#BE122D] text-[#BE122D]"
                         : "border-transparent text-gray-400 hover:text-gray-600"
@@ -1143,7 +1143,7 @@ const filteredPrescriptions = prescriptions.filter((prescription) => {
       filteredPrescriptions.map((prescription) => (
         <div
           key={prescription.id}
-          className="flex items-center justify-between px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors gap-3"
+          className="flex flex-wrap sm:flex-nowrap items-center justify-between px-3 sm:px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors gap-3"
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <AvatarPlaceholder name={prescription.name} />

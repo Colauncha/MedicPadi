@@ -86,6 +86,14 @@ export default function DashboardLayout({
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+  document.body.style.overflow = isSidebarOpen ? "hidden" : "";
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [isSidebarOpen]);
+
   const [labProfileData, setLabProfileData] = useState(() => {
     try {
       const userId = localStorage.getItem("userId");
@@ -320,7 +328,7 @@ const displayName =
 });
 
   return (
-    <div className="flex h-screen w-full bg-white overflow-hidden text-[#1a1a4b]">
+    <div className="flex h-dvh w-full bg-white overflow-hidden text-[#1a1a4b]">
       {/* Mobile Overlay Backdrop */}
       {isSidebarOpen && (
         <div
@@ -462,7 +470,7 @@ const displayName =
 
       {/* Search Results Dropdown */}
       {showSearchResults && searchQuery.trim().length >= 2 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-[100] max-h-[480px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-[100] max-h-[60dvh] overflow-y-auto">
 
           {isSearching && (
             <p className="p-4 text-sm text-gray-500">

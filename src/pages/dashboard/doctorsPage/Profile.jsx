@@ -357,10 +357,10 @@ const handleSaveProfile = async () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 min-h-screen bg-[#F3F4FF]">
+      <div className="w-full min-w-0 p-4 sm:p-6 min-h-screen bg-[#F3F4FF]">
 
         {/* ================= PROFILE HEADER ================= */}
-        <div className="bg-white rounded-2xl p-6 mb-6 flex flex-wrap items-center gap-6">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 mb-6 flex flex-col sm:flex-row sm:flex-wrap items-center gap-5 sm:gap-6 min-w-0">
 
           {/* Profile Picture */}
           <div className="flex flex-col items-center gap-2">
@@ -402,7 +402,7 @@ const handleSaveProfile = async () => {
           </div>
 
           {/* Profile Summary */}
-          <div className="flex flex-wrap gap-8 flex-1">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-5 sm:gap-8 flex-1 min-w-0 w-full">
             {[
               {
                 label: "Gender",
@@ -459,7 +459,7 @@ const handleSaveProfile = async () => {
           </div>
 
           {/* Upload + Save */}
-          <div className="flex flex-col items-end gap-3 ml-auto">
+          <div className="flex flex-col items-center sm:items-end gap-3 w-full sm:w-auto sm:ml-auto">
 
             <div
               onClick={handleImageClick}
@@ -514,10 +514,10 @@ const handleSaveProfile = async () => {
         </div>
 
         {/* ================= MAIN CONTENT ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 min-w-0">
 
           {/* ================= PERSONAL INFORMATION ================= */}
-          <div className="bg-white rounded-2xl p-6">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 min-w-0">
 
             <h2 className="text-base font-semibold text-[#1a1a2e] mb-5">
               Personal Information
@@ -526,7 +526,7 @@ const handleSaveProfile = async () => {
             <div className="flex flex-col gap-4">
 
               {/* First + Last Name */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">
@@ -559,7 +559,7 @@ const handleSaveProfile = async () => {
               </div>
 
               {/* Gender + Phone */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">
@@ -623,7 +623,7 @@ const handleSaveProfile = async () => {
               </div>
 
               {/* Experience + Awards */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">
@@ -656,7 +656,7 @@ const handleSaveProfile = async () => {
               </div>
 
               {/* Cost + Session Length */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">
@@ -726,7 +726,7 @@ const handleSaveProfile = async () => {
           </div>
 
           {/* ================= AVAILABLE APPOINTMENTS ================= */}
-          <div className="bg-white rounded-2xl p-6 flex flex-col gap-4">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 flex flex-col gap-4 min-w-0">
 
             <h2 className="text-base font-semibold text-[#1a1a2e]">
               My Available Appointment
@@ -776,7 +776,7 @@ const handleSaveProfile = async () => {
                         Select your available time to see your patient.
                       </p>
 
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
 
                         {TIME_SLOTS.map((slot) => {
                           const isSelected =
